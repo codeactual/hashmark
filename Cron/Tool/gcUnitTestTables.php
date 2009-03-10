@@ -30,12 +30,13 @@ $coreTables = array('categories', 'categories_milestones', 'categories_scalars',
 
 foreach ($coreTables as $table) {
     $dbHelper->rawQuery($db, "TRUNCATE `{$table}`");
+    $dbHelper->rawQuery($db, "ALTER TABLE `{$table}` SET AUTO_INCREMENT = 1");
 }
 
 $partition = Hashmark::getModule('Partition', '', $db);
 
 $nonPartSampleTable = array('samples_string', 'samples_decimal', 'samples_analyst_temp');
-$garbageTables = array_diff($nonPartSampleTable, $partition->getTablesLike('%samples%'));
+$garbageTables = array_diff($partition->getTablesLike('%samples%'), $nonPartSampleTable);
 
 if ($garbageTables) {
     $partition->dropTable($garbageTables);

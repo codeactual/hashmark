@@ -35,7 +35,11 @@ class Hashmark_Cron extends Hashmark_Module_DbDependent
      */
     public function startJob()
     {
-        $this->_dbHelper->query($this->_db, $this->getSql(__FUNCTION__));
+        $sql = 'INSERT INTO `jobs` '
+             . '(`start`) '
+             . 'VALUES (UTC_TIMESTAMP())';
+
+        $this->_dbHelper->query($this->_db, $sql);
         
         if (1 == $this->_dbHelper->affectedRows($this->_db)) {
             return $this->_dbHelper->insertId($this->_db);
@@ -54,7 +58,11 @@ class Hashmark_Cron extends Hashmark_Module_DbDependent
      */
     public function endJob($id)
     {
-        $this->_dbHelper->query($this->_db, $this->getSql(__FUNCTION__), $id);
+        $sql = 'UPDATE `jobs` '
+             . 'SET `end` = UTC_TIMESTAMP() '
+             . 'WHERE `id` = ?';
+
+        $this->_dbHelper->query($this->_db, $sql, $id);
         
         return (1 == $this->_dbHelper->affectedRows($this->_db));
     }
@@ -76,13 +84,32 @@ class Hashmark_Cron extends Hashmark_Module_DbDependent
         $start = Hashmark_Util::toDatetime($start);
         $end = Hashmark_Util::toDatetime($end);
 
-        $this->_dbHelper->query($this->_db, $this->getSql(__FUNCTION__ . ':updateScalar'),
-                                $value, $end, $scalarId);
+        /**
+         *      -   Synchronize value from latest Cron-obtained value.
+         *      -   Record time of sync.
+         *      -   Reset any past sampler error to flag successful write.
+         *      -   Flip sampler status from "Running" back to "Scheduled".
+         *      -   Increment the count used to seed sample partition table AUTO_INCREMENT
+         *          values for `id`.
+         */
+        $sql = 'UPDATE `scalars` '
+             . 'SET `value` = ?, '
+             . '`last_sample_change` = ?, '
+             . '`sampler_error` = "", '
+             . '`sampler_status` = "Scheduled", '
+             . '`sample_count` = `sample_count` + 1 '
+             . 'WHERE `id` = ?';
+
+        $this->_dbHelper->query($this->_db, $sql, $value, $end, $scalarId);
+        
+        $sql = 'INSERT INTO ~samples '
+             . '(`job_id`, `value`, `start`, `end`) '
+             . 'VALUES (?, ?, ?, ?)';
         
         // queryAtDate() instead of query() so unit tests can
         // create backdated samples.
-        $this->getModule('Partition')->queryAtDate($scalarId, $this->getSql(__FUNCTION__ . ':insertSample'),
-                                                   $end, $jobId, $value, $start, $end);
+        $this->getModule('Partition')->queryAtDate($scalarId, $sql, $end, $jobId,
+                                                   $value, $start, $end);
 
         if (1 == $this->_dbHelper->affectedRows($this->_db)) {
             return true;
@@ -101,7 +128,9 @@ class Hashmark_Cron extends Hashmark_Module_DbDependent
      */
     public function getLatestSample($scalarId)
     {
-        $res = $this->getModule('Partition')->query($scalarId, $this->getSql(__FUNCTION__));
+        $sql = 'SELECT * FROM ~samples ORDER BY `id` DESC LIMIT 1';
+
+        $res = $this->getModule('Partition')->query($scalarId, $sql);
 
         if (!$this->_dbHelper->numRows($res)) {
             return false;
@@ -129,7 +158,12 @@ class Hashmark_Cron extends Hashmark_Module_DbDependent
             $error = mb_substr($error, 0, 255);
         }
 
-        $this->_dbHelper->query($this->_db, $this->getSql(__FUNCTION__), $status, $error, $scalarId);
+        $sql = 'UPDATE `scalars` '
+             . 'SET `sampler_status` = ?, '
+             . '`sampler_error` = ? '
+             . 'WHERE `id` = ?';
+
+        $this->_dbHelper->query($this->_db, $sql, $status, $error, $scalarId);
         
         return (1 == $this->_dbHelper->affectedRows($this->_db));
     }
@@ -147,7 +181,22 @@ class Hashmark_Cron extends Hashmark_Module_DbDependent
      */
     public function getScheduledSamplers()
     {
-        $res = $this->_dbHelper->query($this->_db, $this->getSql(__FUNCTION__));
+        // "Running" means it's scheduled but the last run didn't finish.
+        $statusMatch = '(`sampler_status` IN ("Scheduled", "Running"))';
+        // Recurrence interval has been reached.
+        $isDue = '(`last_sample_change` + INTERVAL `sampler_frequency` MINUTE <= UTC_TIMESTAMP())';
+        // Start date/time has been reached or none was specified.
+        $canStart = '(`sampler_start` = "' . HASHMARK_DATETIME_EMPTY . '" OR `sampler_start` <= UTC_TIMESTAMP())';
+        $hasNeverFinished = '`last_sample_change` = "' . HASHMARK_DATETIME_EMPTY . '"';
+
+        $sql = 'SELECT `id`, `sampler_handler`, `sampler_status` '
+             . 'FROM `scalars` '
+             . "WHERE {$statusMatch} "
+             . "AND ({$isDue} OR {$hasNeverFinished}) "
+             . "AND {$canStart} "
+             . 'AND `sampler_handler` != ""';
+
+        $res = $this->_dbHelper->query($this->_db, $sql);
 
         if (!$this->_dbHelper->numRows($res)) {
             return false;

@@ -25,20 +25,6 @@ abstract class Hashmark_TestCase_Sampler extends Hashmark_TestCase
     /**
      * @test
      * @group Sampler
-     * @group getsSamplerName
-     */
-    abstract public function getsSamplerName();
-    
-    /**
-     * @test
-     * @group Sampler
-     * @group getsSamplerDescription
-     */
-    abstract public function getsSamplerDescription();
-    
-    /**
-     * @test
-     * @group Sampler
      * @group runsSampler
      */
     abstract public function runsSampler();

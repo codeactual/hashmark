@@ -102,7 +102,7 @@ class Hashmark_TestCase_Cron extends Hashmark_TestCase
             $expectedEnd = gmdate(HASHMARK_DATETIME_FORMAT);
 
             $sampleCreated = $this->_cron->createSample($expectedScalarId, $expectedJobId,
-                                                 $value, $expectedStart, $expectedEnd);
+                                                        $value, $expectedStart, $expectedEnd);
             $this->assertTrue($sampleCreated);
 
             $sample = $this->_cron->getLatestSample($expectedScalarId);
@@ -306,9 +306,9 @@ class Hashmark_TestCase_Cron extends Hashmark_TestCase
 
         for ($t = 0; $t < 5; $t++) {
             if ($t < 2) {
-                $this->assertTrue($partition->tableExists($mergeTableNames[$t]));
+                $this->assertTrue($partition->tableExists($mergeTableNames[$t]), "Expected {$mergeTableNames[$t]} to exist");
             } else {
-                $this->assertFalse($partition->tableExists($mergeTableNames[$t]));
+                $this->assertFalse($partition->tableExists($mergeTableNames[$t]), "Expected {$mergeTableNames[$t]} to be missing");
             }
         }
     }

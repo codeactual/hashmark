@@ -164,6 +164,10 @@ abstract class Hashmark_DbHelper extends Hashmark_Module
      */
     public function openDb($profileName)
     {
+        if (defined('HASHMARK_TEST_MODE')) {
+            $profileName = 'unittest';
+        }
+
         if (!isset($this->_baseConfig['profile'][$profileName])) {
             throw new Exception("Connection profile '{$profileName}' was not found.");
         }
@@ -256,22 +260,5 @@ abstract class Hashmark_DbHelper extends Hashmark_Module
         }
 
         return $result;
-    }
-    
-    /**
-     * Public access to connection profile database names.
-     *
-     * @access public
-     * @param string    $profileName
-     * @return string   Database name.
-     * @throws  Exception   If profile is not found in configs.
-     */
-    public function getProfileDbName($profileName)
-    {
-        if (!isset($this->_baseConfig['profile'][$profileName])) {
-            throw new Exception("Connection profile '{$profileName}' was not found.");
-        }
-
-        return $this->_baseConfig['profile'][$profileName]['name'];
     }
 }

@@ -36,3 +36,8 @@ require_once dirname(__FILE__) . '/../Hashmark.php';
  * For Hashmark_TestCase
  */
 require_once dirname(__FILE__) . '/Case.php';
+
+/**
+ * Ex. forces Hashmark_DbHelper::openDb() to always use the 'unittest' profile.
+ */
+define('HASHMARK_TEST_MODE', 1);

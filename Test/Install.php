@@ -45,7 +45,8 @@ foreach ($expectedTableSql as $t => $name) {
 $expectedTableSql = implode(',', $expectedTableSql);
 
 $sql = 'SELECT `TABLE_NAME` FROM `INFORMATION_SCHEMA`.`TABLES` '
-     . "WHERE `TABLE_NAME` IN ({$expectedTableSql}) ";
+     . "WHERE `TABLE_NAME` IN ({$expectedTableSql}) "
+     . 'AND `TABLE_SCHEMA` = DATABASE()';
 
 $profileList = array('cron', 'unittest');
 
@@ -62,10 +63,7 @@ foreach ($profileList as $profile) {
 
     echo "PASS: Connected to DB {$testDetail}\n";
 
-    $schema = $dbHelper->getProfileDbName($profile);
-    $schemaSpecificSql = "{$sql} AND `TABLE_SCHEMA` = '{$schema}'";
-    
-    $res = $dbHelper->query($db, $schemaSpecificSql);
+    $res = $dbHelper->query($db, $sql);
 
     $expectedTableNum = count($expectedTableList);
 

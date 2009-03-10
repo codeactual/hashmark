@@ -43,15 +43,17 @@ class Hashmark_AllTests_Sampler
         // Hashmark_TestCase_Sampler
         require_once $dirname . '/../Sampler.php';
 
-        $samplersOkAsTest = array('Test');
+        foreach (glob($dirname . '/*.php') as $typeFile) {
+            $typeName = basename($typeFile, '.php');
 
-        foreach ($samplersOkAsTest as $typeName) {
-            // Ex. class file for 'Hashmark_Sampler_Mysql'
-            require_once $dirname . '/../../Sampler/' . $typeName . '.php';
-            // Ex. class file for 'Hashmark_TestCase_Sampler_Mysql'
-            require_once $dirname . '/' . $typeName . '.php';
+            if ('AllTests' != $typeName) {
+                // Ex. class file for 'Hashmark_Sampler_Mysql'
+                require_once $dirname . '/../../Sampler/' . $typeName . '.php';
+                // Ex. class file for 'Hashmark_TestCase_Sampler_Mysql'
+                require_once $dirname . '/' . $typeName . '.php';
 
-            $suite->addTestSuite('Hashmark_TestCase_Sampler_' . $typeName);
+                $suite->addTestSuite('Hashmark_TestCase_Sampler_' . $typeName);
+            }
         }
 
         return $suite;

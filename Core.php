@@ -59,7 +59,11 @@ class Hashmark_Core extends Hashmark_Module_DbDependent
      */
     public function getJobById($id)
     {
-        $res = $this->_dbHelper->query($this->_db, $this->getSql(__FUNCTION__), $id);
+        $sql = 'SELECT * '
+             . 'FROM `jobs` '
+             . 'WHERE `id` = ?';
+
+        $res = $this->_dbHelper->query($this->_db, $sql, $id);
 
         if (!$this->_dbHelper->numRows($res)) {
             return false;
@@ -123,7 +127,12 @@ class Hashmark_Core extends Hashmark_Module_DbDependent
             $fields['sampler_start'] = gmdate(HASHMARK_DATETIME_FORMAT, $fields['sampler_start']);
         }
 
-        $this->_dbHelper->query($this->_db, $this->getSql(__FUNCTION__), $fields['name'],
+        $sql = 'INSERT INTO `scalars` '
+             . '(`name`, `value`, `type`, `description`, `sampler_frequency`, '
+             . '`sampler_start`, `sampler_handler`, `sampler_status`) '
+             . 'VALUES (?, ?, ?, ?, ?, ?, ?, ?)';
+
+        $this->_dbHelper->query($this->_db, $sql, $fields['name'],
                                 $fields['value'], $fields['type'],
                                 $fields['description'],$fields['sampler_frequency'],
                                 $fields['sampler_start'],$fields['sampler_handler'],
@@ -142,7 +151,11 @@ class Hashmark_Core extends Hashmark_Module_DbDependent
      */
     public function getScalarById($id)
     {
-        $res = $this->_dbHelper->query($this->_db, $this->getSql(__FUNCTION__), $id);
+        $sql = 'SELECT * '
+             . 'FROM `scalars` '
+             . 'WHERE `id` = ?';
+
+        $res = $this->_dbHelper->query($this->_db, $sql, $id);
 
         if (!$this->_dbHelper->numRows($res)) {
             return false;
@@ -164,7 +177,12 @@ class Hashmark_Core extends Hashmark_Module_DbDependent
      */
     public function getScalarByName($name)
     {
-        $res = $this->_dbHelper->query($this->_db, $this->getSql(__FUNCTION__), $name);
+        $sql = 'SELECT * '
+             . 'FROM `scalars` '
+             . 'WHERE `name` = ? '
+             . 'LIMIT 1';
+
+        $res = $this->_dbHelper->query($this->_db, $sql, $name);
 
         if (!$this->_dbHelper->numRows($res)) {
             return false;
@@ -186,7 +204,11 @@ class Hashmark_Core extends Hashmark_Module_DbDependent
      */
     public function getScalarType($id)
     {
-        $res = $this->_dbHelper->query($this->_db, $this->getSql(__FUNCTION__), $id);
+        $sql = 'SELECT `type` '
+             . 'FROM `scalars` '
+             . 'WHERE `id` = ?';
+
+        $res = $this->_dbHelper->query($this->_db, $sql, $id);
 
         if (!$this->_dbHelper->numRows($res)) {
             return false;
@@ -208,7 +230,11 @@ class Hashmark_Core extends Hashmark_Module_DbDependent
      */
     public function getScalarSampleCount($id)
     {
-        $res = $this->_dbHelper->query($this->_db, $this->getSql(__FUNCTION__), $id);
+        $sql = 'SELECT `sample_count` '
+             . 'FROM `scalars` '
+             . 'WHERE `id` = ?';
+
+        $res = $this->_dbHelper->query($this->_db, $sql, $id);
 
         if (!$this->_dbHelper->numRows($res)) {
             return false;
@@ -230,7 +256,11 @@ class Hashmark_Core extends Hashmark_Module_DbDependent
      */
     public function getScalarIdByName($name)
     {
-        $res = $this->_dbHelper->query($this->_db, $this->getSql(__FUNCTION__), $name);
+        $sql = 'SELECT `id` '
+             . 'FROM `scalars` '
+             . 'WHERE `name` = ?';
+
+        $res = $this->_dbHelper->query($this->_db, $sql, $name);
 
         if (!$this->_dbHelper->numRows($res)) {
             return false;
@@ -253,7 +283,12 @@ class Hashmark_Core extends Hashmark_Module_DbDependent
      */
     public function scalarHasCategory($scalarId, $categoryId)
     {
-        $res = $this->_dbHelper->query($this->_db, $this->getSql(__FUNCTION__), $categoryId, $scalarId);
+        $sql = 'SELECT `scalar_id` '
+             . 'FROM `categories_scalars` '
+             . 'WHERE `category_id` = ? '
+             . 'AND `scalar_id` = ?';
+
+        $res = $this->_dbHelper->query($this->_db, $sql, $categoryId, $scalarId);
         
         $exists = (1 == $this->_dbHelper->numRows($res));
         $this->_dbHelper->freeResult($res);
@@ -274,7 +309,11 @@ class Hashmark_Core extends Hashmark_Module_DbDependent
      */
     public function setScalarCategory($scalarId, $categoryId)
     {
-        $this->_dbHelper->query($this->_db, $this->getSql(__FUNCTION__), $categoryId, $scalarId);
+        $sql = 'REPLACE INTO `categories_scalars` '
+             . '(`category_id`, `scalar_id`) '
+             . 'VALUES (?, ?)';
+
+        $this->_dbHelper->query($this->_db, $sql, $categoryId, $scalarId);
         
         return (1 == $this->_dbHelper->affectedRows($this->_db));
     }
@@ -292,7 +331,11 @@ class Hashmark_Core extends Hashmark_Module_DbDependent
      */
     public function unsetScalarCategory($scalarId, $categoryId)
     {
-        $this->_dbHelper->query($this->_db, $this->getSql(__FUNCTION__), $categoryId, $scalarId);
+        $sql = 'DELETE FROM `categories_scalars` '
+             . 'WHERE `category_id` = ? '
+             . 'AND `scalar_id` = ?';
+
+        $this->_dbHelper->query($this->_db, $sql, $categoryId, $scalarId);
         
         return (1 == $this->_dbHelper->affectedRows($this->_db));
     }
@@ -307,7 +350,9 @@ class Hashmark_Core extends Hashmark_Module_DbDependent
      */
     public function deleteScalar($id)
     {
-        $this->_dbHelper->query($this->_db, $this->getSql(__FUNCTION__), $id);
+        $sql = 'DELETE FROM `scalars` WHERE `id` = ?';
+
+        $this->_dbHelper->query($this->_db, $sql, $id);
 
         return (1 == $this->_dbHelper->affectedRows($this->_db));
     }
@@ -323,8 +368,11 @@ class Hashmark_Core extends Hashmark_Module_DbDependent
      */
     public function createCategory($name, $description = '')
     {
-        $this->_dbHelper->query($this->_db, $this->getSql(__FUNCTION__), $name,
-                                       $description);
+        $sql = 'INSERT INTO `categories` '
+             . '(`name`, `description`) '
+             . 'VALUES (?, ?)';
+
+        $this->_dbHelper->query($this->_db, $sql, $name, $description);
 
         return $this->_dbHelper->insertId($this->_db);
     }
@@ -339,7 +387,11 @@ class Hashmark_Core extends Hashmark_Module_DbDependent
      */
     public function getCategoryById($id)
     {
-        $res = $this->_dbHelper->query($this->_db, $this->getSql(__FUNCTION__), $id);
+        $sql = 'SELECT * '
+             . 'FROM `categories` '
+             . 'WHERE `id` = ?';
+
+        $res = $this->_dbHelper->query($this->_db, $sql, $id);
 
         if (!$this->_dbHelper->numRows($res)) {
             return false;
@@ -361,7 +413,12 @@ class Hashmark_Core extends Hashmark_Module_DbDependent
      */
     public function getCategoryByName($name)
     {
-        $res = $this->_dbHelper->query($this->_db, $this->getSql(__FUNCTION__), $name);
+        $sql = 'SELECT * '
+             . 'FROM `categories` '
+             . 'WHERE `name` = ? '
+             . 'LIMIT 1';
+
+        $res = $this->_dbHelper->query($this->_db, $sql, $name);
 
         if (!$this->_dbHelper->numRows($res)) {
             return false;
@@ -383,7 +440,9 @@ class Hashmark_Core extends Hashmark_Module_DbDependent
      */
     public function deleteCategory($id)
     {
-        $this->_dbHelper->query($this->_db, $this->getSql(__FUNCTION__), $id);
+        $sql = 'DELETE FROM `categories` WHERE `id` = ?';
+
+        $this->_dbHelper->query($this->_db, $sql, $id);
 
         return (1 == $this->_dbHelper->affectedRows($this->_db));
     }
@@ -401,7 +460,11 @@ class Hashmark_Core extends Hashmark_Module_DbDependent
     {
         $when = Hashmark_Util::toDatetime($when);
 
-        $this->_dbHelper->query($this->_db, $this->getSql(__FUNCTION__), $name, $when);
+        $sql = 'INSERT INTO `milestones` '
+             . '(`name`, `when`) '
+             . 'VALUES (?, ?)';
+
+        $this->_dbHelper->query($this->_db, $sql, $name, $when);
 
         return $this->_dbHelper->insertId($this->_db);
     }
@@ -416,7 +479,11 @@ class Hashmark_Core extends Hashmark_Module_DbDependent
      */
     public function getMilestoneById($id)
     {
-        $res = $this->_dbHelper->query($this->_db, $this->getSql(__FUNCTION__), $id);
+        $sql = 'SELECT * '
+             . 'FROM `milestones` '
+             . 'WHERE `id` = ?';
+
+        $res = $this->_dbHelper->query($this->_db, $sql, $id);
 
         if (!$this->_dbHelper->numRows($res)) {
             return false;
@@ -438,7 +505,12 @@ class Hashmark_Core extends Hashmark_Module_DbDependent
      */
     public function getMilestoneByName($name)
     {
-        $res = $this->_dbHelper->query($this->_db, $this->getSql(__FUNCTION__), $name);
+        $sql = 'SELECT * '
+             . 'FROM `milestones` '
+             . 'WHERE `name` = ? '
+             . 'LIMIT 1';
+
+        $res = $this->_dbHelper->query($this->_db, $sql, $name);
 
         if (!$this->_dbHelper->numRows($res)) {
             return false;
@@ -464,7 +536,12 @@ class Hashmark_Core extends Hashmark_Module_DbDependent
     {
         $when = Hashmark_Util::toDatetime($when);
 
-        $this->_dbHelper->query($this->_db, $this->getSql(__FUNCTION__), $name, $when, $id);
+        $sql = 'UPDATE `milestones` '
+             . 'SET `name` = ?, '
+             . '`when` = ? '
+             . 'WHERE `id` = ?';
+
+        $this->_dbHelper->query($this->_db, $sql, $name, $when, $id);
         
         return (1 == $this->_dbHelper->affectedRows($this->_db));
     }
@@ -480,7 +557,12 @@ class Hashmark_Core extends Hashmark_Module_DbDependent
      */
     public function milestoneHasCategory($milestoneId, $categoryId)
     {
-        $res = $this->_dbHelper->query($this->_db, $this->getSql(__FUNCTION__), $categoryId, $milestoneId);
+        $sql = 'SELECT `milestone_id` '
+             . 'FROM `categories_milestones` '
+             . 'WHERE `category_id` = ? '
+             . 'AND `milestone_id` = ?';
+
+        $res = $this->_dbHelper->query($this->_db, $sql, $categoryId, $milestoneId);
         
         $exists = (1 == $this->_dbHelper->numRows($res));
         $this->_dbHelper->freeResult($res);
@@ -501,7 +583,11 @@ class Hashmark_Core extends Hashmark_Module_DbDependent
      */
     public function setMilestoneCategory($milestoneId, $categoryId)
     {
-        $this->_dbHelper->query($this->_db, $this->getSql(__FUNCTION__), $categoryId, $milestoneId);
+        $sql = 'REPLACE INTO `categories_milestones` '
+             . '(`category_id`, `milestone_id`) '
+             . 'VALUES (?, ?)';
+
+        $this->_dbHelper->query($this->_db, $sql, $categoryId, $milestoneId);
         
         return (1 == $this->_dbHelper->affectedRows($this->_db));
     }
@@ -519,7 +605,11 @@ class Hashmark_Core extends Hashmark_Module_DbDependent
      */
     public function unsetMilestoneCategory($milestoneId, $categoryId)
     {
-        $this->_dbHelper->query($this->_db, $this->getSql(__FUNCTION__), $categoryId, $milestoneId);
+        $sql = 'DELETE FROM `categories_milestones` '
+             . 'WHERE `category_id` = ? '
+             . 'AND `milestone_id` = ?';
+
+        $this->_dbHelper->query($this->_db, $sql, $categoryId, $milestoneId);
         
         return (1 == $this->_dbHelper->affectedRows($this->_db));
     }
@@ -534,7 +624,9 @@ class Hashmark_Core extends Hashmark_Module_DbDependent
      */
     public function deleteMilestone($id)
     {
-        $this->_dbHelper->query($this->_db, $this->getSql(__FUNCTION__), $id);
+        $sql = 'DELETE FROM `milestones` WHERE `id` = ?';
+
+        $this->_dbHelper->query($this->_db, $sql, $id);
 
         return (1 == $this->_dbHelper->affectedRows($this->_db));
     }

@@ -63,7 +63,9 @@ class Hashmark_Partition extends Hashmark_Module_DbDependent
         if (!($output = $this->_cache->get($cacheKey, 'schema'))) {
             $values = array('@name' => $name);
 
-            $res = $this->_dbHelper->query($this->_db, $this->getSql(__FUNCTION__), $values);
+            $sql = 'SHOW CREATE TABLE `@name`';
+
+            $res = $this->_dbHelper->query($this->_db, $sql, $values);
 
             if (!$this->_dbHelper->numRows($res)) {
                 return false;
@@ -92,7 +94,12 @@ class Hashmark_Partition extends Hashmark_Module_DbDependent
         $cacheKey = __FUNCTION__ . $name;
 
         if (!($exists = $this->_cache->get($cacheKey, 'tablelist'))) {
-            $res = $this->_dbHelper->query($this->_db, $this->getSql(__FUNCTION__), $name);
+            $sql = 'SELECT `TABLE_NAME` '
+                 . 'FROM `INFORMATION_SCHEMA`.`TABLES` '
+                 . 'WHERE `TABLE_NAME` = ? '
+                 . 'AND `TABLE_SCHEMA` = DATABASE()';
+
+            $res = $this->_dbHelper->query($this->_db, $sql, $name);
 
             $exists = (1 == $this->_dbHelper->numRows($res));
 
@@ -115,7 +122,9 @@ class Hashmark_Partition extends Hashmark_Module_DbDependent
         $cacheKey = __FUNCTION__ . $expr;
 
         if (!($tables = $this->_cache->get($cacheKey, 'tablelist'))) {
-            $res = $this->_dbHelper->query($this->_db, $this->getSql(__FUNCTION__), $expr);
+            $sql = 'SHOW TABLES LIKE ?';
+
+            $res = $this->_dbHelper->query($this->_db, $sql, $expr);
 
             if (!$this->_dbHelper->numRows($res)) {
                 return false;
@@ -155,7 +164,9 @@ class Hashmark_Partition extends Hashmark_Module_DbDependent
 
         $values = array('@list' => implode(',', $name));
 
-        $this->_dbHelper->query($this->_db, $this->getSql(__FUNCTION__), $values);
+        $sql = 'DROP TABLE IF EXISTS @list';
+
+        $this->_dbHelper->query($this->_db, $sql, $values);
 
         $this->_cache->removeGroup('tablelist');
     }
@@ -170,7 +181,11 @@ class Hashmark_Partition extends Hashmark_Module_DbDependent
      */
     public function getTableInfo($name)
     {
-        $res = $this->_dbHelper->query($this->_db, $this->getSql(__FUNCTION__), $name);
+        $sql = 'SELECT * FROM `INFORMATION_SCHEMA`.`TABLES` '
+             . 'WHERE `TABLE_NAME` = ? '
+             . 'AND `TABLE_SCHEMA` = DATABASE()';
+
+        $res = $this->_dbHelper->query($this->_db, $sql, $name);
 
         if (!$this->_dbHelper->numRows($res)) {
             return false;
@@ -192,7 +207,11 @@ class Hashmark_Partition extends Hashmark_Module_DbDependent
      */
     public function getAllMergeTables()
     {
-        $res = $this->_dbHelper->query($this->_db, $this->getSql(__FUNCTION__));
+        $sql = 'SELECT `TABLE_NAME`, `TABLE_COMMENT` FROM `INFORMATION_SCHEMA`.`TABLES` '
+             . 'WHERE SUBSTR(`TABLE_NAME`, 1, 12) = "' . HASHMARK_PARTITION_MERGETABLE_PREFIX . '" '
+             . 'AND `TABLE_SCHEMA` = DATABASE()';
+
+        $res = $this->_dbHelper->query($this->_db, $sql);
 
         if (!$this->_dbHelper->numRows($res)) {
             return false;
@@ -512,6 +531,7 @@ class Hashmark_Partition extends Hashmark_Module_DbDependent
         // Seed the new partition's AUTO_INCREMENT. Allows us to avoid checking
         // the scalar's sample count for every new sample row.
         $sampleCount = $this->getModule('Core')->getScalarSampleCount($scalarId);
+
         $sql = "CREATE TABLE IF NOT EXISTS `{$name}` {$definition} AUTO_INCREMENT=" . max(1, $sampleCount);
 
         $this->_dbHelper->query($this->_db, $sql);

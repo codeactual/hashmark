@@ -45,20 +45,32 @@ class Hashmark_Client extends Hashmark_Module_DbDependent
         }
 
         if ($newSample) {
-            $sql = $this->getSql(__FUNCTION__ . ':updateScalarForNewSample');
+            $sql = 'UPDATE `scalars` '
+                 . 'SET `value` = ?, '
+                 . '`last_sample_change` = UTC_TIMESTAMP(), '
+                 . '`last_inline_change` = UTC_TIMESTAMP() '
+                 . 'WHERE `name` = ?';
+
             $this->_dbHelper->query($this->_db, $sql, $value, $scalarName);
             
             if (!$this->_dbHelper->affectedRows($this->_db)) {
                 return false;
             }
             
-            $partition = $this->getModule('Partition');
-            
-            $sql = $this->getSql(__FUNCTION__ . ':insertSample');
+            $sql = 'INSERT INTO ~samples '
+                 . '(`value`, `start`, `end`) '
+                 . 'VALUES (?, UTC_TIMESTAMP(), UTC_TIMESTAMP())';
+
             $scalarId = $this->getModule('Core')->getScalarIdByName($scalarName);
+
+            $partition = $this->getModule('Partition');
             $partition->query($scalarId, $sql, $value);
         } else {
-            $sql = $this->getSql(__FUNCTION__ . ':updateScalar');
+            $sql = 'UPDATE `scalars` '
+                 . 'SET `value` = ?, '
+                 . '`last_inline_change` = UTC_TIMESTAMP() '
+                 . 'WHERE `name` = ?';
+
             $this->_dbHelper->query($this->_db, $sql, $value, $scalarName);
         }
 
@@ -66,21 +78,31 @@ class Hashmark_Client extends Hashmark_Module_DbDependent
     }
     
     /**
-     * Get the value of a scalar identified by name.
+     * Get the value of a scalar identified by name or ID.
      *
      * @access public
-     * @param string    $scalarName
+     * @param mixed     $scalarNameOrId     Uses string/int type check.
      * @return mixed    Scalar value; null on miss.
      * @throws Exception On query error or non-string $scalarName.
      */
-    public function get($scalarName)
+    public function get($scalarNameOrId)
     {
-        if (!is_string($scalarName)) {
+        if (is_string($scalarNameOrId)) {
+            $sql = 'SELECT `value` '
+                 . 'FROM `scalars` '
+                 . 'WHERE `name` = ? '
+                 . 'LIMIT 1';
+        } else if (is_int($scalarNameOrId)) {
+            $sql = 'SELECT `value` '
+                 . 'FROM `scalars` '
+                 . 'WHERE `id` = ? '
+                 . 'LIMIT 1';
+        } else {
             throw new Exception('Cannot look up scalar with a non-string name.',
                                 HASHMARK_EXCEPTION_VALIDATION);
         }
 
-        $res = $this->_dbHelper->query($this->_db, $this->getSql(__FUNCTION__), $scalarName);
+        $res = $this->_dbHelper->query($this->_db, $sql, $scalarNameOrId);
 
         if (!$this->_dbHelper->numRows($res)) {
             return false;
@@ -116,22 +138,39 @@ class Hashmark_Client extends Hashmark_Module_DbDependent
         }
 
         $values = array(':name' => $scalarName, '@amount' => $amount);
+        $sum = 'CONVERT(`value`, DECIMAL' . HASHMARK_DECIMAL_SQLWIDTH . ') + @amount';
        
         if ($newSample) {
-            $sql = $this->getSql(__FUNCTION__ . ':updateScalarForNewSample');
+            $sql = 'UPDATE `scalars` '
+                 . "SET `value` = {$sum}, "
+                 . '`last_sample_change` = UTC_TIMESTAMP(), '
+                 . '`last_inline_change` = UTC_TIMESTAMP() '
+                 . 'WHERE `name` = :name '
+                 . 'AND `type` = "decimal"';
+
             $this->_dbHelper->query($this->_db, $sql, $values);
         
             if (!$this->_dbHelper->affectedRows($this->_db)) {
                 return false;
             }
 
-            $partition = $this->getModule('Partition');
+            $currentScalarValue = 'SELECT `value` FROM `scalars` WHERE `name` = ? LIMIT 1';
 
-            $sql = $this->getSql(__FUNCTION__ . ':insertSample');
+            $sql = 'INSERT INTO ~samples '
+                 . '(`value`, `start`, `end`) '
+                 . "VALUES (({$currentScalarValue}), UTC_TIMESTAMP(), UTC_TIMESTAMP())";
+
             $scalarId = $this->getModule('Core')->getScalarIdByName($scalarName);
+
+            $partition = $this->getModule('Partition');
             $partition->query($scalarId, $sql, $scalarName);
         } else {
-            $sql = $this->getSql(__FUNCTION__ . ':updateScalar');
+            $sql = 'UPDATE `scalars` '
+                 . "SET `value` = {$sum}, "
+                 . '`last_inline_change` = UTC_TIMESTAMP() '
+                 . 'WHERE `name` = :name '
+                 . 'AND `type` = "decimal"';
+
             $this->_dbHelper->query($this->_db, $sql, $values);
         }
 

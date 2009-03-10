@@ -28,7 +28,6 @@ class Hashmark_TestCase_Module_DbDependent extends Hashmark_TestCase_Module
      * @group getModule
      * @group getDb
      * @group getDbHelper
-     * @group getSql
      */
     public function getsDbProps()
     {
