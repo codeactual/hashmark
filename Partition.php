@@ -63,7 +63,7 @@ class Hashmark_Partition extends Hashmark_Module_DbDependent
         if (!($output = $this->_cache->get($cacheKey, 'schema'))) {
             $values = array('@name' => $name);
 
-            $sql = 'SHOW CREATE TABLE `@name`';
+            $sql = "SHOW CREATE TABLE {$this->_dbName}`@name`";
 
             $res = $this->_dbHelper->query($this->_db, $sql, $values);
 
@@ -94,10 +94,12 @@ class Hashmark_Partition extends Hashmark_Module_DbDependent
         $cacheKey = __FUNCTION__ . $name;
 
         if (!($exists = $this->_cache->get($cacheKey, 'tablelist'))) {
+            $dbName = ($this->_dbName ? '"' . $this->getDbName() . '"' : 'DATABASE()');
+
             $sql = 'SELECT `TABLE_NAME` '
                  . 'FROM `INFORMATION_SCHEMA`.`TABLES` '
                  . 'WHERE `TABLE_NAME` = ? '
-                 . 'AND `TABLE_SCHEMA` = DATABASE()';
+                 . "AND `TABLE_SCHEMA` = {$dbName}";
 
             $res = $this->_dbHelper->query($this->_db, $sql, $name);
 
@@ -122,7 +124,8 @@ class Hashmark_Partition extends Hashmark_Module_DbDependent
         $cacheKey = __FUNCTION__ . $expr;
 
         if (!($tables = $this->_cache->get($cacheKey, 'tablelist'))) {
-            $sql = 'SHOW TABLES LIKE ?';
+            $dbName = ($this->_dbName ? 'FROM `' . $this->getDbName() . '`' : '');
+            $sql = "SHOW TABLES {$dbName} LIKE ?";
 
             $res = $this->_dbHelper->query($this->_db, $sql, $expr);
 
@@ -159,7 +162,7 @@ class Hashmark_Partition extends Hashmark_Module_DbDependent
         }
 
         foreach ($name as $key => $value) {
-            $name[$key] = '`' . $this->_dbHelper->escape($this->_db, $value, false) . '`';
+            $name[$key] = $this->_dbName . '`' . $this->_dbHelper->escape($this->_db, $value, false) . '`';
         }
 
         $values = array('@list' => implode(',', $name));
@@ -181,9 +184,11 @@ class Hashmark_Partition extends Hashmark_Module_DbDependent
      */
     public function getTableInfo($name)
     {
+        $dbName = ($this->_dbName ? '"' . $this->getDbName() . '"' : 'DATABASE()');
+
         $sql = 'SELECT * FROM `INFORMATION_SCHEMA`.`TABLES` '
              . 'WHERE `TABLE_NAME` = ? '
-             . 'AND `TABLE_SCHEMA` = DATABASE()';
+             . "AND `TABLE_SCHEMA` = {$dbName}";
 
         $res = $this->_dbHelper->query($this->_db, $sql, $name);
 
@@ -207,9 +212,11 @@ class Hashmark_Partition extends Hashmark_Module_DbDependent
      */
     public function getAllMergeTables()
     {
+        $dbName = ($this->_dbName ? '"' . $this->getDbName() . '"' : 'DATABASE()');
+
         $sql = 'SELECT `TABLE_NAME`, `TABLE_COMMENT` FROM `INFORMATION_SCHEMA`.`TABLES` '
              . 'WHERE SUBSTR(`TABLE_NAME`, 1, 12) = "' . HASHMARK_PARTITION_MERGETABLE_PREFIX . '" '
-             . 'AND `TABLE_SCHEMA` = DATABASE()';
+             . "AND `TABLE_SCHEMA` = {$dbName}";
 
         $res = $this->_dbHelper->query($this->_db, $sql);
 
@@ -527,12 +534,12 @@ class Hashmark_Partition extends Hashmark_Module_DbDependent
         // Copy the table definition from the partition model, ex. `samples_decimal`.
         $definition = $this->getPartitionDefinition($type);
         $definition = preg_replace('/\n|CREATE TABLE `samples_' . $type . '`/', '', $definition);
-
+        
         // Seed the new partition's AUTO_INCREMENT. Allows us to avoid checking
         // the scalar's sample count for every new sample row.
         $sampleCount = $this->getModule('Core')->getScalarSampleCount($scalarId);
 
-        $sql = "CREATE TABLE IF NOT EXISTS `{$name}` {$definition} AUTO_INCREMENT=" . max(1, $sampleCount);
+        $sql = "CREATE TABLE IF NOT EXISTS {$this->_dbName}`{$name}` {$definition} AUTO_INCREMENT=" . max(1, $sampleCount);
 
         $this->_dbHelper->query($this->_db, $sql);
         
@@ -568,7 +575,7 @@ class Hashmark_Partition extends Hashmark_Module_DbDependent
 
         $union = implode(',', $unionTableNames);
 
-        $sql = "CREATE TABLE IF NOT EXISTS `{$mergeTableName}` {$definition} "
+        $sql = "CREATE TABLE IF NOT EXISTS {$this->_dbName}`{$mergeTableName}` {$definition} "
              . "ENGINE=MERGE UNION=({$union}) INSERT_METHOD=NO COMMENT='{$comment}'";
 
         $this->_dbHelper->query($this->_db, $sql);
@@ -603,7 +610,7 @@ class Hashmark_Partition extends Hashmark_Module_DbDependent
         // query($this->_db, SQL w/expanded partition macro, ... list of template variables)
         $args = func_get_args();
         $args = array_slice($args, 2);
-        array_unshift($args, $this->_db, str_replace('~samples', '`' . $tableName . '`', $template));
+        array_unshift($args, $this->_db, str_replace('~samples', $this->_dbName . '`' . $tableName . '`', $template));
         
         return call_user_func_array(array($this->_dbHelper, 'query'), $args);
     }
@@ -634,7 +641,7 @@ class Hashmark_Partition extends Hashmark_Module_DbDependent
         // query($this->_db, SQL w/expanded partition macro, ... list of template variables)
         $args = func_get_args();
         $args = array_slice($args, 3);
-        array_unshift($args, $this->_db, str_replace('~samples', '`' . $tableName . '`', $template));
+        array_unshift($args, $this->_db, str_replace('~samples', $this->_dbName . '`' . $tableName . '`', $template));
         
         return call_user_func_array(array($this->_dbHelper, 'query'), $args);
     }
@@ -666,7 +673,7 @@ class Hashmark_Partition extends Hashmark_Module_DbDependent
         // query($this->_db, SQL w/expanded partition macro, ... list of template variables)
         $args = func_get_args();
         $args = array_slice($args, 4);
-        array_unshift($args, $this->_db, str_replace('~samples', '`' . $tableName . '`', $template));
+        array_unshift($args, $this->_db, str_replace('~samples', $this->_dbName . '`' . $tableName . '`', $template));
         
         return call_user_func_array(array($this->_dbHelper, 'query'), $args);
     }
@@ -682,10 +689,10 @@ class Hashmark_Partition extends Hashmark_Module_DbDependent
     {
         $name = 'samples_tmpcpy_' . Hashmark_Util::randomSha1();
 
-        $sql = "CREATE TEMPORARY TABLE IF NOT EXISTS `{$name}` LIKE `{$src}`";
+        $sql = "CREATE TEMPORARY TABLE IF NOT EXISTS {$this->_dbName}`{$name}` LIKE {$this->_dbName}`{$src}`";
         $this->_dbHelper->query($this->_db, $sql);
 
-        $sql = "INSERT INTO `{$name}` SELECT * FROM `{$src}`";
+        $sql = "INSERT INTO {$this->_dbName}`{$name}` SELECT * FROM {$this->_dbName}`{$src}`";
         $this->_dbHelper->query($this->_db, $sql);
 
         return $name;
@@ -709,10 +716,10 @@ class Hashmark_Partition extends Hashmark_Module_DbDependent
     {
         $name = 'samples_tmp_' . Hashmark_Util::randomSha1();
 
-        $createSql = "CREATE TEMPORARY TABLE IF NOT EXISTS `{$name}` LIKE `{$src}`";
+        $createSql = "CREATE TEMPORARY TABLE IF NOT EXISTS {$this->_dbName}`{$name}` LIKE `{$src}`";
         $this->_dbHelper->query($this->_db, $createSql);
 
-        $insertSql = "INSERT INTO `{$name}` ({$columns}) {$selectSql}";
+        $insertSql = "INSERT INTO {$this->_dbName}`{$name}` ({$columns}) {$selectSql}";
         if (false === strpos($insertSql, '~samples')) {
             $this->_dbHelper->query($this->_db, $insertSql, $values);
         } else {

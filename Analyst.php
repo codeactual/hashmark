@@ -109,7 +109,7 @@ abstract class Hashmark_Analyst extends Hashmark_Module_DbDependent
                         }
                         $table = $copyTables[$tableLabel];
                     }
-                    $currentSql = preg_replace($regex, '`'. $table . '`', $currentSql, 1);
+                    $currentSql = preg_replace($regex, $this->_dbName . '`'. $table . '`', $currentSql, 1);
                 }
             }
                 

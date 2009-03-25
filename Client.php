@@ -45,7 +45,7 @@ class Hashmark_Client extends Hashmark_Module_DbDependent
         }
 
         if ($newSample) {
-            $sql = 'UPDATE `scalars` '
+            $sql = "UPDATE {$this->_dbName}`scalars` "
                  . 'SET `value` = ?, '
                  . '`last_sample_change` = UTC_TIMESTAMP(), '
                  . '`last_inline_change` = UTC_TIMESTAMP() '
@@ -66,7 +66,7 @@ class Hashmark_Client extends Hashmark_Module_DbDependent
             $partition = $this->getModule('Partition');
             $partition->query($scalarId, $sql, $value);
         } else {
-            $sql = 'UPDATE `scalars` '
+            $sql = "UPDATE {$this->_dbName}`scalars` "
                  . 'SET `value` = ?, '
                  . '`last_inline_change` = UTC_TIMESTAMP() '
                  . 'WHERE `name` = ?';
@@ -89,12 +89,12 @@ class Hashmark_Client extends Hashmark_Module_DbDependent
     {
         if (is_string($scalarNameOrId)) {
             $sql = 'SELECT `value` '
-                 . 'FROM `scalars` '
+                 . "FROM {$this->_dbName}`scalars` "
                  . 'WHERE `name` = ? '
                  . 'LIMIT 1';
         } else if (is_int($scalarNameOrId)) {
             $sql = 'SELECT `value` '
-                 . 'FROM `scalars` '
+                 . "FROM {$this->_dbName}`scalars` "
                  . 'WHERE `id` = ? '
                  . 'LIMIT 1';
         } else {
@@ -141,7 +141,7 @@ class Hashmark_Client extends Hashmark_Module_DbDependent
         $sum = 'CONVERT(`value`, DECIMAL' . HASHMARK_DECIMAL_SQLWIDTH . ') + @amount';
        
         if ($newSample) {
-            $sql = 'UPDATE `scalars` '
+            $sql = "UPDATE {$this->_dbName}`scalars` "
                  . "SET `value` = {$sum}, "
                  . '`last_sample_change` = UTC_TIMESTAMP(), '
                  . '`last_inline_change` = UTC_TIMESTAMP() '
@@ -165,7 +165,7 @@ class Hashmark_Client extends Hashmark_Module_DbDependent
             $partition = $this->getModule('Partition');
             $partition->query($scalarId, $sql, $scalarName);
         } else {
-            $sql = 'UPDATE `scalars` '
+            $sql = "UPDATE {$this->_dbName}`scalars` "
                  . "SET `value` = {$sum}, "
                  . '`last_inline_change` = UTC_TIMESTAMP() '
                  . 'WHERE `name` = :name '

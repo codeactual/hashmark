@@ -35,7 +35,7 @@ class Hashmark_Cron extends Hashmark_Module_DbDependent
      */
     public function startJob()
     {
-        $sql = 'INSERT INTO `jobs` '
+        $sql = "INSERT INTO {$this->_dbName}`jobs` "
              . '(`start`) '
              . 'VALUES (UTC_TIMESTAMP())';
 
@@ -58,7 +58,7 @@ class Hashmark_Cron extends Hashmark_Module_DbDependent
      */
     public function endJob($id)
     {
-        $sql = 'UPDATE `jobs` '
+        $sql = "UPDATE {$this->_dbName}`jobs` "
              . 'SET `end` = UTC_TIMESTAMP() '
              . 'WHERE `id` = ?';
 
@@ -92,7 +92,7 @@ class Hashmark_Cron extends Hashmark_Module_DbDependent
          *      -   Increment the count used to seed sample partition table AUTO_INCREMENT
          *          values for `id`.
          */
-        $sql = 'UPDATE `scalars` '
+        $sql = "UPDATE {$this->_dbName}`scalars` "
              . 'SET `value` = ?, '
              . '`last_sample_change` = ?, '
              . '`sampler_error` = "", '
@@ -158,7 +158,7 @@ class Hashmark_Cron extends Hashmark_Module_DbDependent
             $error = mb_substr($error, 0, 255);
         }
 
-        $sql = 'UPDATE `scalars` '
+        $sql = "UPDATE {$this->_dbName}`scalars` "
              . 'SET `sampler_status` = ?, '
              . '`sampler_error` = ? '
              . 'WHERE `id` = ?';
@@ -190,7 +190,7 @@ class Hashmark_Cron extends Hashmark_Module_DbDependent
         $hasNeverFinished = '`last_sample_change` = "' . HASHMARK_DATETIME_EMPTY . '"';
 
         $sql = 'SELECT `id`, `sampler_handler`, `sampler_status` '
-             . 'FROM `scalars` '
+             . "FROM {$this->_dbName}`scalars` "
              . "WHERE {$statusMatch} "
              . "AND ({$isDue} OR {$hasNeverFinished}) "
              . "AND {$canStart} "

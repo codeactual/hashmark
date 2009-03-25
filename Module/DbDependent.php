@@ -31,6 +31,12 @@ abstract class Hashmark_Module_DbDependent extends Hashmark_Module
      * @var mixed Database connection object/resource.
      */
     protected $_db;
+    
+    /**
+     * @access protected
+     * @var string  Database selection in quoted form `<name>` w/ trailing period.
+     */
+    protected $_dbName;
 
     /**
      * @access protected
@@ -48,14 +54,21 @@ abstract class Hashmark_Module_DbDependent extends Hashmark_Module
 
     /**
      * @access protected
-     * @param mixed     $db     Connection object/resource.
+     * @param mixed     $db         Connection object/resource.
+     * @param string    $dbName     Database selection, unquoted. [optional]
      * @return boolean  False if module could not be initialized and is unusable.
      *                  Hashmark::getModule() will also then return false.
      */
-    public function initModule($db)
+    public function initModule($db, $dbName = '')
     {
         if (!$db) {
             return false;
+        }
+        
+        if ($dbName) {
+            $this->_dbName = "`{$dbName}`.";
+        } else {
+            $this->_dbName = '';
         }
 
         $this->_db = $db;
@@ -104,6 +117,22 @@ abstract class Hashmark_Module_DbDependent extends Hashmark_Module
     {
         return $this->_db;
     }
+    
+    /**
+     * Public access to $_db.
+     *
+     * @access public
+     * @param boolean   $clean  If true, back-quotes and period are removed.
+     * @return mixed
+     */
+    public function getDbName($clean = true)
+    {
+        if ($clean) {
+            return str_replace('`', '', str_replace('.', '', $this->_dbName));
+        }
+
+        return $this->_dbName;
+    }
 
     /**
      * Public access to $_dbHelper.
@@ -125,6 +154,6 @@ abstract class Hashmark_Module_DbDependent extends Hashmark_Module
      */
     public function getModule($name)
     {
-        return Hashmark::getModule($name, '', $this->_db);
+        return Hashmark::getModule($name, '', $this->_db, $this->getDbName());
     }
 }
