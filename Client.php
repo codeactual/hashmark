@@ -154,7 +154,7 @@ class Hashmark_Client extends Hashmark_Module_DbDependent
                 return false;
             }
 
-            $currentScalarValue = 'SELECT `value` FROM `scalars` WHERE `name` = ? LIMIT 1';
+            $currentScalarValue = "SELECT `value` FROM {$this->_dbName}`scalars` WHERE `name` = ? LIMIT 1";
 
             $sql = 'INSERT INTO ~samples '
                  . '(`value`, `start`, `end`) '

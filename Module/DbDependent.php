@@ -64,12 +64,10 @@ abstract class Hashmark_Module_DbDependent extends Hashmark_Module
         if (!$db) {
             return false;
         }
-        
-        if ($dbName) {
-            $this->_dbName = "`{$dbName}`.";
-        } else {
-            $this->_dbName = '';
-        }
+
+        $this->setDbName($dbName);
+
+        $class = get_class($this);
 
         $this->_db = $db;
         $this->_dbHelper = Hashmark::getModule('DbHelper', HASHMARK_DBHELPER_DEFAULT_TYPE);
@@ -119,7 +117,7 @@ abstract class Hashmark_Module_DbDependent extends Hashmark_Module
     }
     
     /**
-     * Public access to $_db.
+     * Public access to $_dbName.
      *
      * @access public
      * @param boolean   $clean  If true, back-quotes and period are removed.
@@ -146,6 +144,22 @@ abstract class Hashmark_Module_DbDependent extends Hashmark_Module
     }
 
     /**
+     * Public write access to $_dbName.
+     *
+     * @access public
+     * @param string    $dbName
+     * @return void
+     */
+    public function setDbName($dbName)
+    {
+        if ($dbName) {
+            $this->_dbName = "`{$dbName}`.";
+        } else {
+            $this->_dbName = '';
+        }
+    }
+
+    /**
      * Return a Hashmark module instance (of the same type as this one)
      *
      * @access protected
@@ -154,6 +168,8 @@ abstract class Hashmark_Module_DbDependent extends Hashmark_Module
      */
     public function getModule($name)
     {
-        return Hashmark::getModule($name, '', $this->_db, $this->getDbName());
+        $module = Hashmark::getModule($name, '', $this->_db);
+        $module->setDbName($this->getDbName());
+        return $module;
     }
 }
