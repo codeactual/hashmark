@@ -20,7 +20,7 @@
  */
 require_once dirname(__FILE__) . '/../../Hashmark.php';
 
-$db = Hashmark::getModule('DbHelper', HASHMARK_DBHELPER_DEFAULT_TYPE)->openDb('cron');
+$db = Hashmark::getModule('DbHelper')->openDb('cron');
 $cron = Hashmark::getModule('Cron', '', $db);
 
 $scheduledScalars = $cron->getScheduledSamplers();

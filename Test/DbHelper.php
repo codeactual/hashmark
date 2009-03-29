@@ -32,7 +32,7 @@ class Hashmark_TestCase_DbHelper extends Hashmark_TestCase
      */
     public function opensAndClosesDbConnection()
     {
-        $dbHelper = Hashmark::getModule('DbHelper', HASHMARK_DBHELPER_DEFAULT_TYPE);
+        $dbHelper = Hashmark::getModule('DbHelper');
         $db = $dbHelper->openDb('unittest');
         $this->assertFalse(empty($db));
         $this->assertTrue($dbHelper->closeDb($db));
@@ -46,7 +46,7 @@ class Hashmark_TestCase_DbHelper extends Hashmark_TestCase
      */
     public function throwsOnQueryError()
     {
-        $dbHelper = Hashmark::getModule('DbHelper', HASHMARK_DBHELPER_DEFAULT_TYPE);
+        $dbHelper = Hashmark::getModule('DbHelper');
         $thrown = false;
 
         try {
@@ -67,7 +67,7 @@ class Hashmark_TestCase_DbHelper extends Hashmark_TestCase
      */
     public function throwsOnMissingLink()
     {
-        $dbHelper = Hashmark::getModule('DbHelper', HASHMARK_DBHELPER_DEFAULT_TYPE);
+        $dbHelper = Hashmark::getModule('DbHelper');
 
         $thrown = false;
         try {
@@ -94,7 +94,7 @@ class Hashmark_TestCase_DbHelper extends Hashmark_TestCase
      */
     public function throwsOnInvalidMacros()
     {
-        $dbHelper = Hashmark::getModule('DbHelper', HASHMARK_DBHELPER_DEFAULT_TYPE);
+        $dbHelper = Hashmark::getModule('DbHelper');
         $db = $dbHelper->openDb('unittest');
         $template = 'SELECT * FROM `@table` WHERE `id` = :id OR `name` = :name';
 
@@ -135,7 +135,7 @@ class Hashmark_TestCase_DbHelper extends Hashmark_TestCase
      */
     public function exposesQueryErrorString()
     {
-        $dbHelper = Hashmark::getModule('DbHelper', HASHMARK_DBHELPER_DEFAULT_TYPE);
+        $dbHelper = Hashmark::getModule('DbHelper');
         $db = $dbHelper->openDb('unittest');
         try {
             $dbHelper->query($db, 'SELECT NOW_TYPO()');
@@ -154,7 +154,7 @@ class Hashmark_TestCase_DbHelper extends Hashmark_TestCase
      */
     public function exposesQueryErrorNum()
     {
-        $dbHelper = Hashmark::getModule('DbHelper', HASHMARK_DBHELPER_DEFAULT_TYPE);
+        $dbHelper = Hashmark::getModule('DbHelper');
         $db = $dbHelper->openDb('unittest');
         try {
             $dbHelper->query($db, 'SELECT NOW_TYPO()');
@@ -172,7 +172,7 @@ class Hashmark_TestCase_DbHelper extends Hashmark_TestCase
      */
     public function escapesValues()
     {
-        $dbHelper = Hashmark::getModule('DbHelper', HASHMARK_DBHELPER_DEFAULT_TYPE);
+        $dbHelper = Hashmark::getModule('DbHelper');
         $db = $dbHelper->openDb('unittest');
 
         // Boolean parameter disables auto-quoting.
@@ -189,7 +189,7 @@ class Hashmark_TestCase_DbHelper extends Hashmark_TestCase
      */
     public function escapesAndQuotesValues()
     {
-        $dbHelper = Hashmark::getModule('DbHelper', HASHMARK_DBHELPER_DEFAULT_TYPE);
+        $dbHelper = Hashmark::getModule('DbHelper');
         $db = $dbHelper->openDb('unittest');
         $this->assertEquals('\'scalarName\'', $dbHelper->escape($db, 'scalarName'));
         $this->assertEquals('\'scalar\\\'Name\'', $dbHelper->escape($db, 'scalar\'Name'));
@@ -206,7 +206,7 @@ class Hashmark_TestCase_DbHelper extends Hashmark_TestCase
      */
     public function executesRawQuery()
     {
-        $dbHelper = Hashmark::getModule('DbHelper', HASHMARK_DBHELPER_DEFAULT_TYPE);
+        $dbHelper = Hashmark::getModule('DbHelper');
         $db = $dbHelper->openDb('unittest');
         try {
             $dbHelper->rawQuery($db, 'SELECT NOW()');
@@ -226,7 +226,7 @@ class Hashmark_TestCase_DbHelper extends Hashmark_TestCase
      */
     public function expandsNamedAndVariableLengthListMacros()
     {
-        $dbHelper = Hashmark::getModule('DbHelper', HASHMARK_DBHELPER_DEFAULT_TYPE);
+        $dbHelper = Hashmark::getModule('DbHelper');
         $db = $dbHelper->openDb('unittest');
 
         $template = 'SELECT * FROM `@table` WHERE `id` = :id OR `name` = :name';

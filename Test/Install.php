@@ -24,7 +24,7 @@ ini_set('display_errors', 1);
  */
 require_once dirname(__FILE__) . '/../Hashmark.php';
 
-$dbHelper = Hashmark::getModule('DbHelper', HASHMARK_DBHELPER_DEFAULT_TYPE);
+$dbHelper = Hashmark::getModule('DbHelper');
 if (!$dbHelper) {
     exit("\nCould not create a new DbHelper object. Does DbHelper/" . HASHMARK_DBHELPER_DEFAULT_TYPE . ".php exist?\n");
 }
@@ -118,7 +118,7 @@ foreach ($modList as $baseName => $typeName) {
  * Misc. configuration value checks.
  *
  */
-$inst = Hashmark::getModule('Cache', HASHMARK_CACHE_DEFAULT_TYPE);
+$inst = Hashmark::getModule('Cache');
 $className = 'Hashmark_Cache_' . HASHMARK_CACHE_DEFAULT_TYPE;
 $testDetail = "{$className} module chosen in Config/Cache.php.\n";
 if ($inst instanceof $className) {

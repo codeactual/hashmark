@@ -29,7 +29,6 @@ class Hashmark_Cron extends Hashmark_Module_DbDependent
     /**
      * Add new row to `jobs`.
      *
-     * @access public
      * @return int  Inserted row ID.
      * @throws Exception On query error.
      */
@@ -51,7 +50,6 @@ class Hashmark_Cron extends Hashmark_Module_DbDependent
     /**
      * Register the end of a job.
      *
-     * @access public
      * @param int       $id
      * @return boolean  True on success.
      * @throws Exception On query error.
@@ -70,7 +68,6 @@ class Hashmark_Cron extends Hashmark_Module_DbDependent
     /**
      * Add new row to `samples`.
      *
-     * @access public
      * @param int       $scalarId
      * @param int       $jobId 
      * @param string    $value
@@ -121,7 +118,6 @@ class Hashmark_Cron extends Hashmark_Module_DbDependent
     /**
      * Return all fields from a scalar's latest sample in the current partition.
      *
-     * @access public
      * @param int       $scalarId
      * @return Array    Assoc. of fields; otherwise false.
      * @throws Exception On query error.
@@ -142,7 +138,6 @@ class Hashmark_Cron extends Hashmark_Module_DbDependent
     /**
      * Update a scalar's sampler status/error message.
      *
-     * @access public
      * @param int       $scalarId
      * @param string    $status     New `scalars`.`sampler_status` ENUM value, ex. 'Scheduled'.
      * @param string    $error      New `scalars`.`sampler_error` message.
@@ -175,7 +170,6 @@ class Hashmark_Cron extends Hashmark_Module_DbDependent
      *   -  Only returns `scalars` fields necessary for resampling: `id`,
      *      `sampler_handler`, `sampler_status`
      *
-     * @access public
      * @return Array    Assoc. of fields; otherwise false.
      * @throws Exception On query error.
      */

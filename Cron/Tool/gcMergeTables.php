@@ -34,7 +34,7 @@ if (!isset($maxCount)) {
     $maxCount = HASHMARK_CRON_MERGE_GC_MAX_COUNT;
 }
    
-$dbHelper = Hashmark::getModule('DbHelper', HASHMARK_DBHELPER_DEFAULT_TYPE);
+$dbHelper = Hashmark::getModule('DbHelper');
 $db = $dbHelper->openDb('cron');
 $partition = Hashmark::getModule('Partition', '', $db);
 

@@ -25,27 +25,23 @@
 abstract class Hashmark_TestCase extends PHPUnit_Framework_TestCase
 {
     /**
-     * @access protected
      * @var boolean     If true, PHPUnit lets globals persist between tests.
      * @link http://sebastian-bergmann.de/archives/797-Global-Variables-and-PHPUnit.html
      */
     protected $backupGlobals = false;
 
     /**
-     * @access protected
      * @var mixed   Database connection object/resource.
      * @see setUp()
      */
     protected $_db;
     
     /**
-     * @access protected
      * @var Hashmark_DbHelper_*    Instance created in setUp().
      */
     protected $_dbHelper;
 
     /**
-     * @access protected
      * @var string  Test case type, ex. 'Mysql'.
      * @see setUp()
      */
@@ -54,7 +50,6 @@ abstract class Hashmark_TestCase extends PHPUnit_Framework_TestCase
     /**
      * Set up the test case fixtures.
      * 
-     * @access protected
      * @return void
      */
     protected function setUp()
@@ -63,17 +58,11 @@ abstract class Hashmark_TestCase extends PHPUnit_Framework_TestCase
         $className = get_class($this);
 
         $this->_type = substr($className, strrpos($className, '_') + 1);
-
-        // Auto-load a DbHelper instance for DB dependent modules.
-        $matchingDbHelperFile = dirname(__FILE__) . '/../DbHelper/' . HASHMARK_DBHELPER_DEFAULT_TYPE . '.php';
-        if (is_readable($matchingDbHelperFile)) {
-            $this->_dbHelper = Hashmark::getModule('DbHelper', HASHMARK_DBHELPER_DEFAULT_TYPE);
-            $this->_db = $this->_dbHelper->openDb('unittest');
-        }
+        $this->_dbHelper = Hashmark::getModule('DbHelper');
+        $this->_db = $this->_dbHelper->openDb('unittest');
     }
     
     /**
-     * @access protected
      * @return void
      */
     protected function tearDown()
@@ -87,8 +76,6 @@ abstract class Hashmark_TestCase extends PHPUnit_Framework_TestCase
      * Return a @dataProvider-compat argument set without the array()
      * wrapping around each value.
      *
-     * @static
-     * @access public
      * @return Array
      */
     public static function unwrapProviderData($providerData)
@@ -101,8 +88,6 @@ abstract class Hashmark_TestCase extends PHPUnit_Framework_TestCase
     /**
      * Provide valid increment values (initial, delta, expected result).
      *
-     * @static
-     * @access public
      * @return Array    Test method argument sets.
      * @see Loaded data file for return value format.
      */
@@ -118,8 +103,6 @@ abstract class Hashmark_TestCase extends PHPUnit_Framework_TestCase
     /**
      * Provide valid decrement values (initial, delta, expected result).
      *
-     * @static
-     * @access public
      * @return Array    Test method argument sets.
      * @see Loaded data file for return value format.
      */
@@ -135,8 +118,6 @@ abstract class Hashmark_TestCase extends PHPUnit_Framework_TestCase
     /**
      * Provide valid string values.
      *
-     * @static
-     * @access public
      * @return Array    Test method argument sets.
      */
     public static function provideStringValues()
@@ -155,8 +136,6 @@ abstract class Hashmark_TestCase extends PHPUnit_Framework_TestCase
     /**
      * Provide valid decimal values.
      *
-     * @static
-     * @access public
      * @return Array    Test method argument sets.
      */
     public static function provideDecimalValues()
@@ -181,8 +160,6 @@ abstract class Hashmark_TestCase extends PHPUnit_Framework_TestCase
     /**
      * Provide names which should never identify a scalar.
      *
-     * @static
-     * @access public
      * @return Array    Test method argument sets.
      */
     public static function provideInvalidScalarNames()
@@ -206,8 +183,6 @@ abstract class Hashmark_TestCase extends PHPUnit_Framework_TestCase
     /**
      * Provide sets of scalar types and values.
      *
-     * @static
-     * @access public
      * @return Array    Test method argument sets.
      * 
      * Format:
@@ -241,8 +216,6 @@ abstract class Hashmark_TestCase extends PHPUnit_Framework_TestCase
     /**
      * Provide fields of scalars scheduled for sampling.
      *
-     * @static
-     * @access public
      * @return Array    Test method argument sets.
      */
     public static function provideScalarsWithScheduledSamplers()
@@ -272,8 +245,6 @@ abstract class Hashmark_TestCase extends PHPUnit_Framework_TestCase
     /**
      * Return a random decimal string.
      *
-     * @static
-     * @access public
      * @return string
      */
     public static function randomDecimal()
@@ -300,8 +271,6 @@ abstract class Hashmark_TestCase extends PHPUnit_Framework_TestCase
     /**
      * Return a random string.
      *
-     * @static
-     * @access public
      * @param int   $minLength  1 to 40.
      * @param int   $maxLength  1 to 40.
      * @return string
@@ -321,8 +290,6 @@ abstract class Hashmark_TestCase extends PHPUnit_Framework_TestCase
     /**
      * Testable logic for assertArrayContainsOnly().
      *
-     * @static
-     * @access public
      * @param mixed     $needle     Only expected element of $haystack.
      * @param Array     $haystack
      * @param boolean   $strict     If true, $a === $b logic is used; othewise in_array().
@@ -347,7 +314,6 @@ abstract class Hashmark_TestCase extends PHPUnit_Framework_TestCase
      *
      *      -   Uses assertTrue() internally to increment assertion count.
      *
-     * @access public
      * @param mixed     $needle     Only expected element of $haystack.
      * @param Array     $haystack
      * @param boolean   $strict     If true, $a === $b logic is used; othewise in_array().
@@ -377,8 +343,6 @@ abstract class Hashmark_TestCase extends PHPUnit_Framework_TestCase
     /**
      * Testable logic for assertDecimalEquals().
      *
-     * @static
-     * @access public
      * @param string    $expected
      * @param string    $actual
      * @return boolean  True if equal.
@@ -399,7 +363,6 @@ abstract class Hashmark_TestCase extends PHPUnit_Framework_TestCase
      *
      *      -   Uses assertTrue() internally to increment assertion count.
      *
-     * @access public
      * @param string    $expected
      * @param string    $actual
      * @return void

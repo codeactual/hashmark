@@ -24,7 +24,6 @@ class Hashmark_TestCase_Client extends Hashmark_TestCase
     /**
      * Resources needed for most tests.
      *
-     * @access protected
      * @return void
      */
     protected function setUp()

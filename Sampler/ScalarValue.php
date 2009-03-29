@@ -47,7 +47,7 @@ class Hashmark_Sampler_ScalarValue extends Hashmark_Sampler
      */
     public static function run($scalarId)
     {
-        $db = Hashmark::getModule('DbHelper', HASHMARK_DBHELPER_DEFAULT_TYPE)->openDb('cron');
+        $db = Hashmark::getModule('DbHelper')->openDb('cron');
         $client = Hashmark::getModule('Client', '', $db);
 
         if (!$client) {

@@ -27,33 +27,27 @@
 abstract class Hashmark_Module_DbDependent extends Hashmark_Module
 {
     /**
-     * @access protected
      * @var mixed Database connection object/resource.
      */
     protected $_db;
     
     /**
-     * @access protected
      * @var string  Database selection in quoted form `<name>` w/ trailing period.
      */
     protected $_dbName;
 
     /**
-     * @access protected
      * @var Hashmark_DbHelper_*    Instance created in initModule().
      */
     protected $_dbHelper;
     
     /**
-     * @static
-     * @access protected
      * @var Array   SQL templates indexed by module base name, then template name
      *              which is usually the associated function's name.
      */
     protected static $_sql;
 
     /**
-     * @access protected
      * @param mixed     $db         Connection object/resource.
      * @param string    $dbName     Database selection, unquoted. [optional]
      * @return boolean  False if module could not be initialized and is unusable.
@@ -70,7 +64,7 @@ abstract class Hashmark_Module_DbDependent extends Hashmark_Module
         $class = get_class($this);
 
         $this->_db = $db;
-        $this->_dbHelper = Hashmark::getModule('DbHelper', HASHMARK_DBHELPER_DEFAULT_TYPE);
+        $this->_dbHelper = Hashmark::getModule('DbHelper');
 
         if (!$this->_dbHelper) {
             return false;
@@ -93,7 +87,6 @@ abstract class Hashmark_Module_DbDependent extends Hashmark_Module
     /**
      * Public access to $_sql by key.
      *
-     * @access public
      * @param string    Template name, usually a function name.
      * @return string   Template SQL; otherwise false.
      */
@@ -108,7 +101,6 @@ abstract class Hashmark_Module_DbDependent extends Hashmark_Module
     /**
      * Public access to $_db.
      *
-     * @access public
      * @return mixed
      */
     public function getDb()
@@ -119,7 +111,6 @@ abstract class Hashmark_Module_DbDependent extends Hashmark_Module
     /**
      * Public access to $_dbName.
      *
-     * @access public
      * @param boolean   $clean  If true, back-quotes and period are removed.
      * @return mixed
      */
@@ -135,7 +126,6 @@ abstract class Hashmark_Module_DbDependent extends Hashmark_Module
     /**
      * Public access to $_dbHelper.
      *
-     * @access public
      * @return Hashmark_DbHelper_*
      */
     public function getDbHelper()
@@ -146,7 +136,6 @@ abstract class Hashmark_Module_DbDependent extends Hashmark_Module
     /**
      * Public write access to $_dbName.
      *
-     * @access public
      * @param string    $dbName
      * @return void
      */
@@ -162,7 +151,6 @@ abstract class Hashmark_Module_DbDependent extends Hashmark_Module
     /**
      * Return a Hashmark module instance (of the same type as this one)
      *
-     * @access protected
      * @param string    $name   Module name, ex. 'Core', 'Cron, 'Client.
      * @return mixed    New instance.
      */

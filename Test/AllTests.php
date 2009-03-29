@@ -29,7 +29,6 @@ class Hashmark_AllTests
     /**
      * Auto-discover test types.
      *
-     * @static
      * @return void
      */
     public static function suite()

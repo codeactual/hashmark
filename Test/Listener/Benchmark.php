@@ -24,24 +24,20 @@
 class Hashmark_TestListener_Benchmark implements PHPUnit_Framework_TestListener
 {
     /**
-     * @access      protected
      * @var Array   Start microtimes indexed by suite name. 
      */
     protected static $suiteStarts = array();
     /**
-     * @access      protected
      * @var float   Current test's starting microtime.
      */
     protected static $currentTestStart;
 
     /**
-     * @access      protected
      * @var Array   Start microtimes indexed by suite name. 
      */
     protected static $suites = array();
     
     /**
-     * @access      protected
      * @var Array   Assoc. of details about each test indexed by test name.
      *
      *      'totalTime':    Total microtime.

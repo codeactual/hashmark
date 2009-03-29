@@ -22,7 +22,7 @@
  */
 require_once dirname(__FILE__) . '/../../Hashmark.php';
 
-$dbHelper = Hashmark::getModule('DbHelper', HASHMARK_DBHELPER_DEFAULT_TYPE);
+$dbHelper = Hashmark::getModule('DbHelper');
 $db = $dbHelper->openDb('unittest');
 
 $coreTables = array('categories', 'categories_milestones', 'categories_scalars',

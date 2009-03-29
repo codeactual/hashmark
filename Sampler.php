@@ -31,8 +31,6 @@ abstract class Hashmark_Sampler extends Hashmark_Module
     /**
      * Return the human-readable name.
      *
-     * @static
-     * @access public
      * @return string
      */
     abstract public static function getName();
@@ -40,8 +38,6 @@ abstract class Hashmark_Sampler extends Hashmark_Module
     /**
      * Return the description text.
      *
-     * @static
-     * @access public
      * @return string
      */
     abstract public static function getDescription();
@@ -49,8 +45,6 @@ abstract class Hashmark_Sampler extends Hashmark_Module
     /**
      * Return the new scalar/sample value using an arbitrary data source.
      *
-     * @static
-     * @access public
      * @param int       $scalarId   Scalar being sampled.
      * @return string   New value; null on error.
      */

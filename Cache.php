@@ -32,7 +32,6 @@ abstract class Hashmark_Cache extends Hashmark_Module
     /**
      * Retrieve a cached value by name.
      *
-     * @access protected
      * @param string    $key    Key name.
      * @return mixed
      */
@@ -41,7 +40,6 @@ abstract class Hashmark_Cache extends Hashmark_Module
     /**
      * Store a named value.
      *
-     * @access protected
      * @param string    $key    Key name.
      * @param mixed     $value
      * @return boolean  True on success.
@@ -51,7 +49,6 @@ abstract class Hashmark_Cache extends Hashmark_Module
     /**
      * Invalidate a key.
      *
-     * @access protected
      * @param string    $key    Key name.
      * @return boolean  True on success.
      */
@@ -60,7 +57,6 @@ abstract class Hashmark_Cache extends Hashmark_Module
     /**
      * Namespacing wrapper for _get().
      *
-     * @access public
      * @param string    $key    Key name.
      * @param string    $group  Group name.
      * @return mixed
@@ -73,7 +69,6 @@ abstract class Hashmark_Cache extends Hashmark_Module
     /**
      * Namespacing wrapper for _set().
      *
-     * @access public
      * @param string    $key    Key name.
      * @param mixed     $value
      * @param string    $group  Group name.
@@ -87,7 +82,6 @@ abstract class Hashmark_Cache extends Hashmark_Module
     /**
      * Namespacing wrapper for _remove().
      *
-     * @access public
      * @param string    $key    Key name.
      * @param string    $group  Group name.
      * @return boolean  True on success.
@@ -100,7 +94,6 @@ abstract class Hashmark_Cache extends Hashmark_Module
     /**
      * Add namespace and group prefix (if needed) to get/set/remove keys.
      *
-     * @access public
      * @param string    $key    Key name.
      * @param string    $group  Group name.
      * @return string   Finalized key.
@@ -123,7 +116,6 @@ abstract class Hashmark_Cache extends Hashmark_Module
     /**
      * Return a value key prefix based on a group name.
      *
-     * @access public
      * @param string    $group  Group name.
      * @param boolean   $new    If true, a new prefix is created.
      * @return string   Active group prefix; false on error.
@@ -147,7 +139,6 @@ abstract class Hashmark_Cache extends Hashmark_Module
     /**
      * Invalidates all value keys composed with $group prefix.
      *
-     * @access public
      * @return boolean  True on success.
      */
     public function removeGroup($group)

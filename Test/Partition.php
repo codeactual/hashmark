@@ -27,7 +27,6 @@ class Hashmark_TestCase_Partition extends Hashmark_TestCase
     /**
      * Resources needed for most tests.
      *
-     * @access protected
      * @return void
      */
     protected function setUp()
@@ -46,8 +45,6 @@ class Hashmark_TestCase_Partition extends Hashmark_TestCase
      *          2008-04-01 01:45:59
      *          2009-06-11 01:45:59
      *
-     * @static
-     * @access public 
      * @return Array    Test method argument sets.
      */
     public static function provideDateRangeCoverages()
@@ -93,8 +90,6 @@ class Hashmark_TestCase_Partition extends Hashmark_TestCase
      *          2008-04-01 01:45:59
      *          2009-06-11 01:45:59
      *
-     * @static
-     * @access public 
      * @return Array    Test method argument sets.
      */
     public static function provideMonthIntervalsWithNoBoundMatches()
@@ -129,8 +124,6 @@ class Hashmark_TestCase_Partition extends Hashmark_TestCase
      *          2008-04-01 01:45:59
      *          2009-06-11 01:45:59
      *
-     * @static
-     * @access public 
      * @return Array    Test method argument sets.
      */
     public static function provideDayIntervalsWithNoBoundMatches()
@@ -165,8 +158,6 @@ class Hashmark_TestCase_Partition extends Hashmark_TestCase
      *          2008-04-01 01:45:59
      *          2009-06-11 01:45:59
      *
-     * @static
-     * @access public 
      * @return Array    Test method argument sets.
      */
     public static function provideMixedIntervalsWithNoBoundMatches()
@@ -201,8 +192,6 @@ class Hashmark_TestCase_Partition extends Hashmark_TestCase
      *          2008-04-01 01:45:59
      *          2009-06-11 01:45:59
      *
-     * @static
-     * @access public 
      * @return Array    Test method argument sets.
      */
     public static function provideMonthIntervalsWithBoundMatches()
@@ -237,8 +226,6 @@ class Hashmark_TestCase_Partition extends Hashmark_TestCase
      *          2008-04-01 01:45:59
      *          2009-06-11 01:45:59
      *
-     * @static
-     * @access public 
      * @return Array    Test method argument sets.
      */
     public static function provideDayIntervalsWithBoundMatches()
@@ -273,8 +260,6 @@ class Hashmark_TestCase_Partition extends Hashmark_TestCase
      *          2008-04-01 01:45:59
      *          2009-06-11 01:45:59
      *
-     * @static
-     * @access public 
      * @return Array    Test method argument sets.
      */
     public static function provideMixedIntervalsWithBoundMatches()

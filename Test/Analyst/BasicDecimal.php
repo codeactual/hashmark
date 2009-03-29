@@ -24,26 +24,21 @@
 class Hashmark_TestCase_Analyst_BasicDecimal extends Hashmark_TestCase
 {
     /**
-     * @access protected
      * @var Hashmark_Analyst_BasicDecimal   Fixture instance.
      */
     protected $_analyst;
 
     /**
-     * @access protected
      * @var Hashmark_Cron   Fixture instance.
      */
     protected $_cron;
 
     /**
-     * @access protected
      * @var Hashmark_Core   Fixture instance.
      */
     protected $_core;
 
     /**
-     * @static
-     * @access protected
      * @var Array   Tested subset of Hashmark_Analyst_BasicDecimal:$_aggFunctions.
      */
     protected static $_aggFunctions = array('AVG', 'SUM', 'MAX', 'MIN');
@@ -51,7 +46,6 @@ class Hashmark_TestCase_Analyst_BasicDecimal extends Hashmark_TestCase
     /**
      * Resources needed for most tests.
      *
-     * @access protected
      * @return void
      */
     protected function setUp()
@@ -66,8 +60,6 @@ class Hashmark_TestCase_Analyst_BasicDecimal extends Hashmark_TestCase
     /**
      * Public acess to $_aggFunctions.
      *
-     * @static
-     * @access public
      * @return Array
      */
     public static function getAggFunctions()
@@ -84,8 +76,6 @@ class Hashmark_TestCase_Analyst_BasicDecimal extends Hashmark_TestCase
      *          2009-04-30 01:45:59
      *      -   Distinct and full group AVG/SUM/COUNT for interval groups should differ at least once.
      *
-     * @static
-     * @access public 
      * @return Array    Test method argument sets.
      */
     public static function provideValuesSamples()
@@ -133,8 +123,6 @@ class Hashmark_TestCase_Analyst_BasicDecimal extends Hashmark_TestCase
      *          those expected in at-interval sets.
      *      -   Distinct and full group AVG/SUM/COUNT for interval groups should differ at least once.
      *
-     * @static
-     * @access public 
      * @return Array    Test method argument sets.
      */
     public static function provideValuesAtIntervalHourSamples()
@@ -180,8 +168,6 @@ class Hashmark_TestCase_Analyst_BasicDecimal extends Hashmark_TestCase
      *          those expected in at-interval sets.
      *      -   Distinct and full group AVG/SUM/COUNT for interval groups should differ at least once.
      *
-     * @static
-     * @access public 
      * @return Array    Test method argument sets.
      */
     public static function provideValuesAtIntervalDaySamples()
@@ -233,8 +219,6 @@ class Hashmark_TestCase_Analyst_BasicDecimal extends Hashmark_TestCase
      *          those expected in at-interval sets.
      *      -   Distinct and full group AVG/SUM/COUNT for interval groups should differ at least once.
      *
-     * @static
-     * @access public 
      * @return Array    Test method argument sets.
      */
     public static function provideValuesAtIntervalWeekSamples()
@@ -286,8 +270,6 @@ class Hashmark_TestCase_Analyst_BasicDecimal extends Hashmark_TestCase
      *          those expected in at-interval sets.
      *      -   Distinct and full group AVG/SUM/COUNT for interval groups should differ at least once.
      *
-     * @static
-     * @access public 
      * @return Array    Test method argument sets.
      */
     public static function provideValuesAtIntervalMonthSamples()
@@ -341,8 +323,6 @@ class Hashmark_TestCase_Analyst_BasicDecimal extends Hashmark_TestCase
      *          those expected in at-interval sets.
      *      -   Distinct and full group AVG/SUM/COUNT for interval groups should differ at least once.
      *
-     * @static
-     * @access public 
      * @return Array    Test method argument sets.
      */
     public static function provideValuesAtIntervalYearSamples()
@@ -381,8 +361,6 @@ class Hashmark_TestCase_Analyst_BasicDecimal extends Hashmark_TestCase
      *
      *      -   Does not use @dataProvider format.
      *
-     * @static
-     * @access public 
      * @param string    $name  Provider method name. 
      * @return Array    If $name is empty, all sample data; otherwise
      *                  only the named section.
@@ -435,8 +413,6 @@ class Hashmark_TestCase_Analyst_BasicDecimal extends Hashmark_TestCase
      *
      *      -   Does not use @dataProvider format.
      *
-     * @static
-     * @access public 
      * @param string    $name   Name of section in provider.php data.
      * @return Array    If $name is empty, all provider.php data; otherwise
      *                  only the named section.
@@ -459,6 +435,17 @@ class Hashmark_TestCase_Analyst_BasicDecimal extends Hashmark_TestCase
         }
 
         return false;
+    }
+
+    /**
+     * @test
+     * @group BasicDecimal
+     * @group hasGeneratedProviderData
+     */
+    public function hasGeneratedProviderData()
+    {
+        $this->assertTrue(is_readable(dirname(__FILE__) . '/BasicDecimal/Data/provider.php'),
+                          'Generate data: php -f Test/Analyst/BasicDecimal/Tool/writeProviderData.php');
     }
     
     /**

@@ -42,8 +42,6 @@ class Hashmark_BcMath
      *          intval() without precision loss.
      *      -   Uses explicit casts to emphasize conversions.
      *
-     * @static
-     * @access public
      * @param string    $value
      * @return string
      */
@@ -102,8 +100,6 @@ class Hashmark_BcMath
     /**
      * Return sum based on bcadd().
      *
-     * @static
-     * @access public
      * @param Array     $values
      * @return string
      * @throws  Exception if $values is not a populated Array.
@@ -128,8 +124,6 @@ class Hashmark_BcMath
     /**
      * Return average based on bcdiv(), sum() and round().
      *
-     * @static
-     * @access public
      * @param Array     $values
      * @return string
      * @throws  Exception if $values is not a populated Array.
@@ -152,8 +146,6 @@ class Hashmark_BcMath
     /**
      * Return maximum based on bccomp().
      *
-     * @static
-     * @access public
      * @param Array     $values
      * @return string   Maximum value.
      * @throws  Exception if $values is not a populated Array.
@@ -173,8 +165,6 @@ class Hashmark_BcMath
     /**
      * Return minimum based on bccomp().
      *
-     * @static
-     * @access public
      * @param Array     $values
      * @return string   Minimum value.
      * @throws  Exception if $values is not a populated Array.

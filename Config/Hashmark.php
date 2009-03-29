@@ -16,20 +16,6 @@
 */
 
 /**
- * Default MySQL extension wrapper class.
- *
- *      -   Used by Cron/Tool/ scripts.
- */
-define('HASHMARK_DBHELPER_DEFAULT_TYPE', 'Mysqli');
-
-/**
- * Default cache extension wrapper class.
- *
- *      -   Used by Partition module to cache table lookups.
- */
-define('HASHMARK_CACHE_DEFAULT_TYPE', 'Static');
-
-/**
  * Should match DECIMAL(D,M) data types in Sql/Schema/hashmark.sql.
  */
 define('HASHMARK_DECIMAL_TOTALWIDTH', 20);

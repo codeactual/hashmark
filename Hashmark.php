@@ -46,8 +46,6 @@ class Hashmark
      *          Hashmark::getModule($base, $type, $a, $b);
      *          Dependency list must match classes initModule() definition.
      *
-     * @static
-     * @access public
      * @param string    $base   Ex. 'Core', optional base class in Core.php.
      * @param string    $type   Ex. 'Mysql', implementation in Core/Mysql.php.
      * @param mixed     ...     Variable-length list of arguments passed on to
@@ -88,6 +86,14 @@ class Hashmark
                 require_once $baseClassFile;
             }
 
+            // Check if $baseClassFile defined a constant for the default type.
+            if (!$type) {
+                $defaultType = 'HASHMARK_' . strtoupper($base) . '_DEFAULT_TYPE';
+                if (defined($defaultType)) {
+                    $type = constant($defaultType);
+                }
+            }
+
             if ($type) {
                 // Use $config from the config file, if present.
                 if (!isset($typeConfigCache[$type])) {
@@ -118,7 +124,14 @@ class Hashmark
             $baseConfig = isset($baseConfigCache[$base]) ? $baseConfigCache[$base] : false;
             $typeConfig = isset($typeConfigCache[$type]) ? $typeConfigCache[$type] : false;
 
-            $moduleCache[$modCacheKey] = new $instClass($base, $baseConfig, $type, $typeConfig);
+            if ('Cache' == $base) {
+                $cache = null;
+            } else {
+                $cache = self::getModule('Cache');
+            }
+
+            $moduleCache[$modCacheKey] = new $instClass($base, $baseConfig, $type,
+                                                        $typeConfig, $cache);
         }
         
         $inst = clone $moduleCache[$modCacheKey];

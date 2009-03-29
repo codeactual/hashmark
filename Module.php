@@ -25,49 +25,52 @@
 abstract class Hashmark_Module
 {
     /**
-     * @access protected
      * @var string Module base name, ex. 'Client'.
      */
     protected $_base;
 
     /**
-     * @access protected
      * @var mixed Base module configs, ex. for all 'Client' implementations.
      */
     protected $_baseConfig;
     
     /**
-     * @access protected
      * @var string Module type name, ex. 'Mysqli'.
      */
     protected $_type;
     
     /**
-     * @access protected
      * @var mixed Module type-specific configs, ex. Hashmark_Client_Mysqli configs.
      */
     protected $_typeConfig;
 
     /**
-     * @access protected
-     * @param string    $base     
-     * @param mixed     $baseConfig
-     * @param string    $type     
-     * @param mixed     $typeConfig     
+     * @var Hashmark_Cache_*    Cache object.
+     */
+    protected $_cache;
+
+    /**
+     * @param string            $base     
+     * @param mixed             $baseConfig
+     * @param string            $type     
+     * @param mixed             $typeConfig     
+     * @param Hashmark_Cache_*  $cache  Instance of implementation selected
+     *                                  in Config/Cache.php and created in
+     *                                  Hashmark::getModule().
      * @return void
      */
-    public function __construct($base, $baseConfig, $type, $typeConfig)
+    public function __construct($base, $baseConfig, $type, $typeConfig, $cache)
     {
         $this->_base = $base;
         $this->_baseConfig = $baseConfig;
         $this->_type = $type;
         $this->_typeConfig = $typeConfig;
+        $this->_cache = $cache;
     }
 
     /**
      * Public access to $_base.
      *
-     * @access public
      * @return string
      */
     public function getBase()
@@ -78,7 +81,6 @@ abstract class Hashmark_Module
     /**
      * Public access to $_baseConfig.
      *
-     * @access public
      * @return string
      */
     public function getBaseConfig()
@@ -89,7 +91,6 @@ abstract class Hashmark_Module
     /**
      * Public access to $_type.
      *
-     * @access public
      * @return string
      */
     public function getType()
@@ -100,7 +101,6 @@ abstract class Hashmark_Module
     /**
      * Public access to $_typeConfig.
      *
-     * @access public
      * @return string
      */
     public function getTypeConfig()

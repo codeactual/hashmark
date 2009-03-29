@@ -28,8 +28,6 @@ class Hashmark_Core extends Hashmark_Module_DbDependent
     /**
      * Return all valid `scalars`.`type` ENUM values.
      *
-     * @static
-     * @access public
      * @return Array
      */
     public static function getValidScalarTypes()
@@ -40,8 +38,6 @@ class Hashmark_Core extends Hashmark_Module_DbDependent
     /**
      * Return all valid `scalars`.`sampler_status` ENUM values.
      *
-     * @static
-     * @access public
      * @return Array
      */
     public static function getValidSampleStatuses()
@@ -52,7 +48,6 @@ class Hashmark_Core extends Hashmark_Module_DbDependent
     /**
      * Return all `jobs` fields associated with an ID.
      *
-     * @access public
      * @param int       $id
      * @return Array    Assoc. of fields; otherwise false.
      * @throws Exception On query error.
@@ -78,7 +73,6 @@ class Hashmark_Core extends Hashmark_Module_DbDependent
     /**
      * Add `scalars` row.
      *
-     * @access public
      * @param Array     $fields     Assoc. scalar properties.
      *
      *      Required:
@@ -144,7 +138,6 @@ class Hashmark_Core extends Hashmark_Module_DbDependent
     /**
      * Return all `scalars` fields associated with an ID.
      *
-     * @access public
      * @param int       $id
      * @return Array    Assoc. of fields; otherwise false.
      * @throws Exception On query error.
@@ -170,7 +163,6 @@ class Hashmark_Core extends Hashmark_Module_DbDependent
     /**
      * Return all `scalars` fields associated with a name.
      *
-     * @access public
      * @param string    $name
      * @return Array    Assoc. of fields; otherwise false.
      * @throws Exception On query error.
@@ -197,7 +189,6 @@ class Hashmark_Core extends Hashmark_Module_DbDependent
     /**
      * Return `scalars`.`type` associated with an ID.
      *
-     * @access public
      * @param int       $id
      * @return string   See Hashmark_Core::getValidScalarTypes() for possible values.
      * @throws Exception On query error.
@@ -223,7 +214,6 @@ class Hashmark_Core extends Hashmark_Module_DbDependent
     /**
      * Return `scalars`.`sample_count` associated with an ID.
      *
-     * @access public
      * @param int       $id
      * @return string
      * @throws Exception On query error.
@@ -249,7 +239,6 @@ class Hashmark_Core extends Hashmark_Module_DbDependent
     /**
      * Return the `id` associated with a scalar name.
      *
-     * @access public
      * @param string    $name
      * @return string
      * @throws Exception On query error.
@@ -275,7 +264,6 @@ class Hashmark_Core extends Hashmark_Module_DbDependent
     /**
      * Verify a `categories_scalars` row/relationship exists.
      *
-     * @access public
      * @param int       $scalarId
      * @param int       $categoryId
      * @return boolean  True on success.
@@ -301,7 +289,6 @@ class Hashmark_Core extends Hashmark_Module_DbDependent
      *
      *      -   scalarHasCategory(scalar_id, category_id) available for validation.
      *
-     * @access public
      * @param int       $scalarId
      * @param int       $categoryId
      * @return boolean  True on success.
@@ -323,7 +310,6 @@ class Hashmark_Core extends Hashmark_Module_DbDependent
      *
      *      -   scalarHasCategory(scalar_id, category_id) available for validation.
      *
-     * @access public
      * @param int   $scalarId
      * @param int   $categoryId
      * @return boolean  True on success.
@@ -343,7 +329,6 @@ class Hashmark_Core extends Hashmark_Module_DbDependent
     /**
      * Delete row from `scalars`.
      *
-     * @access public
      * @param int       $id
      * @return boolean  True on success.
      * @throws Exception On query error.
@@ -360,7 +345,6 @@ class Hashmark_Core extends Hashmark_Module_DbDependent
     /**
      * Add new row to `categories`.
      *
-     * @access public
      * @param string    $name
      * @param string    $description    Optional.
      * @return int      Inserted row ID.
@@ -380,7 +364,6 @@ class Hashmark_Core extends Hashmark_Module_DbDependent
     /**
      * Return all `categories` fields associated with an ID.
      *
-     * @access public
      * @param int       $id
      * @return Array    Assoc. of fields; otherwise false.
      * @throws Exception On query error.
@@ -406,7 +389,6 @@ class Hashmark_Core extends Hashmark_Module_DbDependent
     /**
      * Return all `categories` fields associated with a name.
      *
-     * @access public
      * @param string    $name
      * @return Array    Assoc. of fields; otherwise false.
      * @throws Exception On query error.
@@ -433,7 +415,6 @@ class Hashmark_Core extends Hashmark_Module_DbDependent
     /**
      * Delete row from `categories`.
      *
-     * @access public
      * @param int       $id
      * @return boolean  True on success.
      * @throws Exception On query error.
@@ -450,7 +431,6 @@ class Hashmark_Core extends Hashmark_Module_DbDependent
     /**
      * Add new row to `milestones`.
      *
-     * @access public
      * @param string    $name
      * @param mixed     $when   UNIX timestamp or DATETIME string.
      * @return int      Inserted row ID.
@@ -472,7 +452,6 @@ class Hashmark_Core extends Hashmark_Module_DbDependent
     /**
      * Return all `milestones` fields associated with an ID.
      *
-     * @access public
      * @param int       $id
      * @return Array    Assoc. of fields; otherwise false.
      * @throws Exception On query error.
@@ -498,7 +477,6 @@ class Hashmark_Core extends Hashmark_Module_DbDependent
     /**
      * Return all `milestones` fields associated with a name.
      *
-     * @access public
      * @param string    $name
      * @return Array    Assoc. of fields; otherwise false.
      * @throws Exception On query error.
@@ -525,7 +503,6 @@ class Hashmark_Core extends Hashmark_Module_DbDependent
     /**
      * Update a milestone's fields.
      *
-     * @access public
      * @param int       $id
      * @param string    $name
      * @param mixed     $when   UNIX timestamp or DATETIME string.
@@ -549,7 +526,6 @@ class Hashmark_Core extends Hashmark_Module_DbDependent
     /**
      * Verify a `categories_milestones` row/relationship exists.
      *
-     * @access public
      * @param int       $milestoneId
      * @param int       $categoryId
      * @return boolean  True on success.
@@ -575,7 +551,6 @@ class Hashmark_Core extends Hashmark_Module_DbDependent
      *
      *      -   milestoneHasCategory(milestone_id, category_id) available for validation.
      *
-     * @access public
      * @param int       $milestoneId
      * @param int       $categoryId
      * @return boolean  True on success.
@@ -597,7 +572,6 @@ class Hashmark_Core extends Hashmark_Module_DbDependent
      *
      *      -   milestoneHasCategory(milestone_id, category_id) available for validation.
      *
-     * @access public
      * @param int   $milestoneId
      * @param int   $categoryId
      * @return boolean  True on success.
@@ -617,7 +591,6 @@ class Hashmark_Core extends Hashmark_Module_DbDependent
     /**
      * Delete row from `milestones`.
      *
-     * @access public
      * @param int       $id
      * @return boolean  True on success.
      * @throws Exception On query error.

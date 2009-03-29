@@ -25,13 +25,11 @@
 class Hashmark_Analyst_BasicDecimal extends Hashmark_Analyst
 {
     /**
-     * @access protected
      * @var Hashmark_Partition_*    Instance created in initModule().
      */
     protected $_partition;
 
     /**
-     * @access protected
      * @var int     Current MySQL div_precision_increment setting.
      */
     protected $_divPrecisionIncr = HASHMARK_DBHELPER_DIV_PRECISION_INCREMENT;
@@ -39,8 +37,6 @@ class Hashmark_Analyst_BasicDecimal extends Hashmark_Analyst
     /**
      * Aggregation options.
      *
-     * @static
-     * @access protected
      * @var Array   Function names.
      */
     protected static $_aggFunctions = array('AVG', 'SUM', 'COUNT', 'MAX', 'MIN',
@@ -49,8 +45,6 @@ class Hashmark_Analyst_BasicDecimal extends Hashmark_Analyst
     /**
      * Aggregation options w/ DISTINCT support.
      *
-     * @static
-     * @access protected
      * @var Array   Function names.
      */
     protected static $_distinctFunctions = array('AVG', 'SUM', 'COUNT', 'MAX', 'MIN');
@@ -60,8 +54,6 @@ class Hashmark_Analyst_BasicDecimal extends Hashmark_Analyst
      *
      *      -   Weeks start on Monday.
      *
-     * @static
-     * @access protected
      * @var Array   Keys = interval codes, values = format strings.
      */
     protected static $_intervalDbFormats = array('h' => '%Y%m%d%H', 'd' => '%Y%m%d',
@@ -72,8 +64,6 @@ class Hashmark_Analyst_BasicDecimal extends Hashmark_Analyst
      *
      *      -   Weeks start on Monday.
      *
-     * @static
-     * @access protected
      * @var Array   Keys = interval codes, values = format strings.
      */
     protected static $_intervalPhpFormats = array('h' => 'YmdH', 'd' => 'Ymd',
@@ -85,8 +75,6 @@ class Hashmark_Analyst_BasicDecimal extends Hashmark_Analyst
      *
      *      -   'z' provides (DAYOFYEAR - 1)
      *
-     * @static
-     * @access protected
      * @var Array   Keys = functions, values = date() format strings.
      */
     protected static $_recurFormats = array('HOUR' => 'G', 'DAYOFMONTH' => 'j',
@@ -95,7 +83,6 @@ class Hashmark_Analyst_BasicDecimal extends Hashmark_Analyst
     /**
      * Called by Hashmark::getModule() to inject dependencies.
      *
-     * @access public
      * @param mixed     $db     Connection object/resource.
      * @return boolean  False if module could not be initialized and is unusable.
      *                  Hashmark::getModule() will also then return false.
@@ -112,8 +99,6 @@ class Hashmark_Analyst_BasicDecimal extends Hashmark_Analyst
     /**
      * Public access to $_intervalDbFormats values by interval code.
      *
-     * @static
-     * @access public
      * @param string    $interval    Code, ex. 'h' for hour.
      * @return string   Format string; false if code unrecognized.
      */
@@ -129,8 +114,6 @@ class Hashmark_Analyst_BasicDecimal extends Hashmark_Analyst
     /**
      * Public access to $_intervalPhpFormats values by interval code.
      *
-     * @static
-     * @access public
      * @param string    $interval    Code, ex. 'h' for hour.
      * @return string   Format string; false if code unrecognized.
      */
@@ -146,8 +129,6 @@ class Hashmark_Analyst_BasicDecimal extends Hashmark_Analyst
     /**
      * Public access to $_aggFunctions.
      *
-     * @static
-     * @access public
      * @return Array
      */
     public static function getAggFunctions()
@@ -158,8 +139,6 @@ class Hashmark_Analyst_BasicDecimal extends Hashmark_Analyst
     /**
      * Public access to $_distinctFunctions.
      *
-     * @static
-     * @access public
      * @return Array
      */
     public static function getDistinctFunctions()
@@ -170,8 +149,6 @@ class Hashmark_Analyst_BasicDecimal extends Hashmark_Analyst
     /**
      * Public access to $_recurFormats keys.
      *
-     * @static
-     * @access public
      * @return Array
      */
     public static function getRecurFunctions()
@@ -182,8 +159,6 @@ class Hashmark_Analyst_BasicDecimal extends Hashmark_Analyst
     /**
      * Public access to $_recurFormats.
      *
-     * @static
-     * @access public
      * @return Array
      */
     public static function getRecurFormats()
@@ -194,8 +169,6 @@ class Hashmark_Analyst_BasicDecimal extends Hashmark_Analyst
     /**
      * Public access to $_recurFormats values by function name.
      *
-     * @static
-     * @access public
      * @param string    $recurFunc  Ex. 'DAYOFMONTH'.
      * @return string   date() format string; false if $recurFunc unrecognized.
      */
@@ -211,7 +184,6 @@ class Hashmark_Analyst_BasicDecimal extends Hashmark_Analyst
     /**
      * Set MySQL div_precision_increment variable.
      *
-     * @access public
      * @param int   $incr   New value.
      * @return void
      * @throws Exception On query error.
@@ -230,7 +202,6 @@ class Hashmark_Analyst_BasicDecimal extends Hashmark_Analyst
     /**
      * Finds samples in range/limit.
      *
-     * @access public
      * @param int       $scalarId
      * @param int       $limit  Result set size limit.
      * @param string    $start  Inclusive DATETIME range boundary.
@@ -269,7 +240,6 @@ class Hashmark_Analyst_BasicDecimal extends Hashmark_Analyst
      *      -   Use these to pre-validate parameters:
      *          $interval: getIntervalDbFormat()
      *
-     * @access public
      * @param int       $scalarId
      * @param int       $limit      Result set size limit.
      * @param string    $start      Inclusive DATETIME range boundary.
@@ -316,7 +286,6 @@ class Hashmark_Analyst_BasicDecimal extends Hashmark_Analyst
      *          $aggFunc: getAggFunctions()
      *          $distinct: getDistinctFunctions()
      *
-     * @access public
      * @param int       $scalarId
      * @param string    $start      Inclusive DATETIME range boundary.
      * @param string    $end        Inclusive DATETIME range boundary.
@@ -357,7 +326,6 @@ class Hashmark_Analyst_BasicDecimal extends Hashmark_Analyst
      *          $aggFunc: getAggFunctions()
      *          $distinct: getDistinctFunctions()
      *
-     * @access public
      * @param int       $scalarId
      * @param string    $start      Inclusive DATETIME range boundary.
      * @param string    $end        Inclusive DATETIME range boundary.
@@ -410,7 +378,6 @@ class Hashmark_Analyst_BasicDecimal extends Hashmark_Analyst
      *          $aggFunc*: getAggFunctions()
      *          $distinct*: getDistinctFunctions()
      *
-     * @access public
      * @param int       $scalarId
      * @param string    $start          Inclusive DATETIME range boundary.
      * @param string    $end            Inclusive DATETIME range boundary.
@@ -474,7 +441,6 @@ class Hashmark_Analyst_BasicDecimal extends Hashmark_Analyst
      *          $aggFunc: getAggFunctions()
      *          $distinct: getDistinctFunctions()
      *
-     * @access public
      * @param int       $scalarId
      * @param string    $start          Inclusive DATETIME range boundary.
      * @param string    $end            Inclusive DATETIME range boundary.
@@ -517,7 +483,6 @@ class Hashmark_Analyst_BasicDecimal extends Hashmark_Analyst
     /**
      * Finds value changes between successive samples.
      *
-     * @access public
      * @param int       $scalarId
      * @param int       $limit  Result set size limit.
      * @param string    $start  Inclusive DATETIME range boundary.
@@ -557,7 +522,6 @@ class Hashmark_Analyst_BasicDecimal extends Hashmark_Analyst
      *      -   Use these to pre-validate parameters:
      *          $interval: getIntervalDbFormat()
      *
-     * @access public
      * @param int       $scalarId
      * @param int       $limit  Result set size limit.
      * @param string    $start  Inclusive DATETIME range boundary.
@@ -608,7 +572,6 @@ class Hashmark_Analyst_BasicDecimal extends Hashmark_Analyst
      *          $aggFunc: getAggFunctions()
      *          $distinct: getDistinctFunctions()
      *
-     * @access public
      * @param int       $scalarId
      * @param string    $start      Inclusive DATETIME range boundary.
      * @param string    $end        Inclusive DATETIME range boundary.
@@ -649,7 +612,6 @@ class Hashmark_Analyst_BasicDecimal extends Hashmark_Analyst
      *          $aggFunc: getAggFunctions()
      *          $distinct: getDistinctFunctions()
      *
-     * @access public
      * @param int       $scalarId
      * @param string    $start      Inclusive DATETIME range boundary.
      * @param string    $end        Inclusive DATETIME range boundary.
@@ -709,7 +671,6 @@ class Hashmark_Analyst_BasicDecimal extends Hashmark_Analyst
      *          $aggFunc*: getAggFunctions()
      *          $distinct*: getDistinctFunctions()
      *
-     * @access public
      * @param int       $scalarId
      * @param string    $start          Inclusive DATETIME range boundary.
      * @param string    $end            Inclusive DATETIME range boundary.
@@ -775,7 +736,6 @@ class Hashmark_Analyst_BasicDecimal extends Hashmark_Analyst
      *          $aggFunc: getAggFunctions()
      *          $distinct: getDistinctFunctions()
      *
-     * @access public
      * @param int       $scalarId
      * @param string    $start          Inclusive DATETIME range boundary.
      * @param string    $end            Inclusive DATETIME range boundary.
@@ -818,7 +778,6 @@ class Hashmark_Analyst_BasicDecimal extends Hashmark_Analyst
     /**
      * Finds value occurrence counts, i.e. frequency/popularity.
      *
-     * @access public
      * @param int       $scalarId
      * @param int       $limit      Result set size limit.
      * @param string    $start      Inclusive DATETIME range boundary.
@@ -860,7 +819,6 @@ class Hashmark_Analyst_BasicDecimal extends Hashmark_Analyst
      *          $aggFunc: getAggFunctions()
      *          $distinct: getDistinctFunctions()
      *
-     * @access public
      * @param int       $scalarId
      * @param int       $limit      Result set size limit.
      * @param string    $start      Inclusive DATETIME range boundary.
@@ -912,7 +870,6 @@ class Hashmark_Analyst_BasicDecimal extends Hashmark_Analyst
      *          $aggFunc: getAggFunctions()
      *          $distinct: getDistinctFunctions()
      *
-     * @access public
      * @param int       $scalarId
      * @param int       $limit      Result set size limit.
      * @param string    $start      Inclusive DATETIME range boundary.

@@ -26,32 +26,8 @@
 class Hashmark_Partition extends Hashmark_Module_DbDependent
 {
     /**
-     * @access protected
-     * @var Hashmark_Cache_*    Instance created in initModule().
-     */
-    protected $_cache;
-    
-    /**
-     * Called by Hashmark::getModule() to inject dependencies.
-     *
-     * @access public
-     * @param mixed     $db     Connection object/resource.
-     * @return boolean  False if module could not be initialized and is unusable.
-     *                  Hashmark::getModule() will also then return false.
-     */
-    public function initModule($db)
-    {
-        parent::initModule($db);
-
-        $this->_cache = Hashmark::getModule('Cache', HASHMARK_CACHE_DEFAULT_TYPE);
-
-        return true;
-    }
-
-    /**
      * Return the SHOW CREATE TABLE output for $name.
      *  
-     * @access public
      * @param string    $name
      * @return string
      * @throws Exception On query error.
@@ -84,7 +60,6 @@ class Hashmark_Partition extends Hashmark_Module_DbDependent
     /**
      * Confirm a samples table exists.
      *  
-     * @access public
      * @param string    $name   Table name.
      * @return boolean  True if exists.
      * @throws Exception On query error.
@@ -114,7 +89,6 @@ class Hashmark_Partition extends Hashmark_Module_DbDependent
     /**
      * Find tables LIKE the given expression.
      *  
-     * @access public
      * @param string    $expr
      * @return Array    Table names; otherwise false.
      * @throws Exception On query error.
@@ -150,7 +124,6 @@ class Hashmark_Partition extends Hashmark_Module_DbDependent
     /**
      * Drop a samples table.
      *  
-     * @access public
      * @param mixed    $name   Table name or Array of them.
      * @return void
      * @throws Exception On query error.
@@ -177,7 +150,6 @@ class Hashmark_Partition extends Hashmark_Module_DbDependent
     /**
      * Return the INFORMATON_SCHEMA fields for $name.
      *  
-     * @access public
      * @param string    $name
      * @return void
      * @throws Exception On query error.
@@ -205,7 +177,6 @@ class Hashmark_Partition extends Hashmark_Module_DbDependent
     /**
      * Return all merge table names and comments.
      *
-     * @access public
      * @return Array    Each element is assoc. w/ keys 'TABLE_NAME' and
      *                  'TABLE_COMMENT'.
      * @throws Exception On query error.
@@ -238,7 +209,6 @@ class Hashmark_Partition extends Hashmark_Module_DbDependent
     /**
      * Return the SHOW CREATE TABLE output for `samples_<$type>`.
      *  
-     * @access public
      * @param string    $type   See Hashmark_Core::getValidScalarTypes() for options.
      * @return string
      * @throws Exception On query error; if $type invalid.
@@ -255,7 +225,6 @@ class Hashmark_Partition extends Hashmark_Module_DbDependent
     /**
      * Confirm a MERGE table appears operational.
      *  
-     * @access public
      * @param string    $name   Table name.
      * @return boolean  True if operational; null if table not found.
      * @throws Exception On query error.
@@ -274,7 +243,6 @@ class Hashmark_Partition extends Hashmark_Module_DbDependent
     /**
      * Return the merge table's last-modified UTC timestamp.
      *  
-     * @access public
      * @param string    $name   Table name.
      * @return string   DATETIME string.
      * @throws Exception On query error.
@@ -293,7 +261,6 @@ class Hashmark_Partition extends Hashmark_Module_DbDependent
     /**
      * Build a merge table name based on scalar ID and range.
      *  
-     * @access public
      * @param int       $scalarId
      * @param string    $start              DATETIME string.
      * @param string    $end                DATETIME string.
@@ -311,7 +278,6 @@ class Hashmark_Partition extends Hashmark_Module_DbDependent
     /**
      * Find the narrowest merge table which encompasses a given range.
      *
-     * @access public
      * @param int       $scalarId
      * @param string    $start  DATETIME string.
      * @param string    $end    DATETIME string.
@@ -376,7 +342,6 @@ class Hashmark_Partition extends Hashmark_Module_DbDependent
     /**
      * Find samples tables from an inclusive date range.
      *  
-     * @access public
      * @param int       $scalarId
      * @param string    $start  DATETIME string.
      * @param string    $end    DATETIME string.
@@ -452,7 +417,6 @@ class Hashmark_Partition extends Hashmark_Module_DbDependent
      *
      *      -   Wrapper for getTablesInRange() and getMergeTableWithRange().
      *
-     * @access public
      * @param int       $scalarId
      * @param string    $start  DATETIME string.
      * @param string    $end    DATETIME string.
@@ -489,7 +453,6 @@ class Hashmark_Partition extends Hashmark_Module_DbDependent
     /**
      * Get the name of the samples table that should be used now.
      *
-     * @access public
      * @param int       $scalarId
      * @param mixed     $time       UNIX timestamp or DATETIME string;
      *                              if unspecified, current timestamp used.
@@ -522,7 +485,6 @@ class Hashmark_Partition extends Hashmark_Module_DbDependent
     /**
      * Create a samples table.
      *  
-     * @access public
      * @param int       $scalarId
      * @param string    $name       Table name.
      * @param string    $type       See Hashmark_Core::getValidScalarTypes() for options.
@@ -549,7 +511,6 @@ class Hashmark_Partition extends Hashmark_Module_DbDependent
     /**
      * Create a merge table of samples partitions.
      *  
-     * @access public
      * @param int       $scalarId
      * @param string    $start              DATETIME string.
      * @param string    $end                DATETIME string.
@@ -590,7 +551,6 @@ class Hashmark_Partition extends Hashmark_Module_DbDependent
      *
      *      -   Only queries most recent partition.
      *
-     * @access public
      * @param int       $scalarId
      * @param string    $template
      * @param mixed     ...         String or integer argument for every $template macro.
@@ -620,7 +580,6 @@ class Hashmark_Partition extends Hashmark_Module_DbDependent
      *
      *      -   Only queries one partition identified by $date.
      *
-     * @access public
      * @param int       $scalarId
      * @param string    $template
      * @param string    $date UNIX timestamp or DATETIME string.
@@ -651,7 +610,6 @@ class Hashmark_Partition extends Hashmark_Module_DbDependent
      *
      *      -   Queries a merge table satisfying the given range.
      *
-     * @access public
      * @param int       $scalarId
      * @param string    $start          DATETIME string.
      * @param string    $end            DATETIME string.
@@ -681,7 +639,6 @@ class Hashmark_Partition extends Hashmark_Module_DbDependent
     /**
      * Copy a table's definition and data into a temporary table.
      *
-     * @access public
      * @param string    $src    Source table name.
      * @return string   Destination temporary table name.
      */
@@ -701,7 +658,6 @@ class Hashmark_Partition extends Hashmark_Module_DbDependent
     /**
      * Create a temporary table from a SELECT statement and existing definition.
      *
-     * @access public
      * @param string    $src        Name of table providing a definition.
      * @param string    $columns    Columns populated by $sql, ex.: `x`, `y`
      * @param string    $selectSql  Pre-escaped statement.

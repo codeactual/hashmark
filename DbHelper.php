@@ -32,7 +32,6 @@ abstract class Hashmark_DbHelper extends Hashmark_Module
      *
      *      -   Mainly for the Cron and unit test classes.
      *
-     * @access protected
      * @param string    $profileName
      * @return mixed    New database connection object/resource.
      */
@@ -43,7 +42,6 @@ abstract class Hashmark_DbHelper extends Hashmark_Module
      *
      *      -   Mainly for the Cron and unit test classes.
      *
-     * @access public
      * @param mixed  $link      Database connection object/resource.
      * @return boolean
      */
@@ -52,7 +50,6 @@ abstract class Hashmark_DbHelper extends Hashmark_Module
     /**
      * Returns the last connection error string.
      *
-     * @access public
      * @param mixed  $link      Database connection object/resource.
      * @return string
      */
@@ -61,7 +58,6 @@ abstract class Hashmark_DbHelper extends Hashmark_Module
     /**
      * Returns the last query error string.
      *
-     * @access public
      * @param mixed  $link      Database connection object/resource.
      * @return string
      */
@@ -70,7 +66,6 @@ abstract class Hashmark_DbHelper extends Hashmark_Module
     /**
      * Returns the last query error number.
      *
-     * @access public
      * @param mixed  $link      Database connection object/resource.
      * @return int
      */
@@ -79,7 +74,6 @@ abstract class Hashmark_DbHelper extends Hashmark_Module
     /**
      * Escapes values, ex. for template macro expansions.
      *
-     * @access public
      * @param mixed     $link   Database connection object/resource.
      * @param mixed     $value  String-representable value.
      * @param boolean   $quote  If true, value will be single-quoted.
@@ -92,7 +86,6 @@ abstract class Hashmark_DbHelper extends Hashmark_Module
     /**
      * Pass-through wrapper for mysql_num_rows(), etc.
      *
-     * @access public
      * @param mixed     $res    Result object/resource.
      * @return int  Return row count.
      */
@@ -101,7 +94,6 @@ abstract class Hashmark_DbHelper extends Hashmark_Module
     /**
      * Pass-through wrapper for mysql_free_result(), etc.
      *
-     * @access public
      * @param mixed     $res    Result object/resource.
      * @return boolean  True on success.
      */
@@ -110,7 +102,6 @@ abstract class Hashmark_DbHelper extends Hashmark_Module
     /**
      * Pass-through wrapper for mysql_fetch_assoc(), etc.
      *
-     * @access public
      * @param mixed     $res    Result object/resource.
      * @return Array    One result row as associative Array.
      */
@@ -119,7 +110,6 @@ abstract class Hashmark_DbHelper extends Hashmark_Module
     /**
      * Pass-through wrapper for mysql_fetch_row(), etc.
      *
-     * @access public
      * @param mixed     $res    Result object/resource.
      * @return Array    One result row as numeric Array.
      */
@@ -128,7 +118,6 @@ abstract class Hashmark_DbHelper extends Hashmark_Module
     /**
      * Pass-through wrapper for mysql_affected_rows(), etc.
      *
-     * @access public
      * @param mixed     $link   Database cnnection object/resource.
      * @return int  Affected row count.
      */
@@ -137,7 +126,6 @@ abstract class Hashmark_DbHelper extends Hashmark_Module
     /**
      * Pass-through wrapper for mysql_insert_id(), etc.
      *
-     * @access public
      * @param mixed     $link   Database cnnection object/resource.
      * @return int  Connection's last inserted row ID.
      */
@@ -146,7 +134,6 @@ abstract class Hashmark_DbHelper extends Hashmark_Module
     /**
      * Pass-through wrapper for mysql_query(), etc.
      *
-     * @access public
      * @param mixed     $link   Database connection object/resource.
      * @param string    $sql
      * @return mixed    Query result object/resource.
@@ -157,7 +144,6 @@ abstract class Hashmark_DbHelper extends Hashmark_Module
     /**
      * Public wrapper for _openDb().
      *
-     * @access public
      * @param string    $profileName
      * @return mixed    New database connection object/resource.
      * @throws  Exception   If profile is not found in configs.
@@ -178,7 +164,6 @@ abstract class Hashmark_DbHelper extends Hashmark_Module
     /**
      * Expands ?, :name and @name macros. Escapes/quotes matching values.
      *
-     * @access public
      * @param mixed     $link       Database connection object/resource.
      * @param string    $template   Statement with 0 or more macros.
      * @param Array     Two options:
@@ -232,7 +217,6 @@ abstract class Hashmark_DbHelper extends Hashmark_Module
     /**
      * Query wrapper which accepts expandMacros() compatible templates and macro lists.
      *
-     * @access public
      * @param mixed     $link       Database connection object/resource.
      * @param string    $template   Statement with 0 or more macros.
      * @param mixed     ...         See $queryArgs parameter of expandMacros().

@@ -63,7 +63,7 @@ class Hashmark_TestCase_Module_DbDependent extends Hashmark_TestCase_Module
     {
         $expectedBase = 'Client';
         
-        $db = Hashmark::getModule('DbHelper', HASHMARK_DBHELPER_DEFAULT_TYPE)->openDb('unittest');
+        $db = Hashmark::getModule('DbHelper')->openDb('unittest');
         $inst = Hashmark::getModule($expectedBase, '', $db);
 
         $relatedInst = $inst->getModule('Core');

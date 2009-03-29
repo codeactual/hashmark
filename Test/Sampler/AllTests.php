@@ -29,7 +29,6 @@ class Hashmark_AllTests_Sampler
     /**
      * Auto-discover all tests.
      *
-     * @static
      * @return PHPUnit_Framework_TestSuite  Suite covering all implementations.
      */
     public static function suite()

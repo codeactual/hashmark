@@ -34,8 +34,6 @@ class Hashmark_Util
     /**
      * Normalize date+time strings and UNIX timestamps to DATETIME format.
      *
-     * @static
-     * @access public
      * @param mixed     $str
      * @return mixed    Normalized string; otherwise false.
      */
@@ -58,8 +56,6 @@ class Hashmark_Util
     /**
      * Reverse comparator based on string length.
      * 
-     * @static
-     * @access public
      * @param string $a
      * @param string $b
      * @return int
@@ -81,8 +77,6 @@ class Hashmark_Util
     /**
      * Return a pseudorandom SHA1 hash.
      *
-     * @static
-     * @access public
      * @return string
      */
     public static function randomSha1()

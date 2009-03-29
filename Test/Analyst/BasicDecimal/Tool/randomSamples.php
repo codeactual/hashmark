@@ -18,8 +18,6 @@
 /**
  * Return an assoc. of timestamp/scalar pairs.
  *
- * @static
- * @access public
  * @param string    $type           See Hashmark_Core::getValidScalarTypes() for options.
  * @param mixed     $minTime        UNIX timestamp or strtotime() string.
  * @param mixed     $maxTime        UNIX timestamp or strtotime() string.

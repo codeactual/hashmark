@@ -29,29 +29,6 @@
 abstract class Hashmark_Analyst extends Hashmark_Module_DbDependent
 {
     /**
-     * @access protected
-     * @var Hashmark_Cache_*    Instance created in initModule().
-     */
-    protected $_cache;
-    
-    /**
-     * Called by Hashmark::getModule() to inject dependencies.
-     *
-     * @access public
-     * @param mixed     $db     Connection object/resource.
-     * @return boolean  False if module could not be initialized and is unusable.
-     *                  Hashmark::getModule() will also then return false.
-     */
-    public function initModule($db)
-    {
-        parent::initModule($db);
-
-        $this->_cache = Hashmark::getModule('Cache', HASHMARK_CACHE_DEFAULT_TYPE);
-
-        return true;
-    }
-
-    /**
      * Execute one or more SQL statements.
      *
      *      -   Results from each statement, except the last, is stored in a
@@ -60,7 +37,6 @@ abstract class Hashmark_Analyst extends Hashmark_Module_DbDependent
      *          temp. table macros.
      *      -   Supports 1 temp. table self-join per statement.
      * 
-     * @access public
      * @param mixed     $sql        One statement or an Array of them with unique
      *                              labels as keys. Labels are used for temp. table
      *                              macros in the format: ~name.

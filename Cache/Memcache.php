@@ -24,7 +24,6 @@
 class Hashmark_Cache_Memcache extends Hashmark_Cache
 {
     /**
-     * @access protected
      * @var Memcache
      */
     protected $_memcache;
@@ -32,7 +31,6 @@ class Hashmark_Cache_Memcache extends Hashmark_Cache
     /**
      * Called by Hashmark::getModule() to inject dependencies.
      *
-     * @access public
      * @return boolean  False if module could not be initialized and is unusable.
      *                  Hashmark::getModule() will also then return false.
      */

@@ -28,7 +28,6 @@ class Hashmark_Client extends Hashmark_Module_DbDependent
     /**
      * Set the value of a scalar identified by name.
      *
-     * @access public
      * @param string    $scalarName
      * @param mixed     $value      Integers/floats OK if precision if PHP can accurately
      *                              convert to string. If not, supply as string.
@@ -80,7 +79,6 @@ class Hashmark_Client extends Hashmark_Module_DbDependent
     /**
      * Get the value of a scalar identified by name or ID.
      *
-     * @access public
      * @param mixed     $scalarNameOrId     Uses string/int type check.
      * @return mixed    Scalar value; null on miss.
      * @throws Exception On query error or non-string $scalarName.
@@ -117,7 +115,6 @@ class Hashmark_Client extends Hashmark_Module_DbDependent
     /**
      * Increment a scalar identified by name.
      *
-     * @access public
      * @param string    $name
      * @param string    $amount
      * @param boolean   $newSample  If true, a new sample partition row is inserted
@@ -180,7 +177,6 @@ class Hashmark_Client extends Hashmark_Module_DbDependent
     /**
      * Decrement a scalar identified by name.
      *
-     * @access public
      * @param string    $name
      * @param string    $amount     Unsigned.
      * @param boolean   $newSample  If true, a new sample partition row is inserted

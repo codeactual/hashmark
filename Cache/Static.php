@@ -26,7 +26,6 @@
 class Hashmark_Cache_Static extends Hashmark_Cache
 {
     /**
-     * @access protected
      * @var Array   Assoc. of cache key/value pairs.
      */
     protected static $_storage;
