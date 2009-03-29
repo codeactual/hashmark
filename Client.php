@@ -142,7 +142,9 @@ class Hashmark_Client extends Hashmark_Module_DbDependent
 
         if ($this->_createScalarIfNotExists) {
             $core = $this->getModule('Core');
-            if (!$core->getScalarIdByName($scalarName)) {
+
+            $scalarId = $core->getScalarIdByName($scalarName);
+            if (!$scalarId) {
                 $fields = array('name' => $scalarName, 'type' => 'decimal',
                                 'value' => $amount,
                                 'description' => 'Auto-created by client'); 
@@ -188,10 +190,7 @@ class Hashmark_Client extends Hashmark_Module_DbDependent
                  . '(`value`, `start`, `end`) '
                  . "VALUES (({$currentScalarValue}), UTC_TIMESTAMP(), UTC_TIMESTAMP())";
 
-            // Might have been defined during $_createScalarIfNotExists handling.
-            if (empty($scalarId)) {
-                $scalarId = $this->getModule('Core')->getScalarIdByName($scalarName);
-            }
+            $scalarId = $this->getModule('Core')->getScalarIdByName($scalarName);
 
             $partition = $this->getModule('Partition');
             $partition->query($scalarId, $sql, $scalarName);
