@@ -132,7 +132,11 @@ class Hashmark_Core extends Hashmark_Module_DbDependent
                                 $fields['sampler_start'],$fields['sampler_handler'],
                                 $fields['sampler_status']);
         
-        return $this->_dbHelper->insertId($this->_db);
+        $scalarId = $this->_dbHelper->insertId($this->_db);
+        
+        $this->_cache->removeGroup('scalar:' . $scalarId);
+
+        return $scalarId;
     }
     
     /**
@@ -245,20 +249,27 @@ class Hashmark_Core extends Hashmark_Module_DbDependent
      */
     public function getScalarIdByName($name)
     {
-        $sql = 'SELECT `id` '
-             . "FROM {$this->_dbName}`scalars` "
-             . 'WHERE `name` = ?';
+        $cacheKey = __FUNCTION__ . $name;
+        
+        if (!($output = $this->_cache->get($cacheKey, 'schema'))) {
+            $sql = 'SELECT `id` '
+                . "FROM {$this->_dbName}`scalars` "
+                . 'WHERE `name` = ?';
 
-        $res = $this->_dbHelper->query($this->_db, $sql, $name);
+            $res = $this->_dbHelper->query($this->_db, $sql, $name);
 
-        if (!$this->_dbHelper->numRows($res)) {
-            return false;
+            if (!$this->_dbHelper->numRows($res)) {
+                return false;
+            }
+
+            $scalar = $this->_dbHelper->fetchAssoc($res);
+            $this->_dbHelper->freeResult($res);
+
+            $output = $scalar['id'];
+            $this->_cache->set($cacheKey, $scalar['id'], 'scalar:' . $scalar['id']);
         }
 
-        $scalar = $this->_dbHelper->fetchAssoc($res);
-        $this->_dbHelper->freeResult($res);
-
-        return $scalar['id'];
+        return $output;
     }
     
     /**

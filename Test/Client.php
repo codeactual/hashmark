@@ -303,4 +303,44 @@ class Hashmark_TestCase_Client extends Hashmark_TestCase
         $sample = $cron->getLatestSample($expectedId);
         $this->assertDecimalEquals($value['sum'], $sample['value']);
     }
+
+    /**
+     * @test
+     * @group Client
+     * @group scalarCreatedIfNotExists
+     * @group incr
+     */
+    public function scalarCreatedIfNotExists()
+    {
+        $this->_client->createScalarIfNotExists(true);
+
+        $expectedName = self::randomString();
+        $expectedValue = self::randomDecimal();
+
+        $this->_client->incr($expectedName, $expectedValue);
+        $scalar = $this->_core->getScalarByName($expectedName);
+
+        $this->assertDecimalEquals($expectedValue, $scalar['value']);
+    }
+
+    /**
+     * @test
+     * @group Client
+     * @group scalarCreatedIfNotExistsWithNewSample
+     * @group incr
+     */
+    public function scalarCreatedIfNotExistsWithNewSample()
+    {
+        $this->_client->createScalarIfNotExists(true);
+
+        $expectedName = self::randomString();
+        $expectedValue = self::randomDecimal();
+
+        $this->_client->incr($expectedName, $expectedValue, true);
+        $scalar = $this->_core->getScalarByName($expectedName);
+
+        $cron = Hashmark::getModule('Cron', '', $this->_db);
+        $sample = $cron->getLatestSample($scalar['id']);
+        $this->assertDecimalEquals($expectedValue, $sample['value']);
+    }
 }

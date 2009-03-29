@@ -26,6 +26,12 @@
 class Hashmark_Client extends Hashmark_Module_DbDependent
 {
     /**
+     * @var boolean     If true, incr()/decr() will create the named scalar
+     *                  if it doesn't exist.
+     */
+    protected $_createScalarIfNotExists = false;
+
+    /**
      * Set the value of a scalar identified by name.
      *
      * @param string    $scalarName
@@ -134,6 +140,31 @@ class Hashmark_Client extends Hashmark_Module_DbDependent
                                 HASHMARK_EXCEPTION_VALIDATION);
         }
 
+        if ($this->_createScalarIfNotExists) {
+            $core = $this->getModule('Core');
+            if (!$core->getScalarIdByName($scalarName)) {
+                $fields = array('name' => $scalarName, 'type' => 'decimal',
+                                'value' => $amount,
+                                'description' => 'Auto-created by client'); 
+                $scalarId = $core->createScalar($fields);
+                if (!$scalarId) {
+                    throw new Exception("Scalar '{$scalarName}' was not auto-created",
+                                        HASHMARK_EXCEPTION_SQL);
+                }
+            }
+
+            if ($newSample) {
+                $sql = 'INSERT INTO ~samples '
+                     . '(`value`, `start`, `end`) '
+                     . "VALUES ({$amount}, UTC_TIMESTAMP(), UTC_TIMESTAMP())";
+
+                $partition = $this->getModule('Partition');
+                $partition->query($scalarId, $sql);
+            }
+
+            return true;
+        }
+
         $values = array(':name' => $scalarName, '@amount' => $amount);
         $sum = 'CONVERT(`value`, DECIMAL' . HASHMARK_DECIMAL_SQLWIDTH . ') + @amount';
        
@@ -157,7 +188,10 @@ class Hashmark_Client extends Hashmark_Module_DbDependent
                  . '(`value`, `start`, `end`) '
                  . "VALUES (({$currentScalarValue}), UTC_TIMESTAMP(), UTC_TIMESTAMP())";
 
-            $scalarId = $this->getModule('Core')->getScalarIdByName($scalarName);
+            // Might have been defined during $_createScalarIfNotExists handling.
+            if (empty($scalarId)) {
+                $scalarId = $this->getModule('Core')->getScalarIdByName($scalarName);
+            }
 
             $partition = $this->getModule('Partition');
             $partition->query($scalarId, $sql, $scalarName);
@@ -187,5 +221,16 @@ class Hashmark_Client extends Hashmark_Module_DbDependent
     public function decr($scalarName, $amount = '1', $newSample = false)
     {
         return $this->incr($scalarName, "-({$amount})", $newSample);
+    }
+
+    /**
+     * Public write access to $_createScalarIfNotExists.
+     *
+     * @param boolean   $newValue
+     * @return void
+     */
+    public function createScalarIfNotExists($newValue)
+    {
+        $this->_createScalarIfNotExists = $newValue;
     }
 }
