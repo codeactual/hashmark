@@ -54,4 +54,19 @@ class Hashmark_TestCase_Hashmark extends Hashmark_TestCase
         $this->assertEquals('HASHMARK_TEST_CONFIG_VALUE', HASHMARK_TEST_CONFIG_NAME);
         $this->assertEquals('HASHMARK_TEST_FAKEMODULETYPE_CONFIG_VALUE', HASHMARK_TEST_FAKEMODULETYPE_CONFIG_NAME);
     }
+
+    /**
+     * @test
+     * @group Hashmark
+     * @group loadsExternalModuleType
+     * @group getModule
+     */
+    public function loadsExternalModuleType()
+    {
+        $inst = Hashmark::getModule('Test', 'FakeExternalType');
+        $this->assertTrue(is_subclass_of($inst, 'Hashmark_Test_FakeModuleType'));
+
+        $typeConfig = $inst->getTypeConfig();
+        $this->assertEquals(4400, $typeConfig['test_key']);
+    }
 }

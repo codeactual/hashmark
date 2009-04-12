@@ -343,4 +343,31 @@ class Hashmark_TestCase_Client extends Hashmark_TestCase
         $sample = $cron->getLatestSample($scalar['id']);
         $this->assertDecimalEquals($expectedValue, $sample['value']);
     }
+    
+    /**
+     * Covers Google Code issue 33 regression addressed in r17 and r18.
+     *
+     *  -   http://code.google.com/p/hashmark/source/detail?r=17
+     * 
+     * @test
+     * @group Client
+     * @group createdIfNotExistsSettingDoesNotAffectExistingScalar
+     * @group incr
+     */
+    public function createdIfNotExistsSettingDoesNotAffectExistingScalar()
+    {
+        $this->_client->createScalarIfNotExists(true);
+
+        $expectedFields = array();
+        $expectedFields['name'] = self::randomString();
+        $expectedFields['type'] = 'decimal';
+        $expectedFields['value'] = '1';
+
+        $expectedId = $this->_core->createScalar($expectedFields);
+
+        $this->_client->incr($expectedFields['name'], '1');
+        $scalar = $this->_core->getScalarById($expectedId);
+
+        $this->assertDecimalEquals('2', $scalar['value']);
+    }
 }

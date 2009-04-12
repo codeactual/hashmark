@@ -153,18 +153,18 @@ class Hashmark_Client extends Hashmark_Module_DbDependent
                     throw new Exception("Scalar '{$scalarName}' was not auto-created",
                                         HASHMARK_EXCEPTION_SQL);
                 }
+
+                if ($newSample) {
+                    $sql = 'INSERT INTO ~samples '
+                         . '(`value`, `start`, `end`) '
+                         . "VALUES ({$amount}, UTC_TIMESTAMP(), UTC_TIMESTAMP())";
+    
+                    $partition = $this->getModule('Partition');
+                    $partition->query($scalarId, $sql);
+                }
+
+                return true;
             }
-
-            if ($newSample) {
-                $sql = 'INSERT INTO ~samples '
-                     . '(`value`, `start`, `end`) '
-                     . "VALUES ({$amount}, UTC_TIMESTAMP(), UTC_TIMESTAMP())";
-
-                $partition = $this->getModule('Partition');
-                $partition->query($scalarId, $sql);
-            }
-
-            return true;
         }
 
         $values = array(':name' => $scalarName, '@amount' => $amount);

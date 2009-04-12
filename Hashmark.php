@@ -97,23 +97,45 @@ class Hashmark
             if ($type) {
                 // Use $config from the config file, if present.
                 if (!isset($typeConfigCache[$type])) {
-                    $typeConfigFile = $dirname . "/Config/{$base}/{$type}.php";
-                    if (is_readable($typeConfigFile)) {
-                        unset($config);
-                        require_once $typeConfigFile;
-                        if (isset($config)) {
-                            $typeConfigCache[$type] = $config;
-                        } else {
-                            $typeConfigCache[$type] = false;
+                    
+                    // Apply external config paths defined in the base config file.
+                    $configPaths = array("{$dirname}/Config");
+                    if (!empty($baseConfigCache[$base]['ext_config_paths'])) {
+                        $configPaths = array_merge($baseConfigCache[$base]['ext_config_paths'], $configPaths);
+                    }
+                    
+                    foreach ($configPaths as $path) {
+                        $typeConfigFile = "{$path}/{$base}/{$type}.php";
+                        if (is_readable($typeConfigFile)) {
+                            unset($config);
+                            require_once $typeConfigFile;
+                            if (isset($config)) {
+                                $typeConfigCache[$type] = $config;
+                                break;
+                            } else {
+                                $typeConfigCache[$type] = false;
+                            }
                         }
                     }
 
-                    $typeClassFle = $dirname . "/{$base}/{$type}.php";
-                    if (!is_readable($typeClassFle)) {
-                        throw new Exception("File not found for class Hashmark_{$base}_{$type}.");
+                    // Apply external module paths defined in the base config file.
+                    $modulePaths = array($dirname);
+                    if (!empty($baseConfigCache[$base]['ext_module_paths'])) {
+                        $modulePaths = array_merge($baseConfigCache[$base]['ext_module_paths'], $modulePaths);
                     }
 
-                    require_once $typeClassFle;
+                    foreach ($modulePaths as $path) {
+                        $typeClassFile = "{$path}/{$base}/{$type}.php";
+                        if (is_readable($typeClassFile)) {
+                            require_once $typeClassFile;
+                            break;
+                        }
+                        $typeClassFile = '';
+                    }
+                    
+                    if (!$typeClassFile) {
+                        throw new Exception("File not found for class Hashmark_{$base}_{$type}.");
+                    }
                 }
 
                 $instClass = "Hashmark_{$base}_{$type}";

@@ -21,3 +21,11 @@
 define('HASHMARK_TEST_CONFIG_NAME', 'HASHMARK_TEST_CONFIG_VALUE');
 
 $config = array('base' => 'Test');
+
+/**
+ * Paths inspected before Samplers/ when loading an external sampler type.
+ *
+ * No trailing slashes.
+ */
+$config['ext_config_paths'] = array(dirname(__FILE__) . '/../Test/ExtConfig');
+$config['ext_module_paths'] = array(dirname(__FILE__) . '/../Test/ExtModule');
