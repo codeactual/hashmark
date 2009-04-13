@@ -37,22 +37,36 @@ class Hashmark_TestCase_Hashmark extends Hashmark_TestCase
             $this->assertEquals('Hashmark_' . $module . '_' . $type, get_class($inst));
         }
     }
+    
+    /**
+     * @test
+     * @group Hashmark
+     * @group configFileOverridesDefaults
+     * @group getModule
+     * @group getBaseConfig
+     */
+    public function configFileOverridesDefaults()
+    {
+        $inst = Hashmark::getModule('Test', 'FakeExternalType');
+        $baseConfig = $inst->getBaseConfig();
+        $this->assertEquals('overwritten', $baseConfig['override_me']);
+    }
 
     /**
      * @test
      * @group Hashmark
      * @group loadsModuleConfigs
      * @group getModule
+     * @group getBaseConfig
+     * @group getTypeConfig
      */
     public function loadsModuleConfigs()
     {
-        $this->assertFalse(defined('HASHMARK_TEST_CONFIG_NAME'));
-        $this->assertFalse(defined('HASHMARK_TEST_FAKEMODULETYPE_CONFIG_NAME'));
-        Hashmark::getModule('Test', 'FakeModuleType');
-        $this->assertTrue(defined('HASHMARK_TEST_CONFIG_NAME'));
-        $this->assertTrue(defined('HASHMARK_TEST_FAKEMODULETYPE_CONFIG_NAME'));
-        $this->assertEquals('HASHMARK_TEST_CONFIG_VALUE', HASHMARK_TEST_CONFIG_NAME);
-        $this->assertEquals('HASHMARK_TEST_FAKEMODULETYPE_CONFIG_VALUE', HASHMARK_TEST_FAKEMODULETYPE_CONFIG_NAME);
+        $test = Hashmark::getModule('Test', 'FakeModuleType');
+        $baseConfig = $test->getBaseConfig();
+        $typeConfig = $test->getTypeConfig();
+        $this->assertEquals('Test', $baseConfig['base']);
+        $this->assertEquals('FakeModuleType', $typeConfig['type']);
     }
 
     /**
@@ -60,11 +74,12 @@ class Hashmark_TestCase_Hashmark extends Hashmark_TestCase
      * @group Hashmark
      * @group loadsExternalModuleType
      * @group getModule
+     * @group getTypeConfig
      */
     public function loadsExternalModuleType()
     {
         $inst = Hashmark::getModule('Test', 'FakeExternalType');
-        $this->assertTrue(is_subclass_of($inst, 'Hashmark_Test_FakeModuleType'));
+        $this->assertTrue(is_subclass_of($inst, 'Hashmark_Test'));
 
         $typeConfig = $inst->getTypeConfig();
         $this->assertEquals(4400, $typeConfig['test_key']);

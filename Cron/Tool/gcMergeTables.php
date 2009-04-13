@@ -21,17 +21,16 @@
  * For getModule() and cron constants.
  */
 require_once dirname(__FILE__) . '/../../Hashmark.php';
-require_once dirname(__FILE__) . '/../../Config/Cron.php';
 
 // Max. table age in days.
 if (!isset($maxDays)) {
-    $maxDays = HASHMARK_CRON_MERGE_GC_MAX_DAYS;
+    $maxDays = Hashmark::getConfig('Cron', '', 'merge_gc_max_days');
 }
  
 // Max. table count. Non-expired tables will be sorted
 // by age descending and then pruned.
 if (!isset($maxCount)) {
-    $maxCount = HASHMARK_CRON_MERGE_GC_MAX_COUNT;
+    $maxCount = Hashmark::getConfig('Cron', '', 'merge_gc_max_count');
 }
    
 $dbHelper = Hashmark::getModule('DbHelper');

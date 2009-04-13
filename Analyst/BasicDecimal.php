@@ -32,7 +32,7 @@ class Hashmark_Analyst_BasicDecimal extends Hashmark_Analyst
     /**
      * @var int     Current MySQL div_precision_increment setting.
      */
-    protected $_divPrecisionIncr = HASHMARK_DBHELPER_DIV_PRECISION_INCREMENT;
+    protected $_divPrecisionIncr;
 
     /**
      * Aggregation options.
@@ -92,6 +92,9 @@ class Hashmark_Analyst_BasicDecimal extends Hashmark_Analyst
         parent::initModule($db);
 
         $this->_partition = $this->getModule('Partition');
+
+        $dbHelperConfig = $this->_dbHelper->getBaseConfig();
+        $this->_divPrecisionIncr = $dbHelperConfig['div_precision_increment'];
 
         return true;
     }

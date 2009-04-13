@@ -186,7 +186,7 @@ class Hashmark_Partition extends Hashmark_Module_DbDependent
         $dbName = ($this->_dbName ? '"' . $this->getDbName() . '"' : 'DATABASE()');
 
         $sql = 'SELECT `TABLE_NAME`, `TABLE_COMMENT` FROM `INFORMATION_SCHEMA`.`TABLES` '
-             . 'WHERE SUBSTR(`TABLE_NAME`, 1, 12) = "' . HASHMARK_PARTITION_MERGETABLE_PREFIX . '" '
+             . "WHERE SUBSTR(`TABLE_NAME`, 1, 12) = '{$this->_baseConfig['mergetable_prefix']}' "
              . "AND `TABLE_SCHEMA` = {$dbName}";
 
         $res = $this->_dbHelper->query($this->_db, $sql);
@@ -272,7 +272,7 @@ class Hashmark_Partition extends Hashmark_Module_DbDependent
         $start = preg_replace('/^(\d{4})-(\d{2})-(\d{2}).*$/', '\1\2\3', $start);
         $end = preg_replace('/^(\d{4})-(\d{2})-(\d{2}).*$/', '\1\2\3', $end);
         
-        return HASHMARK_PARTITION_MERGETABLE_PREFIX . "{$scalarId}_{$start}_{$end}";
+        return "{$this->_baseConfig['mergetable_prefix']}{$scalarId}_{$start}_{$end}";
     }
     
     /**
@@ -307,7 +307,7 @@ class Hashmark_Partition extends Hashmark_Module_DbDependent
             $approxDateId .= $start['year'];
         }
         
-        $candidates = $this->getTablesLike(HASHMARK_PARTITION_MERGETABLE_PREFIX . "{$scalarId}_{$approxDateId}%_{$approxDateId}%");
+        $candidates = $this->getTablesLike("{$this->_baseConfig['mergetable_prefix']}{$scalarId}_{$approxDateId}%_{$approxDateId}%");
         if (!$candidates) {
             return false;
         }
@@ -441,7 +441,7 @@ class Hashmark_Partition extends Hashmark_Module_DbDependent
         // Ex. merge table name: samples_mrg_4501_20090622_20091022
         $start = preg_replace('/^(\d{4})-(\d{2})-(\d{2}).*$/', '\1\2\3', $start);
         $end = preg_replace('/^(\d{4})-(\d{2})-(\d{2}).*$/', '\1\2\3', $end);
-        $mergeTableName = HASHMARK_PARTITION_MERGETABLE_PREFIX . "{$scalarId}_{$start}_{$end}";
+        $mergeTableName = "{$this->_baseConfig['mergetable_prefix']}{$scalarId}_{$start}_{$end}";
 
         if ($this->tableExists($mergeTableName)) {
             return $mergeTableName;
@@ -458,14 +458,18 @@ class Hashmark_Partition extends Hashmark_Module_DbDependent
      *                              if unspecified, current timestamp used.
      * @param string    $interval   Interval code.
      * @return string   Full table name, not just unique part.
-     * @see Config/Partition.php for HASHMARK_PARTITION_INTERVAL value and options.
+     * @see Config/Partition.php for default value and options.
      */
-    public function getIntervalTableName($scalarId, $time = null, $interval = HASHMARK_PARTITION_INTERVAL)
+    public function getIntervalTableName($scalarId, $time = null, $interval = '')
     {
         if (is_null($time)) {
             $time = time();
         } else if (is_string($time)) {
             $time = strtotime($time . ' UTC');
+        }
+
+        if (!$interval) {
+            $interval = $this->_baseConfig['interval'];
         }
 
         switch ($interval) {

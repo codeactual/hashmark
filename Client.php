@@ -167,8 +167,10 @@ class Hashmark_Client extends Hashmark_Module_DbDependent
             }
         }
 
+        $dbHelperConfig = $this->_dbHelper->getBaseConfig();
+
         $values = array(':name' => $scalarName, '@amount' => $amount);
-        $sum = 'CONVERT(`value`, DECIMAL' . HASHMARK_DECIMAL_SQLWIDTH . ') + @amount';
+        $sum = 'CONVERT(`value`, DECIMAL' . $dbHelperConfig['decimal_sql_width'] . ') + @amount';
        
         if ($newSample) {
             $sql = "UPDATE {$this->_dbName}`scalars` "

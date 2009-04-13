@@ -26,7 +26,10 @@ require_once dirname(__FILE__) . '/../Hashmark.php';
 
 $dbHelper = Hashmark::getModule('DbHelper');
 if (!$dbHelper) {
-    exit("\nCould not create a new DbHelper object. Does DbHelper/" . HASHMARK_DBHELPER_DEFAULT_TYPE . ".php exist?\n");
+    $msg = "\nCould not create a new DbHelper object. Does DbHelper/"
+         . Hashmark::getConfig('DbHelper', '', 'default_type')
+         . ".php exist?\n";
+    exit($msg);
 }
 
 /**
@@ -119,7 +122,7 @@ foreach ($modList as $baseName => $typeName) {
  *
  */
 $inst = Hashmark::getModule('Cache');
-$className = 'Hashmark_Cache_' . HASHMARK_CACHE_DEFAULT_TYPE;
+$className = 'Hashmark_Cache_' . Hashmark::getConfig('Cache', '', 'default_type');
 $testDetail = "{$className} module chosen in Config/Cache.php.\n";
 if ($inst instanceof $className) {
     echo "PASS: Loaded {$testDetail}";
@@ -129,7 +132,9 @@ if ($inst instanceof $className) {
 
 $mockScalarId = 1234;
 $partitionTableName = Hashmark::getModule('Partition', '', $mockDb)->getIntervalTableName($mockScalarId);
-$testDetail = "partition name with '" . HASHMARK_PARTITION_INTERVAL . "' setting in Config/Partition.php.\n";
+$testDetail = "partition name with '"
+            . Hashmark::getConfig('Partition', '', 'interval')
+            . "' setting in Config/Partition.php.\n";
 
 if ($partitionTableName) {
     echo "PASS: Built {$partitionTableName} {$testDetail}";

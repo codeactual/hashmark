@@ -269,9 +269,10 @@ class Hashmark_TestCase_Cron extends Hashmark_TestCase
     public function collectsGarbageMergeTables()
     {
         $partition = Hashmark::getModule('Partition', '', $this->_db);
+        $mergeTablePrefix = Hashmark::getConfig('Partition', '', 'mergetable_prefix');
 
         // Drop all merge tables to clear the slate.
-        $priorMergeTables = $partition->getTablesLike(HASHMARK_PARTITION_MERGETABLE_PREFIX . '%');
+        $priorMergeTables = $partition->getTablesLike($mergeTablePrefix . '%');
         if ($priorMergeTables) {
             $partition->dropTable($priorMergeTables);
         }
@@ -294,7 +295,7 @@ class Hashmark_TestCase_Cron extends Hashmark_TestCase
         for ($t = 0; $t < 5; $t++) {
             $end = "2009-06-1{$t} 01:45:59";
             $comment = gmdate(HASHMARK_DATETIME_FORMAT, $now - ($t * 86400));
-            $mergeTableNames[$t] = HASHMARK_PARTITION_MERGETABLE_PREFIX . "{$scalarId}_20080401_2009061{$t}";
+            $mergeTableNames[$t] = $mergeTablePrefix . "{$scalarId}_20080401_2009061{$t}";
             $actualTable = $partition->createMergeTable($scalarId, $start, $end, array($regTableName), $comment);
             $this->assertEquals($mergeTableNames[$t], $actualTable);
         }

@@ -35,6 +35,7 @@ class Hashmark_TestCase_Partition extends Hashmark_TestCase
         
         $this->_partition = Hashmark::getModule('Partition', '', $this->_db);
         $this->_core = Hashmark::getModule('Core', '', $this->_db);
+        $this->_mergeTablePrefix = Hashmark::getConfig('Partition', '', 'mergetable_prefix');
     }
 
     /**
@@ -390,7 +391,7 @@ class Hashmark_TestCase_Partition extends Hashmark_TestCase
         $start = "2008-04-01 01:45:59";
         $end = "2009-06-11 01:45:59";
 
-        $expectedName = HASHMARK_PARTITION_MERGETABLE_PREFIX . "{$scalarId}_20080401_20090611";
+        $expectedName = $this->_mergeTablePrefix . "{$scalarId}_20080401_20090611";
         $actualName = $this->_partition->getMergeTableName($scalarId, $start, $end, '', $this->_db);
 
         $this->assertEquals($expectedName, $actualName);
@@ -551,7 +552,7 @@ class Hashmark_TestCase_Partition extends Hashmark_TestCase
             $start = '2008-04-01 01:45:59';
             $end = '2009-06-11 01:45:59';
 
-            $expectedMergeTableName = HASHMARK_PARTITION_MERGETABLE_PREFIX . $scalarId . '_20080401_20090611';
+            $expectedMergeTableName = $this->_mergeTablePrefix . $scalarId . '_20080401_20090611';
             $actualMergeTableName = $this->_partition->createMergeTable($scalarId, $start, $end, $createdTables);
 
             $this->assertEquals($expectedMergeTableName, $actualMergeTableName);
@@ -570,7 +571,7 @@ class Hashmark_TestCase_Partition extends Hashmark_TestCase
     public function getsAllMergeTables()
     {
         $scalarId = self::randomString();
-        $expectedTableName = HASHMARK_PARTITION_MERGETABLE_PREFIX . $scalarId;
+        $expectedTableName = $this->_mergeTablePrefix . $scalarId;
         $this->_partition->createTable($scalarId, $expectedTableName, 'decimal');
         
         $unexpectedTableName = 'test_samples_' . $scalarId;
@@ -677,7 +678,7 @@ class Hashmark_TestCase_Partition extends Hashmark_TestCase
                 $createdTables[] = $tableName;
             }
 
-            $mergeTableName = HASHMARK_PARTITION_MERGETABLE_PREFIX . "{$scalarId}_{$coverage['start']}_{$coverage['end']}";
+            $mergeTableName = $this->_mergeTablePrefix . "{$scalarId}_{$coverage['start']}_{$coverage['end']}";
             $this->_partition->createMergeTable($scalarId, $coverage['startFull'], $coverage['endFull'], $createdTables);
 
             $actualMatch = $this->_partition->getMergeTableWithRange($scalarId, $rangeStart, $rangeEnd);
@@ -728,7 +729,7 @@ class Hashmark_TestCase_Partition extends Hashmark_TestCase
         $this->_partition->createTable($scalarId, $secondSingleTable, $type);
 
         // Mock merge table.
-        $oldMergeTableName = HASHMARK_PARTITION_MERGETABLE_PREFIX . "{$scalarId}_20080401_20090611";
+        $oldMergeTableName = $this->_mergeTablePrefix . "{$scalarId}_20080401_20090611";
         $this->_partition->createTable($scalarId, $oldMergeTableName, $type);
 
         // Found two single tables and found preexisting merge table.
@@ -737,7 +738,7 @@ class Hashmark_TestCase_Partition extends Hashmark_TestCase
 
         $this->_partition->dropTable($oldMergeTableName);
 
-        $newMergeTableName = HASHMARK_PARTITION_MERGETABLE_PREFIX . "{$scalarId}_20080401_20090611";
+        $newMergeTableName = $this->_mergeTablePrefix . "{$scalarId}_20080401_20090611";
 
         // Found two single tables and returned new merge table.
         $actualMatch = $this->_partition->getAnyTableWithRange($scalarId, $rangeStart, $rangeEnd);
@@ -856,7 +857,7 @@ class Hashmark_TestCase_Partition extends Hashmark_TestCase
         $actualResult = $this->_partition->queryInRange($scalarId, $rangeStart, $rangeEnd, $sql);
         $this->assertFalse(empty($actualResult));
 
-        $expectedMergeTableName = HASHMARK_PARTITION_MERGETABLE_PREFIX . $scalarId . '_20080401_20090611';
+        $expectedMergeTableName = $this->_mergeTablePrefix . $scalarId . '_20080401_20090611';
         $this->assertTrue($this->_partition->tableExists($expectedMergeTableName));
     }
     
@@ -928,7 +929,7 @@ class Hashmark_TestCase_Partition extends Hashmark_TestCase
                                $this->_partition->getTableDefinition($tempName));
         $destDef = str_replace(' AUTO_INCREMENT=2', '', $destDef);
         $this->assertEquals($srcDef, $destDef);
-        $exists = $this->_partition->tableExists(HASHMARK_PARTITION_MERGETABLE_PREFIX . "{$scalarId}_20080603_20081212");
+        $exists = $this->_partition->tableExists($this->_mergeTablePrefix . "{$scalarId}_20080603_20081212");
         $this->assertTrue(empty($exists));
         
         // Trigger a DbHelper::queryInRange().
@@ -947,7 +948,7 @@ class Hashmark_TestCase_Partition extends Hashmark_TestCase
         $destDef = str_replace(' AUTO_INCREMENT=3', '', $destDef);
         $this->assertEquals($srcDef, $destDef);
         $expectedPartition = $this->_partition->getIntervalTableName($scalarId, $start);
-        $exists = $this->_partition->tableExists(HASHMARK_PARTITION_MERGETABLE_PREFIX . "{$scalarId}_20080603_20081212");
+        $exists = $this->_partition->tableExists($this->_mergeTablePrefix . "{$scalarId}_20080603_20081212");
         $this->assertFalse(empty($exists));
     }
 }

@@ -17,7 +17,6 @@
 /**
  * Minimal set required by most modules creaed by getModule().
  */
-require_once dirname(__FILE__) . '/Config/Hashmark.php';
 require_once dirname(__FILE__) . '/Module.php';
 require_once dirname(__FILE__) . '/Module/DbDependent.php';
 require_once dirname(__FILE__) . '/Util.php';
@@ -52,90 +51,58 @@ class Hashmark
      *                          instance's initModule().
      * @return mixed    New instance; false if instance's initModule()
      *                  returns false.
-     * @throws Exception    If class file for $type is unreadable.
+     * @throws Exception    If class file for $type is unreadable;
+     *                      if $config in Config/Hashmark.php is missing.
      */
     public static function getModule($base, $type = '')
     {
+        /**
+         * Previously configured module instances. Clones will be returned
+         * using cached objects as sources.
+         *
+         * Indexed by $base.$type values.
+         */
         static $moduleCache = array();
+        
+        $dirname = dirname(__FILE__);
 
-        // Skip class/config file loading if possible.
-        $modCacheKey = $base . $type;
-        if (!isset($moduleCache[$modCacheKey])) {
-            static $baseConfigCache = array();
-            static $typeConfigCache = array();
-
-            $dirname = dirname(__FILE__);
-
-            // Use $config from the config file, if present.
-            if (!isset($baseConfigCache[$base])) {
-                $baseConfigFile = $dirname . "/Config/{$base}.php";
-                if (is_readable($baseConfigFile)) {
-                    unset($config);
-                    require_once $baseConfigFile;
-                    if (isset($config)) {
-                        $baseConfigCache[$base] = $config;
-                    } else {
-                        $baseConfigCache[$base] = false;
-                    }
-                }
-
-                $baseClassFile = $dirname . "/{$base}.php";
-                if (!is_readable($baseClassFile)) {
-                    throw new Exception("File not found for class Hashmark_{$base}.");
-                }
-                require_once $baseClassFile;
+        $baseConfig = self::getConfig($base);
+        $typeConfig = null;
+        
+        // Look for a fallback default module type.
+        if (!$type && !empty($baseConfig['default_type'])) {
+            $type = $baseConfig['default_type'];
+        }
+        
+        $moduleId = $base . $type;
+        
+        // Cache miss: load base/type classes and configs.
+        if (!isset($moduleCache[$moduleId])) {
+            $baseClassFile = $dirname . "/{$base}.php";
+            if (!is_readable($baseClassFile)) {
+                throw new Exception("File not found for class Hashmark_{$base}.");
             }
-
-            // Check if $baseClassFile defined a constant for the default type.
-            if (!$type) {
-                $defaultType = 'HASHMARK_' . strtoupper($base) . '_DEFAULT_TYPE';
-                if (defined($defaultType)) {
-                    $type = constant($defaultType);
-                }
-            }
+            require_once $baseClassFile;
 
             if ($type) {
-                // Use $config from the config file, if present.
-                if (!isset($typeConfigCache[$type])) {
-                    
-                    // Apply external config paths defined in the base config file.
-                    $configPaths = array("{$dirname}/Config");
-                    if (!empty($baseConfigCache[$base]['ext_config_paths'])) {
-                        $configPaths = array_merge($baseConfigCache[$base]['ext_config_paths'], $configPaths);
-                    }
-                    
-                    foreach ($configPaths as $path) {
-                        $typeConfigFile = "{$path}/{$base}/{$type}.php";
-                        if (is_readable($typeConfigFile)) {
-                            unset($config);
-                            require_once $typeConfigFile;
-                            if (isset($config)) {
-                                $typeConfigCache[$type] = $config;
-                                break;
-                            } else {
-                                $typeConfigCache[$type] = false;
-                            }
-                        }
-                    }
+                // Apply external module paths defined in the base config file.
+                $modulePaths = array("{$dirname}/{$base}");
+                if (!empty($baseConfig['ext_module_paths'])) {
+                    $modulePaths = array_merge($baseConfig['ext_module_paths'], $modulePaths);
+                }
 
-                    // Apply external module paths defined in the base config file.
-                    $modulePaths = array($dirname);
-                    if (!empty($baseConfigCache[$base]['ext_module_paths'])) {
-                        $modulePaths = array_merge($baseConfigCache[$base]['ext_module_paths'], $modulePaths);
+                // Use the first class found with matching name.
+                foreach ($modulePaths as $path) {
+                    $typeClassFile = "{$path}/{$type}.php";
+                    if (is_readable($typeClassFile)) {
+                        require_once $typeClassFile;
+                        break;
                     }
+                    $typeClassFile = '';
+                }
 
-                    foreach ($modulePaths as $path) {
-                        $typeClassFile = "{$path}/{$base}/{$type}.php";
-                        if (is_readable($typeClassFile)) {
-                            require_once $typeClassFile;
-                            break;
-                        }
-                        $typeClassFile = '';
-                    }
-                    
-                    if (!$typeClassFile) {
-                        throw new Exception("File not found for class Hashmark_{$base}_{$type}.");
-                    }
+                if (!$typeClassFile) {
+                    throw new Exception("File not found for class Hashmark_{$base}_{$type}.");
                 }
 
                 $instClass = "Hashmark_{$base}_{$type}";
@@ -143,22 +110,20 @@ class Hashmark
                 $instClass = "Hashmark_{$base}";
             }
 
-            $baseConfig = isset($baseConfigCache[$base]) ? $baseConfigCache[$base] : false;
-            $typeConfig = isset($typeConfigCache[$type]) ? $typeConfigCache[$type] : false;
-
+            // Auto-inject a cache object into every module.
             if ('Cache' == $base) {
                 $cache = null;
             } else {
                 $cache = self::getModule('Cache');
             }
 
-            $moduleCache[$modCacheKey] = new $instClass($base, $baseConfig, $type,
-                                                        $typeConfig, $cache);
+            $moduleCache[$moduleId] = new $instClass($base, $baseConfig, $type,
+                                               self::getConfig($base, $type), $cache);
         }
         
-        $inst = clone $moduleCache[$modCacheKey];
+        $inst = clone $moduleCache[$moduleId];
         
-        // Inject variable dependencies.
+        // Inject variable argument list into instance's initModule(), if exists.
         $initArgs = func_get_args();
         if (method_exists($inst, 'initModule')) {
             if (count($initArgs) > 2) {
@@ -167,11 +132,136 @@ class Hashmark
                 $initOk = $inst->initModule();
             }
 
+            // Module logic indicates the instance is unusable, ex. dependencies
+            // are missing or misconfigured.
             if (!$initOk) {
                 return false;
             }
         }
 
         return $inst;
+    }
+
+    /**
+     * 
+     * @param string    $base   Ex. 'Core', optional base class in Core.php.
+     * @param string    $type   Ex. 'Mysql', implementation in Core/Mysql.php. Optional.
+     * @param string    $key    If key exists in the config array, only the
+     *                          associated value is returned, rather than whole
+     *                          array. Optional.
+     * @throws Exception    If class file for $type is unreadable;
+     *                      if $config in Config/Hashmark.php is missing.
+     */
+    public static function getConfig($base, $type = '', $key = '')
+    {
+        /**
+         * Holds $config from Config/Hashmark.php.
+         * These defaults can be overriden by base/type config files.
+         */
+        static $defaultConfigCache;
+
+        /**
+         * Defaults and optional overrides from base config files.
+         * Indexed by base names.
+         */
+        static $baseConfigCache = array();
+        
+        /**
+         * Defaults and optional overrides from type config files.
+         * Indexed by <base>_<type>.
+         */
+        static $typeConfigCache = array();
+        
+        $dirname = dirname(__FILE__);
+
+        if (!isset($defaultConfigCache)) {
+            $defaultConfigFile = $dirname . '/Config/Hashmark.php';
+            if (!is_readable($defaultConfigFile)) {
+                throw new Exception("Default config file missing: {$defaultConfigFile}.");
+            }
+
+            require_once $defaultConfigFile;
+
+            if (!isset($config)) {
+                throw new Exception("Default config values missing: {$defaultConfigFile}.");
+            }
+            
+            $defaultConfigCache = $config;
+        }
+
+        if (!isset($baseConfigCache[$base])) {
+            // Apply default configs. Allow base-specific config file to
+            // override the values.
+            if (isset($defaultConfigCache[$base])) {
+                $config = $defaultConfigCache[$base];
+            } else {
+                $config = array();
+            }
+
+            $baseConfigFile = $dirname . "/Config/{$base}.php";
+
+            if (is_readable($baseConfigFile)) {
+                require_once $baseConfigFile;   // May update $config
+            }
+                
+            // Cache this default+overrides config set.
+            $baseConfigCache[$base] = $config;
+        }
+                    
+        // Apply external module paths defined in the base config file.
+        $configPaths = array("{$dirname}/Config/{$base}");
+        if (!empty($baseConfigCache[$base]['ext_config_paths'])) {
+            $configPaths = array_merge($baseConfigCache[$base]['ext_config_paths'], $configPaths);
+        }
+
+        if ($type) {
+            $typeId = "{$base}_{$type}";
+
+            if (!isset($typeConfigCache[$typeId])) {
+                // Apply default configs. Allow type-specific config file to
+                // override the values.
+                if (isset($defaultConfigCache[$typeId])) {
+                    $config = $defaultConfigCache[$typeId];
+                } else {
+                    $config = array();
+                }
+
+                // Use the first class found with matching name.
+                foreach ($configPaths as $path) {
+                    $typeConfigFile = "{$path}/{$type}.php";
+                    if (is_readable($typeConfigFile)) {
+                        require_once $typeConfigFile;   // May update $config
+                        break;
+                    }
+                }
+            
+                // Cache this default+overrides config set.
+                $typeConfigCache[$typeId] = $config;
+            }
+
+            // Return a specific config value, if exists.
+            if ($key) {
+                if (isset($typeConfigCache[$typeId][$key])) {
+                    return $typeConfigCache[$typeId][$key];
+                } else {
+                    return null;
+                }
+            }
+
+            return $typeConfigCache[$typeId];
+        }
+
+        // Return a specific config value, if exists.
+        if ($key) {
+            if (isset($baseConfigCache[$base][$key])) {
+                return $baseConfigCache[$base][$key];
+            } else {
+                return null;
+            }
+        }
+                
+        // Returns all config values for the module, ex. $config['DbHelper']
+        // defined in Config/Hashmark.php.
+        return $baseConfigCache[$base];
     }
 }

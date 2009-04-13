@@ -243,25 +243,29 @@ abstract class Hashmark_TestCase extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * Return a random decimal string.
+     * Return a random decimal string. Based on DECIMAL(M,D) configuration.
      *
+     * @see DECIMAL type, http://dev.mysql.com/doc/refman/5.0/en/numeric-type-overview.html#id4944739
+     * @see Config/Hashmark.php, $config['DbHelper']
      * @return string
      */
     public static function randomDecimal()
     {
+        $decimalTotalWidth = Hashmark::getConfig('DbHelper', '', 'decimal_total_width');
+        $decimalRightWidth = Hashmark::getConfig('DbHelper', '', 'decimal_right_width');
+
         // Random DECIMAL(M,D) numbers.
-        // @see DECIMAL type, http://dev.mysql.com/doc/refman/5.0/en/numeric-type-overview.html#id4944739
 
         // Before decimal point:
         $value = '';
-        $wholeDigits = mt_rand(1, HASHMARK_DECIMAL_TOTALWIDTH - HASHMARK_DECIMAL_RIGHTWIDTH);
+        $wholeDigits = mt_rand(1, $decimalTotalWidth - $decimalRightWidth);
         for ($d = 0; $d < $wholeDigits; $d++) {
             $value .= mt_rand(0, 9);
         }
 
         // After:
         $value = preg_replace('/^0+/', '', $value) . '.';
-        $pointDigits = mt_rand(1, HASHMARK_DECIMAL_RIGHTWIDTH);
+        $pointDigits = mt_rand(1, $decimalRightWidth);
         for ($d = 0; $d < $pointDigits; $d++) {
             $value .= mt_rand(0, 9);
         }
@@ -352,8 +356,8 @@ abstract class Hashmark_TestCase extends PHPUnit_Framework_TestCase
         if (!is_string($expected) || !is_string($actual)) {
             return false;
         }
-
-        bcscale(HASHMARK_DECIMAL_RIGHTWIDTH);
+        
+        bcscale(Hashmark::getConfig('DbHelper', '', 'decimal_right_width'));
 
         return 0 === bccomp($expected, $actual);
     }

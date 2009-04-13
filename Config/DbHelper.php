@@ -13,15 +13,6 @@
  * @version     $Id: DbHelper.php 282 2009-02-06 17:09:38Z david $
 */
 
-/**
- * Default MySQL extension wrapper class.
- */
-define('HASHMARK_DBHELPER_DEFAULT_TYPE', 'Mysqli');
-
-$config = array();
-
-$config['profile'] = array();
-
 $config['profile']['cron'] = array('host' => 'localhost',
                                    'sock' => '/var/run/mysqld/mysqld.sock',
                                    'port' => '3306',

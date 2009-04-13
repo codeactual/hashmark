@@ -15,7 +15,7 @@
  */
 
 /**
- * Load constants, ex. HASHMARK_DECIMAL_RIGHTWIDTH.
+ * Load constants.
  */
 require_once dirname(__FILE__) . '/Hashmark.php';
 
@@ -45,8 +45,12 @@ class Hashmark_BcMath
      * @param string    $value
      * @return string
      */
-    public static function round($value, $precision = HASHMARK_DECIMAL_RIGHTWIDTH)
+    public static function round($value, $precision = '')
     {
+        if (!$precision) {
+            $precision = Hashmark::getConfig('DbHelper', '', 'decimal_right_width');
+        };
+
         // Ex. $value = '1000000000000000.29255000', $precision = 4
         if (false === ($pointPos = strrpos($value, '.'))) {
             return $value;
@@ -110,7 +114,7 @@ class Hashmark_BcMath
             throw new Exception('sum() requires a populated Array.', HASHMARK_EXCEPTION_VALIDATION);
         }
 
-        bcscale(HASHMARK_DECIMAL_RIGHTWIDTH);
+        bcscale(Hashmark::getConfig('DbHelper', '', 'decimal_right_width'));
 
         $result = '';
 
@@ -138,7 +142,7 @@ class Hashmark_BcMath
         $sum = self::sum($values);
 
         // Increase bcscale() to provide extra precision for rounding.
-        bcscale(HASHMARK_DECIMAL_RIGHTWIDTH * 2);
+        bcscale(Hashmark::getConfig('DbHelper', '', 'decimal_right_width') * 2);
 
         return self::round(bcdiv($sum, count($values)));
     }
@@ -156,7 +160,7 @@ class Hashmark_BcMath
             throw new Exception('max() requires a populated Array.', HASHMARK_EXCEPTION_VALIDATION);
         }
 
-        bcscale(HASHMARK_DECIMAL_RIGHTWIDTH);
+        bcscale(Hashmark::getConfig('DbHelper', '', 'decimal_right_width'));
 
         usort($values, 'bccomp');
         return $values[count($values) - 1];
@@ -175,7 +179,7 @@ class Hashmark_BcMath
             throw new Exception('min() requires a populated Array.', HASHMARK_EXCEPTION_VALIDATION);
         }
 
-        bcscale(HASHMARK_DECIMAL_RIGHTWIDTH );
+        bcscale(Hashmark::getConfig('DbHelper', '', 'decimal_right_width'));
 
         usort($values, 'bccomp');
         return $values[0];

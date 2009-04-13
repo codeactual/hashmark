@@ -26,6 +26,9 @@
  * @version     $Id: BasicDecimal.php 296 2009-02-13 05:03:11Z david $
 */
 
+$decimalTotalWidth = Hashmark::getConfig('DbHelper', '', 'decimal_total_width');
+$decimalRightWidth = Hashmark::getConfig('DbHelper', '', 'decimal_right_width');
+
 $sql = array();
         
 $sql['values'] = 'SELECT `end` AS `x`, '
@@ -52,23 +55,23 @@ $sql['valuesAtInterval'] = 'SELECT `s1`.`end` AS `x`, '
                          . 'AND `s1`.`end` <= :end '
                          . 'AND `s2`.`end` IS NULL ';
 
-$sql['valuesAgg'] = 'SELECT ROUND(@aggFunc(@distinct`value`), ' . HASHMARK_DECIMAL_RIGHTWIDTH . ') AS `y` '
+$sql['valuesAgg'] = 'SELECT ROUND(@aggFunc(@distinct`value`), ' . $decimalRightWidth . ') AS `y` '
                   . 'FROM ~samples '
                   . 'WHERE `end` >= :start '
                   . 'AND `end` <= :end ';
 
 $sql['valuesAggAtInterval'] = 'SELECT DATE_FORMAT(`end`, :format) AS `x`, '
-                            . 'ROUND(@aggFunc(@distinct`value`), '. HASHMARK_DECIMAL_RIGHTWIDTH . ') AS `y` '
+                            . 'ROUND(@aggFunc(@distinct`value`), '. $decimalRightWidth . ') AS `y` '
                             . 'FROM ~samples '
                             . 'WHERE `end` >= :start '
                             . 'AND `end` <= :end '
                             . 'GROUP BY `x` ';
         
-$sql['valuesNestedAggAtInterval'] = 'SELECT ROUND(@aggFunc(@distinct`y2`), ' . HASHMARK_DECIMAL_RIGHTWIDTH . ') AS `y2` '
+$sql['valuesNestedAggAtInterval'] = 'SELECT ROUND(@aggFunc(@distinct`y2`), ' . $decimalRightWidth . ') AS `y2` '
                                   . 'FROM ~valuesAggAtInterval ';
 
 $sql['valuesAggAtRecurrence'] = 'SELECT @recurFunc(`end`) AS `x`, '
-                              . 'ROUND(@aggFunc(@distinct`value`), ' . HASHMARK_DECIMAL_RIGHTWIDTH . ') AS `y` '
+                              . 'ROUND(@aggFunc(@distinct`value`), ' . $decimalRightWidth . ') AS `y` '
                               . 'FROM ~samples '
                               . 'WHERE `end` >= :start '
                               . 'AND `end` <= :end '
@@ -101,7 +104,7 @@ $sql['changesAtInterval'] = 'SELECT DATE_FORMAT(`s1`.`x`, :format) AS `x`, '
  *  -   Duplicate the start/end conditions in the self-join
  *      in order to narrow `s2` scan.
  */
-$sql['changesAgg'] = 'SELECT ROUND(@aggFunc(@distinct(`s1`.`value` - `s2`.`value`)), ' . HASHMARK_DECIMAL_RIGHTWIDTH . ') AS `y` '
+$sql['changesAgg'] = 'SELECT ROUND(@aggFunc(@distinct(`s1`.`value` - `s2`.`value`)), ' . $decimalRightWidth . ') AS `y` '
                    . 'FROM ~samples AS `s1` '
                    . 'INNER JOIN ~samples AS `s2` '
                    . 'ON `s1`.`id` - 1 = `s2`.`id` '
@@ -111,15 +114,15 @@ $sql['changesAgg'] = 'SELECT ROUND(@aggFunc(@distinct(`s1`.`value` - `s2`.`value
                    . 'AND `s1`.`end` <= :end ';
         
 $sql['changesAggAtInterval'] = 'SELECT DATE_FORMAT(`x`, :format) AS `x`, '
-                             . 'ROUND(@aggFunc(@distinct`y2`), ' . HASHMARK_DECIMAL_RIGHTWIDTH . ') AS `y` '
+                             . 'ROUND(@aggFunc(@distinct`y2`), ' . $decimalRightWidth . ') AS `y` '
                              . 'FROM ~changes '
                              . 'GROUP BY DATE_FORMAT(`x`, :format) ';
         
-$sql['changesNestedAggAtInterval'] = 'SELECT ROUND(@aggFunc(@distinct`y`), ' . HASHMARK_DECIMAL_RIGHTWIDTH . ') AS `y` '
+$sql['changesNestedAggAtInterval'] = 'SELECT ROUND(@aggFunc(@distinct`y`), ' . $decimalRightWidth . ') AS `y` '
                                    . 'FROM ~changesAggAtInterval ';
 
 $sql['changesAggAtRecurrence'] = 'SELECT @recurFunc(`s1`.`end`) AS `x`, '
-                               . 'ROUND(@aggFunc(@distinct(`s1`.`value` - `s2`.`value`)), ' . HASHMARK_DECIMAL_RIGHTWIDTH . ') AS `y` '
+                               . 'ROUND(@aggFunc(@distinct(`s1`.`value` - `s2`.`value`)), ' . $decimalRightWidth . ') AS `y` '
                                . 'FROM ~samples AS `s1` '
                                . 'INNER JOIN ~samples AS `s2` '
                                . 'ON `s1`.`id` - 1 = `s2`.`id` '
@@ -144,7 +147,7 @@ $sql['frequency'] = 'SELECT `value` AS `x`, '
  */
  $sql['moving'] = 'SELECT `s1`.`end` AS `x`, '
                 . '`s1`.`value` AS `y`, '
-                . 'ROUND(@aggFunc(@distinct`s2`.`value`), ' . HASHMARK_DECIMAL_RIGHTWIDTH . ') AS `y2` '
+                . 'ROUND(@aggFunc(@distinct`s2`.`value`), ' . $decimalRightWidth . ') AS `y2` '
                 . 'FROM ~samples AS `s1` '
                 . 'INNER JOIN ~samples AS `s2` '
                 . 'ON `s1`.`id` >= `s2`.`id` '

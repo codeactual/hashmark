@@ -21,6 +21,6 @@
  * @package     Hashmark-Test
  * @subpackage  External
  */
-class Hashmark_Test_FakeExternalType extends Hashmark_Test_FakeModuleType
+class Hashmark_Test_FakeExternalType extends Hashmark_Test
 {
 }
