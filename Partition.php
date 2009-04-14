@@ -360,20 +360,30 @@ class Hashmark_Partition extends Hashmark_Module_DbDependent
             return false;
         }
 
+        // Add leading zeroes.
         foreach (array('month', 'day') as $field) {
             $start[$field] = $start[$field] < 10 ? '0' . $start[$field] : $start[$field];
             $end[$field] = $end[$field] < 10 ? '0' . $end[$field] : $end[$field];
         }
 
+        
         // Reduce LIKE scope if possible.
+        $datePatternFields = array('year', 'month');
+        if ('d' == $this->_baseConfig['interval']) {
+            $datePatternFields[] = 'day';
+        }
         $approxDateId = '';
-        foreach (array('year', 'month', 'day') as $field) {
+        foreach ($datePatternFields as $field) {
             if ($start[$field] == $end[$field]) {
                 $approxDateId .= $start[$field];
             } else {
                 $approxDateId .= '%';
                 break;
             }
+        }
+        // Add a day wildcard (if needed) when patterns narrowed to month.
+        if ('%' != substr($approxDateId, -1) && 'month' == $field) {
+            $approxDateId .= '%';
         }
         
         $candidates = $this->getTablesLike("samples_{$scalarId}_{$approxDateId}");
@@ -465,7 +475,7 @@ class Hashmark_Partition extends Hashmark_Module_DbDependent
         if (is_null($time)) {
             $time = time();
         } else if (is_string($time)) {
-            $time = strtotime($time . ' UTC');
+            $time = strtotime($time);
         }
 
         if (!$interval) {
@@ -564,10 +574,17 @@ class Hashmark_Partition extends Hashmark_Module_DbDependent
     public function query($scalarId, $template)
     {
         $tableName = $this->getIntervalTableName($scalarId);
+        $isWrite = preg_match('/^\s*insert|replace/i', $template);
+        $tableExists = $this->tableExists($tableName);
 
-        if (!$this->tableExists($tableName)) {
+        if (!$tableExists && $isWrite) {
             $type = $this->getModule('Core')->getScalarType($scalarId);
             $this->createTable($scalarId, $tableName, $type);
+            $tableExists = true;
+        }
+
+        if (!$tableExists) {
+            return false;
         }
         
         // Reorganize $args for final call into:
@@ -575,7 +592,7 @@ class Hashmark_Partition extends Hashmark_Module_DbDependent
         $args = func_get_args();
         $args = array_slice($args, 2);
         array_unshift($args, $this->_db, str_replace('~samples', $this->_dbName . '`' . $tableName . '`', $template));
-        
+
         return call_user_func_array(array($this->_dbHelper, 'query'), $args);
     }
     
@@ -594,10 +611,17 @@ class Hashmark_Partition extends Hashmark_Module_DbDependent
     public function queryAtDate($scalarId, $template, $date)
     {
         $tableName = $this->getIntervalTableName($scalarId, $date);
+        $isWrite = preg_match('/^\s*insert|replace/i', $template);
+        $tableExists = $this->tableExists($tableName);
 
-        if (!$this->tableExists($tableName)) {
+        if (!$tableExists && $isWrite) {
             $type = $this->getModule('Core')->getScalarType($scalarId);
             $this->createTable($scalarId, $tableName, $type);
+            $tableExists = true;
+        }
+
+        if (!$tableExists) {
+            return false;
         }
 
         // Reorganize $args for final call into:

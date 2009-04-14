@@ -951,4 +951,82 @@ class Hashmark_TestCase_Partition extends Hashmark_TestCase
         $exists = $this->_partition->tableExists($this->_mergeTablePrefix . "{$scalarId}_20080603_20081212");
         $this->assertFalse(empty($exists));
     }
+
+    /**
+     * Covers Google Code issue 29: "Partition query functions should only
+     * create partition tables for inserts".
+     *
+     * @test
+     * @group Partition
+     * @group queryDoesNotAutoCreateTablesForReads
+     * @group query
+     * @group issue29
+     */
+    public function queryDoesNotAutoCreateTablesForReads()
+    {
+        $scalarId = self::randomString();
+        $expectedTableName = $this->_partition->getIntervalTableName($scalarId);
+        $this->_partition->query($scalarId, 'SELECT `id` FROM ~samples LIMIT 1');
+        $this->assertFalse($this->_partition->tableExists($expectedTableName));
+    }
+    
+    /**
+     * Covers Google Code issue 29: "Partition query functions should only
+     * create partition tables for inserts".
+     *
+     * @test
+     * @group Partition
+     * @group queryAtDateDoesNotAutoCreateTablesForReads
+     * @group queryAtDate
+     * @group issue29
+     */
+    public function queryAtDateDoesNotAutoCreateTablesForReads()
+    {
+        $scalarId = self::randomString();
+        $expectedTableName = $this->_partition->getIntervalTableName($scalarId);
+        $this->_partition->queryAtDate($scalarId, 'SELECT `id` FROM ~samples LIMIT 1', gmdate(HASHMARK_DATETIME_FORMAT));
+        $this->assertFalse($this->_partition->tableExists($expectedTableName));
+    }
+    
+    /**
+     * Covers Google Code issue 29: "Partition query functions should only
+     * create partition tables for inserts".
+     *
+     * @test
+     * @group Partition
+     * @group queryDoesAutoCreateTablesForWrites
+     * @group query
+     * @group issue29
+     */
+    public function queryDoesAutoCreateTablesForWrites()
+    {
+        $scalarFields['name'] = self::randomString();
+        $scalarFields['type'] = 'decimal';
+        $scalarId = $this->_core->createScalar($scalarFields);
+        $expectedTableName = $this->_partition->getIntervalTableName($scalarId);
+        $this->_partition->query($scalarId, 'INSERT INTO ~samples (`value`) VALUES (1)');
+        $this->assertTrue($this->_partition->tableExists($expectedTableName));
+    }
+    
+    /**
+     * Covers Google Code issue 29: "Partition query functions should only
+     * create partition tables for inserts".
+     *
+     * @test
+     * @group Partition
+     * @group queryAtDateDoesAutoCreateTablesForWrites
+     * @group queryAtDate
+     * @group issue29
+     */
+    public function queryAtDateDoesAutoCreateTablesForWrites()
+    {
+        $scalarFields['name'] = self::randomString();
+        $scalarFields['type'] = 'decimal';
+        $scalarId = $this->_core->createScalar($scalarFields);
+        $expectedTableName = $this->_partition->getIntervalTableName($scalarId);
+        $this->_partition->queryAtDate($scalarId,
+                                       'INSERT INTO ~samples (`value`) VALUES (1)',
+                                       gmdate(HASHMARK_DATETIME_FORMAT));
+        $this->assertTrue($this->_partition->tableExists($expectedTableName));
+    }
 }
