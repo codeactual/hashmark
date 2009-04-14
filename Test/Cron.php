@@ -198,12 +198,12 @@ class Hashmark_TestCase_Cron extends Hashmark_TestCase
      */
     public function avoidsUnscheduledSamples()
     {
-        $fieldsToTamper = array('sampler_handler', 'sampler_status', 'sampler_frequency', 'sampler_start');
+        $fieldsToTamper = array('sampler_name', 'sampler_status', 'sampler_frequency', 'sampler_start');
         
         foreach (self::provideScalarsWithScheduledSamplers() as $scalarFields) {
             foreach ($fieldsToTamper as $tamperField) {
                 switch ($tamperField) {
-                    case 'sampler_handler':
+                    case 'sampler_name':
                         $scalarFields[$tamperField] = '';
                         break;
                     case 'sampler_status':

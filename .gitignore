@@ -1,4 +1,4 @@
-Config/*.php
+Config/*
 !Config/Hashmark.php
 !Config/Test.php
 Test/Analyst/BasicDecimal/Data/provider.php

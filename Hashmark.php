@@ -143,12 +143,20 @@ class Hashmark
     }
 
     /**
+     * Returns a base module's config value(s).
+     *
+     *      -   Optionally filtered by module type and specific config key.
+     *      -   Starts with default configs defined in Config/Hashmark.php,
+     *          then applies overrides defined in optional files discovered
+     *          with standard Hashmark naming conventions inside Config/.
      * 
      * @param string    $base   Ex. 'Core', optional base class in Core.php.
      * @param string    $type   Ex. 'Mysql', implementation in Core/Mysql.php. Optional.
      * @param string    $key    If key exists in the config array, only the
      *                          associated value is returned, rather than whole
      *                          array. Optional.
+     * @return mixed        The filtered value identified by non-empty $base,
+     *                      $type, and $key values; null if not found.
      * @throws Exception    If class file for $type is unreadable;
      *                      if $config in Config/Hashmark.php is missing.
      */

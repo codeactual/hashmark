@@ -39,9 +39,9 @@ foreach ($scheduledScalars as $scalar) {
         continue;
     }
 
-    if (!isset($cache[$scalar['sampler_handler']])) {
+    if (!isset($cache[$scalar['sampler_name']])) {
         try {
-            $cache[$scalar['sampler_handler']] = Hashmark::getModule('Sampler', $scalar['sampler_handler']);
+            $cache[$scalar['sampler_name']] = Hashmark::getModule('Sampler', $scalar['sampler_name']);
         } catch (Exception $e) {
             $error = "Sampler unavailable: " . $e->getMessage();
             $cron->setSamplerStatus($scalar['id'], 'Unscheduled', $error);
@@ -49,9 +49,9 @@ foreach ($scheduledScalars as $scalar) {
         }
     }
 
-    if (!$cache[$scalar['sampler_handler']]) {
+    if (!$cache[$scalar['sampler_name']]) {
         $cron->setSamplerStatus($scalar['id'], 'Unscheduled',
-                                "Sampler '{$scalar['sampler_handler']}' was missing.");
+                                "Sampler '{$scalar['sampler_name']}' was missing.");
         continue;
     }
 
@@ -59,14 +59,14 @@ foreach ($scheduledScalars as $scalar) {
 
     // It's OK if $start and $end are the same.
     $start = time();
-    $value = $cache[$scalar['sampler_handler']]->run($scalar['id']);
+    $value = $cache[$scalar['sampler_name']]->run($scalar['id']);
     $end = time();
 
     $cron->setSamplerStatus($scalar['id'], 'Scheduled');
 
     if (is_null($value)) {
         $cron->setSamplerStatus($scalar['id'], 'Unscheduled',
-                                "Sampler '{$scalar['sampler_handler']}' could not finish.");
+                                "Sampler '{$scalar['sampler_name']}' could not finish.");
         continue;
     }
 

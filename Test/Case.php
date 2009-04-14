@@ -229,7 +229,7 @@ abstract class Hashmark_TestCase extends PHPUnit_Framework_TestCase
                 $argSet['type'] = $type;
                 $argSet['description'] = self::randomString();
                 $argSet['sampler_status'] = 'Scheduled';
-                $argSet['sampler_handler'] = 'Test';
+                $argSet['sampler_name'] = 'Test';
                 $argSet['sampler_start'] = gmdate(HASHMARK_DATETIME_FORMAT);
             
                 // 0-minute frequencies will make them due to run immediately.

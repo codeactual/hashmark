@@ -87,7 +87,7 @@ class Hashmark_Core extends Hashmark_Module_DbDependent
      *      'sampler_frequency':    Recurrence interval in minutes.
      *      'sampler_start':        Earliest possible sampling as UNIX timestamp or DATETIME string.
      *      'sampler_status':       Ex. 'Scheduled'
-     *      'sampler_handler`:      Hashmark_Sampler_* implementation name, ex. 'SomeFeatureUsage`.
+     *      'sampler_name`:         Hashmark_Sampler_* implementation name, ex. 'SomeFeatureUsage`.
      *                              It would refer to class Hashmark_Sampler_SomeFeatureUsage defined
      *                              in Sampler/SomeFeatureUsage.php.
      * @return int      Inserted row ID.
@@ -114,7 +114,7 @@ class Hashmark_Core extends Hashmark_Module_DbDependent
         $fields['description'] = isset($fields['description']) ? $fields['description'] : '';
         $fields['sampler_frequency'] = isset($fields['sampler_frequency']) ? $fields['sampler_frequency'] : '';
         $fields['sampler_start'] = isset($fields['sampler_start']) ? $fields['sampler_start'] : HASHMARK_DATETIME_EMPTY;
-        $fields['sampler_handler'] = isset($fields['sampler_handler']) ? $fields['sampler_handler'] : '';
+        $fields['sampler_name'] = isset($fields['sampler_name']) ? $fields['sampler_name'] : '';
         $fields['sampler_status'] = isset($fields['sampler_status']) ? $fields['sampler_status'] : 'Unscheduled';
         
         if (is_int($fields['sampler_start'])) {
@@ -123,13 +123,13 @@ class Hashmark_Core extends Hashmark_Module_DbDependent
 
         $sql = "INSERT INTO {$this->_dbName}`scalars` "
              . '(`name`, `value`, `type`, `description`, `sampler_frequency`, '
-             . '`sampler_start`, `sampler_handler`, `sampler_status`) '
+             . '`sampler_start`, `sampler_name`, `sampler_status`) '
              . 'VALUES (?, ?, ?, ?, ?, ?, ?, ?)';
 
         $this->_dbHelper->query($this->_db, $sql, $fields['name'],
                                 $fields['value'], $fields['type'],
                                 $fields['description'],$fields['sampler_frequency'],
-                                $fields['sampler_start'],$fields['sampler_handler'],
+                                $fields['sampler_start'],$fields['sampler_name'],
                                 $fields['sampler_status']);
         
         $scalarId = $this->_dbHelper->insertId($this->_db);

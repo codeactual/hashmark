@@ -49,16 +49,14 @@ $config['DbHelper']['profile']['cron'] = array('host' => '',
                                                'port' => '',
                                                'name' => 'hashmark',
                                                'user' => '',
-                                               'pass' => '',
-                                               'div_precision_increment', 4);
+                                               'pass' => '');
 
 $config['DbHelper']['profile']['unittest'] = array('host' => '',
                                                    'sock' => '',
                                                    'port' => '',
                                                    'name' => 'hashmark_test',
                                                    'user' => '',
-                                                   'pass' => '',
-                                                   'div_precision_increment', 4);
+                                                   'pass' => '');
 /**
  * interval options:
  *

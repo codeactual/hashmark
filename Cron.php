@@ -168,7 +168,7 @@ class Hashmark_Cron extends Hashmark_Module_DbDependent
      *  
      *   -  Due = Based on their frequency and last update, or have never ran.
      *   -  Only returns `scalars` fields necessary for resampling: `id`,
-     *      `sampler_handler`, `sampler_status`
+     *      `sampler_name`, `sampler_status`
      *
      * @return Array    Assoc. of fields; otherwise false.
      * @throws Exception On query error.
@@ -183,12 +183,12 @@ class Hashmark_Cron extends Hashmark_Module_DbDependent
         $canStart = '(`sampler_start` = "' . HASHMARK_DATETIME_EMPTY . '" OR `sampler_start` <= UTC_TIMESTAMP())';
         $hasNeverFinished = '`last_sample_change` = "' . HASHMARK_DATETIME_EMPTY . '"';
 
-        $sql = 'SELECT `id`, `sampler_handler`, `sampler_status` '
+        $sql = 'SELECT `id`, `sampler_name`, `sampler_status` '
              . "FROM {$this->_dbName}`scalars` "
              . "WHERE {$statusMatch} "
              . "AND ({$isDue} OR {$hasNeverFinished}) "
              . "AND {$canStart} "
-             . 'AND `sampler_handler` != ""';
+             . 'AND `sampler_name` != ""';
 
         $res = $this->_dbHelper->query($this->_db, $sql);
 

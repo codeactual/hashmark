@@ -28,7 +28,7 @@ CREATE TABLE `categories` (
   `description` varchar(100) collate utf8_unicode_ci NOT NULL default '',
   PRIMARY KEY  (`id`),
   KEY `idx_uniq_name` (`name`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci COMMENT='Group scalars, milestones, etc';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci COMMENT='Group scalars, milestones, etc';
 SET character_set_client = @saved_cs_client;
 
 --
@@ -88,7 +88,7 @@ CREATE TABLE `milestones` (
   `name` varchar(40) collate utf8_unicode_ci NOT NULL default '',
   PRIMARY KEY  (`id`),
   KEY `idx_when_name` (`when`,`name`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci COMMENT='Named times for graphs';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci COMMENT='Named times for graphs';
 SET character_set_client = @saved_cs_client;
 
 --
@@ -164,13 +164,13 @@ CREATE TABLE `scalars` (
   `last_sample_change` datetime NOT NULL default '0000-00-00 00:00:00' COMMENT 'Last update from cron/sampler result',
   `sampler_error` varchar(255) collate utf8_unicode_ci NOT NULL default '',
   `sampler_status` enum('Unscheduled','Scheduled','Running') collate utf8_unicode_ci NOT NULL default 'Unscheduled',
-  `sampler_handler` varchar(30) collate utf8_unicode_ci NOT NULL default '' COMMENT 'Ex. PHP class name',
+  `sampler_name` varchar(30) collate utf8_unicode_ci NOT NULL default '' COMMENT 'Ex. PHP class name',
   `sampler_frequency` int(10) unsigned NOT NULL default '0' COMMENT 'Minutes',
   `sampler_start` datetime NOT NULL default '0000-00-00 00:00:00',
   `sample_count` int(10) unsigned NOT NULL default '0',
   PRIMARY KEY  (`id`),
   KEY `idx_get` (`name`,`value`),
-  KEY `idx_scheduled` (`sampler_handler`,`sampler_status`,`sampler_frequency`,`sampler_start`,`last_sample_change`)
+  KEY `idx_scheduled` (`sampler_name`,`sampler_status`,`sampler_frequency`,`sampler_start`,`last_sample_change`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci COMMENT='Tracked data points';
 SET character_set_client = @saved_cs_client;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -183,4 +183,4 @@ SET character_set_client = @saved_cs_client;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2009-02-17 14:25:29
+-- Dump completed on 2009-04-14  4:14:10

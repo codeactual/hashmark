@@ -95,7 +95,7 @@ class Hashmark_TestCase_Core extends Hashmark_TestCase
             $this->assertEquals(HASHMARK_DATETIME_EMPTY, $scalar['sampler_start']);
             $this->assertTrue(empty($scalar['sampler_error']));
             $this->assertEquals('Unscheduled', $scalar['sampler_status']);
-            $this->assertTrue(empty($scalar['sampler_handler']));
+            $this->assertTrue(empty($scalar['sampler_name']));
             $this->assertEquals(0, $scalar['sampler_frequency']);
             $this->assertEquals(0, $scalar['sample_count']);
         }
@@ -133,7 +133,7 @@ class Hashmark_TestCase_Core extends Hashmark_TestCase
             $this->assertEquals(HASHMARK_DATETIME_EMPTY, $scalar['sampler_start']);
             $this->assertTrue(empty($scalar['sampler_error']));
             $this->assertEquals('Unscheduled', $scalar['sampler_status']);
-            $this->assertTrue(empty($scalar['sampler_handler']));
+            $this->assertTrue(empty($scalar['sampler_name']));
             $this->assertEquals(0, $scalar['sampler_frequency']);
             $this->assertEquals(0, $scalar['sample_count']);
         }
@@ -261,7 +261,7 @@ class Hashmark_TestCase_Core extends Hashmark_TestCase
                 $this->assertEquals(HASHMARK_DATETIME_EMPTY, $scalar['last_sample_change']);
                 $this->assertEquals($expectedFields['sampler_start'], $scalar['sampler_start']);
                 $this->assertEquals($expectedFields['sampler_status'], $scalar['sampler_status']);
-                $this->assertEquals($expectedFields['sampler_handler'], $scalar['sampler_handler']);
+                $this->assertEquals($expectedFields['sampler_name'], $scalar['sampler_name']);
                 $this->assertEquals($expectedFields['sampler_frequency'], $scalar['sampler_frequency']);
             }
         }
