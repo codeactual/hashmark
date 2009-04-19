@@ -52,7 +52,8 @@ class Hashmark_TestCase_Analyst_BasicDecimal extends Hashmark_TestCase
     {
         parent::setUp();
         
-        $this->_analyst = Hashmark::getModule('Analyst', 'BasicDecimal', $this->_db);
+        $partition = Hashmark::getModule('Partition', '', $this->_db);
+        $this->_analyst = Hashmark::getModule('Analyst', 'BasicDecimal', $this->_db, $partition);
         $this->_cron = Hashmark::getModule('Cron', '', $this->_db);
         $this->_core = Hashmark::getModule('Core', '', $this->_db);
     }

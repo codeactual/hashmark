@@ -93,9 +93,8 @@ $mockDb = 1;
  * Module loading checks.
  *
  */
-$modList = array('Analyst' => 'BasicDecimal', 'Client' => '', 'Core' => '',
-                 'Cache' => 'Static', 'Cron' => '', 'Partition' => '',
-                 'Sampler' => 'YahooWeather');
+$modList = array('Client' => '', 'Core' => '', 'Cache' => 'Static', 'Cron' => '',
+                 'Partition' => '', 'Sampler' => 'YahooWeather');
 
 foreach ($modList as $baseName => $typeName) {
     // Cache/Sampler modules don't use the DB argument,

@@ -83,15 +83,17 @@ class Hashmark_Analyst_BasicDecimal extends Hashmark_Analyst
     /**
      * Called by Hashmark::getModule() to inject dependencies.
      *
-     * @param mixed     $db     Connection object/resource.
+     * @param mixed                 $db         Connection object/resource.
+     * @param string                $dbName     Database selection, unquoted. [optional]
+     * @param Hashmark_Partition    $partition  Initialized instance.
      * @return boolean  False if module could not be initialized and is unusable.
      *                  Hashmark::getModule() will also then return false.
      */
-    public function initModule($db)
+    public function initModule($db, $partition)
     {
         parent::initModule($db);
 
-        $this->_partition = $this->getModule('Partition');
+        $this->_partition = $partition;
 
         $dbHelperConfig = $this->_dbHelper->getBaseConfig();
         $this->_divPrecisionIncr = $dbHelperConfig['div_precision_increment'];
