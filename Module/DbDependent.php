@@ -152,12 +152,27 @@ abstract class Hashmark_Module_DbDependent extends Hashmark_Module
      * Return a Hashmark module instance (of the same type as this one)
      *
      * @param string    $name   Module name, ex. 'Core', 'Cron, 'Client.
+     * @param string    $type   Ex. 'Mysql', implementation in Core/Mysql.php.
      * @return mixed    New instance.
      */
-    public function getModule($name)
+    public function getModule($name, $type = '')
     {
-        $module = Hashmark::getModule($name, '', $this->_db);
-        $module->setDbName($this->getDbName());
-        return $module;
+        $args = func_get_args();
+
+        // Ensure this omission gets passed to Hashmark::getModule().
+        if (!$type) {
+            array_splice($args, 1, 0, '');
+        }
+
+        // Use the current module's DB object/resource.
+        if (isset($args[2])) {
+            array_splice($args, 2, 0, array($this->_db));
+        } else {
+            $args[] = $this->_db;
+        }
+
+        $inst = call_user_func_array(array('Hashmark', 'getModule'), $args);
+        $inst->setDbName($this->getDbName());
+        return $inst;
     }
 }
