@@ -49,17 +49,14 @@ abstract class Hashmark_Module_DbDependent extends Hashmark_Module
 
     /**
      * @param mixed     $db         Connection object/resource.
-     * @param string    $dbName     Database selection, unquoted. [optional]
      * @return boolean  False if module could not be initialized and is unusable.
      *                  Hashmark::getModule() will also then return false.
      */
-    public function initModule($db, $dbName = '')
+    public function initModule($db)
     {
         if (!$db) {
             return false;
         }
-
-        $this->setDbName($dbName);
 
         $class = get_class($this);
 

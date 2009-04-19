@@ -70,5 +70,21 @@ class Hashmark_TestCase_Module_DbDependent extends Hashmark_TestCase_Module
 
         $this->assertEquals($inst->getDb(), $relatedInst->getDb());
         $this->assertEquals($inst->getDbHelper(), $relatedInst->getDbHelper());
+        $this->assertEquals($inst->getDbName(), $relatedInst->getDbName());
+    }
+    
+    /**
+     * @test
+     * @group Module
+     * @group setsDbName
+     * @group getModule
+     * @group setDbName
+     */
+    public function setsDbName()
+    {
+        $expectedDbName = self::randomString();
+        $inst = Hashmark::getModule('Client', '', $this->_db);
+        $inst->setDbName($expectedDbName);
+        $this->assertEquals($expectedDbName, $inst->getDbName());
     }
 }
