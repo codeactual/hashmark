@@ -45,8 +45,8 @@ abstract class Hashmark_Sampler extends Hashmark_Module
     /**
      * Return the new scalar/sample value using an arbitrary data source.
      *
-     * @param int       $scalarId   Scalar being sampled.
+     * @param array     $params     Optional, sampler-specific config array.
      * @return string   New value; null on error.
      */
-    abstract public static function run($scalarId);
+    abstract public static function run($params = array());
 }

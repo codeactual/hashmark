@@ -42,7 +42,7 @@ class Hashmark_Sampler_Test extends Hashmark_Sampler
     /**
      * @see Abstract parent signature docs.
      */
-    public static function run($scalarId)
+    public static function run($params = array())
     {
         return '1234';
     }

@@ -44,7 +44,7 @@ class Hashmark_Sampler_DiskFree extends Hashmark_Sampler
     /**
      * @see Abstract parent signature docs.
      */
-    public static function run($scalarId)
+    public static function run($params = array())
     {
         return disk_free_space('/');
     }

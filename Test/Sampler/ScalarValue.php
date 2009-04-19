@@ -36,7 +36,7 @@ class Hashmark_TestCase_Sampler_ScalarValue extends Hashmark_TestCase_Sampler
         $expectedFields['type'] = 'string';
 
         $expectedId = Hashmark::getModule('Core', '', $this->_db)->createScalar($expectedFields);
-        $sample = Hashmark::getModule('Sampler', 'ScalarValue')->run($expectedId);
+        $sample = Hashmark::getModule('Sampler', 'ScalarValue')->run(array('scalarId' => $expectedId));
 
         $this->assertEquals($expectedFields['value'], $sample);
     }

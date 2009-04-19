@@ -44,7 +44,7 @@ class Hashmark_Sampler_StockPrice extends Hashmark_Sampler
     /**
      * @see Abstract parent signature docs.
      */
-    public static function run($scalarId)
+    public static function run($params = array())
     {
         $json = file_get_contents('http://www.google.com/finance/info?client=ig&q=AAPL');
         if (!$json) {

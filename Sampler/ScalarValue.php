@@ -45,8 +45,12 @@ class Hashmark_Sampler_ScalarValue extends Hashmark_Sampler
     /**
      * @see Abstract parent signature docs.
      */
-    public static function run($scalarId)
+    public static function run($params = array())
     {
+        if (empty($params['scalarId'])) {
+            return null;
+        }
+
         $db = Hashmark::getModule('DbHelper')->openDb('cron');
         $client = Hashmark::getModule('Client', '', $db);
 
@@ -54,6 +58,6 @@ class Hashmark_Sampler_ScalarValue extends Hashmark_Sampler
             return null;
         }
 
-        return $client->get((int) $scalarId);
+        return $client->get((int) $params['scalarId']);
     }
 }

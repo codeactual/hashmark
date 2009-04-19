@@ -59,7 +59,7 @@ foreach ($scheduledScalars as $scalar) {
 
     // It's OK if $start and $end are the same.
     $start = time();
-    $value = $cache[$scalar['sampler_name']]->run($scalar['id']);
+    $value = $cache[$scalar['sampler_name']]->run(array('scalarId' => $scalar['id']));
     $end = time();
 
     $cron->setSamplerStatus($scalar['id'], 'Scheduled');

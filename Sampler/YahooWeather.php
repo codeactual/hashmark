@@ -44,7 +44,7 @@ class Hashmark_Sampler_YahooWeather extends Hashmark_Sampler
     /**
      * @see Abstract parent signature docs.
      */
-    public static function run($scalarId)
+    public static function run($params = array())
     {
         $xml = file_get_contents('http://weather.yahooapis.com/forecastrss?p=98103&u=f');
         if (!$xml) {
