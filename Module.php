@@ -35,12 +35,12 @@ abstract class Hashmark_Module
     protected $_baseConfig;
     
     /**
-     * @var string Module type name, ex. 'Mysqli'.
+     * @var string Module type name, ex. 'DbDependent' (Hashmark_Module_DbDependent).
      */
     protected $_type;
     
     /**
-     * @var mixed Module type-specific configs, ex. Hashmark_Client_Mysqli configs.
+     * @var mixed Module type-specific configs.
      */
     protected $_typeConfig;
 

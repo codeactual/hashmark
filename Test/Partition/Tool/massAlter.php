@@ -31,12 +31,12 @@ if (!$alterExprs) {
  */
 require_once dirname(__FILE__) . '/../../Hashmark.php';
 
-$db = Hashmark::getModule('DbHelper', 'Mysqli')->openDb('unittest');
+$db = Hashmark::getModule('DbHelper')->openDb('unittest');
 if (!$db) {
     die("\nNo DB link.\n");
 }
 
-$p = Hashmark::getModule('Partition', 'Mysqli', $db);
+$p = Hashmark::getModule('Partition', '', $db);
 
 $targets = $p->getTablesLike($likeExpr);
 if (!$targets) {
@@ -45,12 +45,10 @@ if (!$targets) {
 
 foreach ($targets as $table) {
     foreach ($alterExprs as $alter) {
-        $res = $db->query("ALTER TABLE `{$table}` {$alter}");
-        if (!$res) {
-            die("\nAlter error: {$db->error}\n");
-        }
-        if ($db->affected_rows) {
+        $stmt = $db->query("ALTER TABLE `{$table}` {$alter}");
+        if ($stmt->rowCount()) {
             echo "`{$table}`: {$alter}\n";
         }
+        unset($stmt);
     }
 }

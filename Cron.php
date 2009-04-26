@@ -38,13 +38,9 @@ class Hashmark_Cron extends Hashmark_Module_DbDependent
              . '(`start`) '
              . 'VALUES (UTC_TIMESTAMP())';
 
-        $this->_dbHelper->query($this->_db, $sql);
+        $this->_db->query($sql);
         
-        if (1 == $this->_dbHelper->affectedRows($this->_db)) {
-            return $this->_dbHelper->insertId($this->_db);
-        }
-
-        return false;
+        return $this->_db->lastInsertId();
     }
     
     /**
@@ -60,9 +56,9 @@ class Hashmark_Cron extends Hashmark_Module_DbDependent
              . 'SET `end` = UTC_TIMESTAMP() '
              . 'WHERE `id` = ?';
 
-        $this->_dbHelper->query($this->_db, $sql, $id);
+        $stmt = $this->_db->query($sql, array($id));
         
-        return (1 == $this->_dbHelper->affectedRows($this->_db));
+        return (1 == $stmt->rowCount());
     }
 
     /**
@@ -97,22 +93,18 @@ class Hashmark_Cron extends Hashmark_Module_DbDependent
              . '`sample_count` = `sample_count` + 1 '
              . 'WHERE `id` = ?';
 
-        $this->_dbHelper->query($this->_db, $sql, $value, $end, $scalarId);
+        $this->_db->query($sql, array($value, $end, $scalarId));
         
         $sql = 'INSERT INTO ~samples '
              . '(`job_id`, `value`, `start`, `end`) '
              . 'VALUES (?, ?, ?, ?)';
         
-        // queryAtDate() instead of query() so unit tests can
+        // queryAtDate() instead of queryCurrent() so unit tests can
         // create backdated samples.
-        $this->getModule('Partition')->queryAtDate($scalarId, $sql, $end, $jobId,
-                                                   $value, $start, $end);
+        $bind = array($jobId, $value, $start, $end);
+        $stmt = $this->getModule('Partition')->queryAtDate($scalarId, $sql, $end, $bind);
 
-        if (1 == $this->_dbHelper->affectedRows($this->_db)) {
-            return true;
-        }
-        
-        return false;
+        return (1 == $stmt->rowCount());
     }
 
     /**
@@ -126,13 +118,14 @@ class Hashmark_Cron extends Hashmark_Module_DbDependent
     {
         $sql = 'SELECT * FROM ~samples ORDER BY `id` DESC LIMIT 1';
 
-        $res = $this->getModule('Partition')->query($scalarId, $sql);
+        $stmt = $this->getModule('Partition')->queryCurrent($scalarId, $sql);
 
-        if (!$this->_dbHelper->numRows($res)) {
+        $rows = $stmt->fetchAll();
+        if (!$rows) {
             return false;
         }
 
-        return $this->_dbHelper->fetchAssoc($res);
+        return $rows[0];
     }
 
     /**
@@ -158,9 +151,9 @@ class Hashmark_Cron extends Hashmark_Module_DbDependent
              . '`sampler_error` = ? '
              . 'WHERE `id` = ?';
 
-        $this->_dbHelper->query($this->_db, $sql, $status, $error, $scalarId);
+        $stmt = $this->_db->query($sql, array($status, $error, $scalarId));
         
-        return (1 == $this->_dbHelper->affectedRows($this->_db));
+        return (1 == $stmt->rowCount());
     }
     
     /**
@@ -180,8 +173,8 @@ class Hashmark_Cron extends Hashmark_Module_DbDependent
         // Recurrence interval has been reached.
         $isDue = '(`last_sample_change` + INTERVAL `sampler_frequency` MINUTE <= UTC_TIMESTAMP())';
         // Start date/time has been reached or none was specified.
-        $canStart = '(`sampler_start` = "' . HASHMARK_DATETIME_EMPTY . '" OR `sampler_start` <= UTC_TIMESTAMP())';
-        $hasNeverFinished = '`last_sample_change` = "' . HASHMARK_DATETIME_EMPTY . '"';
+        $canStart = '(`sampler_start` = ? OR `sampler_start` <= UTC_TIMESTAMP())';
+        $hasNeverFinished = '`last_sample_change` = ?';
 
         $sql = 'SELECT `id`, `sampler_name`, `sampler_status` '
              . "FROM {$this->_dbName}`scalars` "
@@ -190,20 +183,12 @@ class Hashmark_Cron extends Hashmark_Module_DbDependent
              . "AND {$canStart} "
              . 'AND `sampler_name` != ""';
 
-        $res = $this->_dbHelper->query($this->_db, $sql);
+        $rows = $this->_db->fetchAll($sql, array(HASHMARK_DATETIME_EMPTY, HASHMARK_DATETIME_EMPTY));
 
-        if (!$this->_dbHelper->numRows($res)) {
+        if (!$rows) {
             return false;
         }
 
-        $samplers = array();
-
-        while ($scalar = $this->_dbHelper->fetchAssoc($res)) {
-            $samplers[] = $scalar;
-        }
-
-        $this->_dbHelper->freeResult($res);
-
-        return $samplers;
+        return $rows;
     }
 }

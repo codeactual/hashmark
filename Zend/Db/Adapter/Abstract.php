@@ -266,6 +266,20 @@ abstract class Zend_Db_Adapter_Abstract
     }
 
     /**
+     * Set the adapter's connection object or resource.
+     *
+     * Allows Hashmark to use a client application's existing connection.
+     *
+     * @param object|resource|null $connection
+     * @return Zend_Db_Adapter_Abstract Fluent interface
+     */
+    public function setConnection($connection)
+    {
+        $this->_connection = $connection;
+        return $this;
+    }
+
+    /**
      * Returns the underlying database connection object or resource.
      * If not presently connected, this initiates the connection.
      *

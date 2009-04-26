@@ -56,11 +56,13 @@ class Hashmark_Client extends Hashmark_Module_DbDependent
                  . '`last_inline_change` = UTC_TIMESTAMP() '
                  . 'WHERE `name` = ?';
 
-            $this->_dbHelper->query($this->_db, $sql, $value, $scalarName);
+            $stmt = $this->_db->query($sql, array($value, $scalarName));
             
-            if (!$this->_dbHelper->affectedRows($this->_db)) {
+            if (!$stmt->rowCount()) {
                 return false;
             }
+
+            unset($stmt);
             
             $sql = 'INSERT INTO ~samples '
                  . '(`value`, `start`, `end`) '
@@ -69,17 +71,17 @@ class Hashmark_Client extends Hashmark_Module_DbDependent
             $scalarId = $this->getModule('Core')->getScalarIdByName($scalarName);
 
             $partition = $this->getModule('Partition');
-            $partition->query($scalarId, $sql, $value);
+            $stmt = $partition->queryCurrent($scalarId, $sql, array($value));
         } else {
             $sql = "UPDATE {$this->_dbName}`scalars` "
                  . 'SET `value` = ?, '
                  . '`last_inline_change` = UTC_TIMESTAMP() '
                  . 'WHERE `name` = ?';
 
-            $this->_dbHelper->query($this->_db, $sql, $value, $scalarName);
+            $stmt = $this->_db->query($sql, array($value, $scalarName));
         }
 
-        return (1 == $this->_dbHelper->affectedRows($this->_db));
+        return (1 == $stmt->rowCount());
     }
     
     /**
@@ -106,16 +108,13 @@ class Hashmark_Client extends Hashmark_Module_DbDependent
                                 HASHMARK_EXCEPTION_VALIDATION);
         }
 
-        $res = $this->_dbHelper->query($this->_db, $sql, $scalarNameOrId);
+        $rows = $this->_db->fetchAll($sql, array($scalarNameOrId));
 
-        if (!$this->_dbHelper->numRows($res)) {
+        if (!$rows) {
             return false;
         }
         
-        $scalar = $this->_dbHelper->fetchAssoc($res);
-        $this->_dbHelper->freeResult($res);
-        
-        return $scalar['value'];
+        return $rows[0]['value'];
     }
     
     /**
@@ -160,31 +159,34 @@ class Hashmark_Client extends Hashmark_Module_DbDependent
                          . "VALUES ({$amount}, UTC_TIMESTAMP(), UTC_TIMESTAMP())";
     
                     $partition = $this->getModule('Partition');
-                    $partition->query($scalarId, $sql);
+                    $partition->queryCurrent($scalarId, $sql);
                 }
 
                 return true;
             }
         }
 
-        $dbHelperConfig = $this->_dbHelper->getBaseConfig();
+        $dbHelperConfig = Hashmark::getConfig('DbHelper');
 
-        $values = array(':name' => $scalarName, '@amount' => $amount);
-        $sum = 'CONVERT(`value`, DECIMAL' . $dbHelperConfig['decimal_sql_width'] . ') + @amount';
+        $sum = 'CONVERT(`value`, DECIMAL'
+             . $dbHelperConfig['decimal_sql_width'] . ') + '
+             . $this->escape($amount);
        
         if ($newSample) {
             $sql = "UPDATE {$this->_dbName}`scalars` "
                  . "SET `value` = {$sum}, "
                  . '`last_sample_change` = UTC_TIMESTAMP(), '
                  . '`last_inline_change` = UTC_TIMESTAMP() '
-                 . 'WHERE `name` = :name '
+                 . 'WHERE `name` = ? '
                  . 'AND `type` = "decimal"';
 
-            $this->_dbHelper->query($this->_db, $sql, $values);
+            $stmt = $this->_db->query($sql, array($scalarName));
         
-            if (!$this->_dbHelper->affectedRows($this->_db)) {
+            if (!$stmt->rowCount()) {
                 return false;
             }
+
+            unset($stmt);
 
             $currentScalarValue = "SELECT `value` FROM {$this->_dbName}`scalars` WHERE `name` = ? LIMIT 1";
 
@@ -195,18 +197,18 @@ class Hashmark_Client extends Hashmark_Module_DbDependent
             $scalarId = $this->getModule('Core')->getScalarIdByName($scalarName);
 
             $partition = $this->getModule('Partition');
-            $partition->query($scalarId, $sql, $scalarName);
+            $stmt = $partition->queryCurrent($scalarId, $sql, array($scalarName));
         } else {
             $sql = "UPDATE {$this->_dbName}`scalars` "
                  . "SET `value` = {$sum}, "
                  . '`last_inline_change` = UTC_TIMESTAMP() '
-                 . 'WHERE `name` = :name '
+                 . 'WHERE `name` = ? '
                  . 'AND `type` = "decimal"';
 
-            $this->_dbHelper->query($this->_db, $sql, $values);
+            $stmt = $this->_db->query($sql, array($scalarName));
         }
 
-        return (1 == $this->_dbHelper->affectedRows($this->_db));
+        return (1 == $stmt->rowCount());
     }
     
     /**

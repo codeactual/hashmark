@@ -16,133 +16,157 @@
 */
 
 /**
- * Base class for cache extension wrappers.
+ * Zend_Cache wrapper.
  *
- *      -   Implementations live in Cache/. Each defines methods wrapping
- *          functions for setting, group removal, etc.
- *      -   Group prefixing based on Alex Rickabaugh's:
- *          http://www.aminus.org/blogs/index.php/2007/12/30/memcached_set_invalidation?blog=2#c38801
+ *  -   Group keys based on Alex Rickabaugh's:
+ *      http://www.aminus.org/blogs/index.php/2007/12/30/memcached_set_invalidation?blog=2#c38801
  *
- * @abstract
  * @package     Hashmark
  * @subpackage  Base
  */
-abstract class Hashmark_Cache extends Hashmark_Module
+class Hashmark_Cache extends Hashmark_Module
 {
     /**
-     * Retrieve a cached value by name.
-     *
-     * @param string    $key    Key name.
-     * @return mixed
+     * @var Zend_Cache_Frontend_*   Current instance. See initModule().
      */
-    abstract protected function _get($key);
+    protected $_cache;
 
     /**
-     * Store a named value.
-     *
-     * @param string    $key    Key name.
-     * @param mixed     $value
-     * @return boolean  True on success.
+     * @param mixed     $db         Connection object/resource.
+     * @return boolean  False if module could not be initialized and is unusable.
+     *                  Hashmark::getModule() will also then return false.
      */
-    abstract protected function _set($key, $value);
-    
-    /**
-     * Invalidate a key.
-     *
-     * @param string    $key    Key name.
-     * @return boolean  True on success.
-     */
-    abstract protected function _remove($name);
-
-    /**
-     * Namespacing wrapper for _get().
-     *
-     * @param string    $key    Key name.
-     * @param string    $group  Group name.
-     * @return mixed
-     */
-    public function get($key, $group = '')
+    public function initModule()
     {
-        return $this->_get($this->finalizeKey($key, $group));
+        if (!empty($this->_baseConfig['backEndName'])) {
+            $this->_cache = Zend_Cache::factory('Core',
+                                                $this->_baseConfig['backEndName'],
+                                                $this->_baseConfig['frontEndOpts'],
+                                                $this->_baseConfig['backEndOpts']);
+        }
+
+        // Do not require caching.
+        return true;
+    }
+
+    /**
+     * Expose cache adapter status.
+     *
+     * @return boolean
+     */
+    public function isConfigured()
+    {
+        return (boolean) $this->_cache;
+    }
+
+    /**
+     * Namespace/group-key wrapper for load().
+     *
+     * @param string    $key
+     * @param string    $group
+     * @param boolean   $doNotTestCacheValidity     See Zend_Cache_Core::save().
+     * @param boolean   $doNotUnserialize           See Zend_Cache_Core::save().
+     * @return mixed
+     */
+    public function load($key, $group = '', $doNotTestCacheValidity = false, $doNotUnserialize = false)
+    {
+        if (!$this->_cache) {
+            return false;
+        }
+
+        return $this->_cache->load($this->_finalizeKey($key, $group),
+                                   $doNotTestCacheValidity, $doNotUnserialize);
     }
     
     /**
-     * Namespacing wrapper for _set().
+     * Namespace/group-key wrapper for save().
      *
-     * @param string    $key    Key name.
      * @param mixed     $value
-     * @param string    $group  Group name.
+     * @param string    $key
+     * @param string    $group
+     * @param int       $specificLifetime   See Zend_Cache_Core::save().
+     * @param int       $priority           See Zend_Cache_Core::save().
+     * @throws Zend_Cache_Exception
      * @return boolean  True on success.
      */
-    public function set($key, $value, $group = '')
+    public function save($value, $key, $group = '', $specificLifetime = false, $priority = 8)
     {
-        return $this->_set($this->finalizeKey($key, $group), $value);
+        if (!$this->_cache) {
+            return true;
+        }
+
+        return $this->_cache->save($value, $this->_finalizeKey($key, $group), array(),
+                                   $specificLifetime, $priority);
     }
     
     /**
-     * Namespacing wrapper for _remove().
+     * Namespace/group-key wrapper for remove().
      *
-     * @param string    $key    Key name.
-     * @param string    $group  Group name.
+     * @param string    $key
+     * @param string    $group
      * @return boolean  True on success.
      */
     public function remove($key, $group = '')
     {
-        return $this->_remove($this->finalizeKey($key, $group));
-    }
-
-    /**
-     * Add namespace and group prefix (if needed) to get/set/remove keys.
-     *
-     * @param string    $key    Key name.
-     * @param string    $group  Group name.
-     * @return string   Finalized key.
-     */
-    public function finalizeKey($key, $group = '')
-    {
-        $fullPrefix = 'Hashmark';
-
-        if ($group) {
-            $groupPrefix = $this->getGroupPrefix($group);
-            if (!$groupPrefix) {
-                $groupPrefix = $this->getGroupPrefix($group, true);
-            }
-            $fullPrefix .= $groupPrefix;
+        if (!$this->_cache) {
+            return true;
         }
 
-        return $fullPrefix . $key;
-    }
-    
-    /**
-     * Return a value key prefix based on a group name.
-     *
-     * @param string    $group  Group name.
-     * @param boolean   $new    If true, a new prefix is created.
-     * @return string   Active group prefix; false on error.
-     */
-    public function getGroupPrefix($group, $new = false)
-    {
-        $key = '~Hashmark' . $group;
-
-        if ($new) {
-            $prefix = Hashmark_Util::randomSha1();
-            if ($this->set($key, $prefix)) {
-                return $prefix;
-            } else {
-                return false;
-            }
-        }
-
-        return $this->get($key);
+        return $this->_cache->remove($this->_finalizeKey($key, $group));
     }
 
     /**
-     * Invalidates all value keys composed with $group prefix.
+     * Invalidates all value keys composed with $group key.
      *
      * @return boolean  True on success.
      */
     public function removeGroup($group)
     {
-        return $this->getGroupPrefix($group, true) ? true : false;
+        return $this->_getGroupKey($group, true) ? true : false;
+    }
+
+    /**
+     * Add namespace and group key (if needed) to get/set/remove keys.
+     *
+     * @param string    $key    Key name.
+     * @param string    $group  Group name.
+     * @return string   Finalized key.
+     */
+    protected function _finalizeKey($key, $group = '')
+    {
+        $fullKey = 'Hashmark';
+
+        if ($group) {
+            $groupKey = $this->_getGroupKey($group);
+            if (!$groupKey) {
+                $groupKey = $this->_getGroupKey($group, true);
+            }
+            $fullKey .= $groupKey;
+        }
+
+        return $fullKey . $key;
+    }
+    
+    /**
+     * Return a value key key based on a group name.
+     *
+     * @param string    $group  Group name.
+     * @param boolean   $new    If true, a new key is created.
+     * @return string   Active group key; false on error.
+     */
+    protected function _getGroupKey($group, $new = false)
+    {
+        $groupKeyKey = 'Hashmark' . $group;
+
+        if ($new) {
+            $groupKeyValue = Hashmark_Util::randomSha1();
+            if ($this->save($groupKeyValue, $groupKeyKey)) {
+                return $groupKeyValue;
+            } else {
+                return false;
+            }
+        }
+
+        return $this->load($groupKeyKey);
     }
 }

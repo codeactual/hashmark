@@ -43,6 +43,7 @@ class Hashmark_AllTests
         $required[] = $dirname . '/Hashmark/AllTests.php';
         $required[] = $dirname . '/Module/AllTests.php';
         $required[] = $dirname . '/DbHelper/AllTests.php';
+        $required[] = $dirname . '/Cache/AllTests.php';
         $dependents = glob($dirname . '/*/AllTests.php');
         $sortedTestFiles = array_unique(array_merge($required, $dependents));
 

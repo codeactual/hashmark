@@ -451,6 +451,7 @@ class Hashmark_TestCase_Analyst_BasicDecimal extends Hashmark_TestCase
     
     /**
      * @test
+     * @group Analyst
      * @group BasicDecimal
      * @group throwsOnMissingSql
      * @group query
@@ -462,7 +463,7 @@ class Hashmark_TestCase_Analyst_BasicDecimal extends Hashmark_TestCase
 
         foreach (array('', array(), 1) as $sql) {
             try {
-                $this->_analyst->query($sql, $values);
+                $this->_analyst->multiQuery($sql, $values);
             } catch (Exception $e) {
                 $thrown = true;
             }

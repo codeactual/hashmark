@@ -33,8 +33,7 @@ if (!isset($maxCount)) {
     $maxCount = Hashmark::getConfig('Cron', '', 'merge_gc_max_count');
 }
    
-$dbHelper = Hashmark::getModule('DbHelper');
-$db = $dbHelper->openDb('cron');
+$db = Hashmark::getModule('DbHelper')->openDb('cron');
 $partition = Hashmark::getModule('Partition', '', $db);
 
 $garbageTables = array();
@@ -66,5 +65,5 @@ $garbageTables = array_merge($garbageTables, $excessTables);
 
 if ($garbageTables) {
     $partition->dropTable($garbageTables);
-    $dbHelper->rawQuery($db, 'FLUSH TABLES');
+    $db->query('FLUSH TABLES');
 }

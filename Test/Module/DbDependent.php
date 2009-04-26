@@ -23,38 +23,38 @@ class Hashmark_TestCase_Module_DbDependent extends Hashmark_TestCase_Module
 {
     /**
      * @test
-     * @group Module
+     * @group DbDependent
      * @group getsDbProps
+     * @group setDbName
      * @group getModule
      * @group getDb
-     * @group getDbHelper
      */
     public function getsDbProps()
     {
-        $moduleNames = array('BasicDecimal', 'Client', 'Core', 'Cron', 'Partition');
+        $moduleNames = array('Client' => '', 'Core' => '', 'Cron' => '', 'Partition' => '');
         
-        foreach ($moduleNames as $module) {
-            // Find all type scripts under BasicDecimal/, Client/, etc.
-            foreach (glob(dirname(__FILE__) . '/../../' . $module . '/*.php') as $typeFile) {
-                $type = basename($typeFile, '.php');
-    
-                $dbHelper = Hashmark::getModule('DbHelper', $type);
-                $db = $dbHelper->openDb('unittest');
-    
-                $inst = Hashmark::getModule($module, $type, $db);
-    
-                $this->assertEquals('Hashmark_' . $module . '_' . $type, get_class($inst));
-                $this->assertEquals($db, $inst->getDb());
-                $this->assertEquals($dbHelper, $inst->getDbHelper());
+        $dbHelper = Hashmark::getModule('DbHelper');
+        $dbHelperConfig = $dbHelper->getBaseConfig();
+        
+        foreach ($moduleNames as $module => $type) {
+            $db = $dbHelper->openDb('unittest');
 
-                $dbHelper->closeDb($db);
-            }
+            $inst = Hashmark::getModule($module, $type, $db);
+            $inst->setDbName('customDbName');
+
+            $this->assertEquals('Hashmark_' . $module . ($type ? "_{$type}" : ''),
+                                get_class($inst));
+            $this->assertEquals($db, $inst->getDb());
+            $this->assertEquals('customDbName',
+                                $inst->getDbName());
+
+            $db->closeConnection();
         }
     }
     
     /**
      * @test
-     * @group Module
+     * @group DbDependent
      * @group getsModuleUsingSameDbProperties
      * @group getModule
      * @group getType
@@ -69,13 +69,12 @@ class Hashmark_TestCase_Module_DbDependent extends Hashmark_TestCase_Module
         $relatedInst = $inst->getModule('Core');
 
         $this->assertEquals($inst->getDb(), $relatedInst->getDb());
-        $this->assertEquals($inst->getDbHelper(), $relatedInst->getDbHelper());
         $this->assertEquals($inst->getDbName(), $relatedInst->getDbName());
     }
     
     /**
      * @test
-     * @group Module
+     * @group DbDependent
      * @group setsDbName
      * @group getModule
      * @group setDbName
@@ -86,5 +85,77 @@ class Hashmark_TestCase_Module_DbDependent extends Hashmark_TestCase_Module
         $inst = Hashmark::getModule('Client', '', $this->_db);
         $inst->setDbName($expectedDbName);
         $this->assertEquals($expectedDbName, $inst->getDbName());
+    }
+
+    /**
+     * @test
+     * @group DbDependent
+     * @group throwsOnInvalidMacros
+     * @group expandSql
+     */
+    public function throwsOnInvalidMacros()
+    {
+        $mod = Hashmark::getModule('Core', '', $this->_db);
+        $sql = 'SELECT * FROM `@table` WHERE `id` = :id OR `name` = :name';
+
+        $values = array('@table' => 'sca"lars', '%id' => 2, ':name' => 'two\'s');
+        $thrown = false;
+        try {
+            $mod->expandSql($sql, $values);
+        } catch (Exception $e) {
+            $thrown = true;
+        }
+        $this->assertTrue($thrown);
+        
+        $values = array('@table' => 'sca"lars', ':id' => 2, '!name' => 'two\'s');
+        $thrown = false;
+        try {
+            $mod->expandSql($sql, $values);
+        } catch (Exception $e) {
+            $thrown = true;
+        }
+        $this->assertTrue($thrown);
+        
+        $values = array('@table' => 'sca"lars', ':id' => 2, ':name' => 'two\'s');
+        $thrown = false;
+        try {
+            $mod->expandSql($sql, $values);
+        } catch (Exception $e) {
+            $thrown = true;
+        }
+        $this->assertFalse($thrown);
+    }
+    
+    /**
+     * @test
+     * @group DbDependent
+     * @group escapesValuesWithoutQuoting
+     * @group escape
+     */
+    public function escapesValuesWithoutQuoting()
+    {
+        $mod = Hashmark::getModule('Core', '', $this->_db);
+        $this->assertEquals('scalarName', $mod->escape('scalarName'));
+        $this->assertEquals('scalar\\\'Name', $mod->escape('scalar\'Name'));
+        $this->assertEquals('scalar\"Name', $mod->escape('scalar"Name'));
+    }
+    
+    /**
+     * @test
+     * @group DbDependent
+     * @group expandsNamedMacros
+     * @group expandSql
+     */
+    public function expandsNamedMacros()
+    {
+        $mod = Hashmark::getModule('Core', '', $this->_db);
+
+        // Verify that ':' prefixed macros get escaped/quoted;
+        // that '@' prefixed get only escaped.
+        $sql = 'SELECT * FROM `@table` WHERE `id` = :id OR `name` = :name';
+        $values = array('@table' => 'sca"lars', ':id' => 2, ':name' => 'two\'s');
+        $expectedSql = 'SELECT * FROM `sca\"lars` WHERE `id` = 2 OR `name` = \'two\\\'s\'';
+        $actualSql = $mod->expandSql($sql, $values);
+        $this->assertEquals($expectedSql, $actualSql);
     }
 }

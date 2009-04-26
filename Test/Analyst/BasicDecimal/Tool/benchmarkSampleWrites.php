@@ -20,7 +20,7 @@ $dirname = dirname(__FILE__);
 /**
  * For Hashmark::getModule().
  */
-require_once $dirname . '/../../../Hashmark.php';
+require_once $dirname . '/../../../bootstrap.php';
 
 /**
  * For hashmark_random_samples().
@@ -33,8 +33,8 @@ define('HASHMARK_CREATESAMPLES_COUNT', 10000);
 define('HASHMARK_CREATESAMPLES_STARTDATE', '2009-01-01 00:00:00 UTC');
 define('HASHMARK_CREATESAMPLES_ENDDATE', '2009-01-01 23:59:59 UTC');
 
-$db = Hashmark::getModule('DbHelper', 'Mysqli')->openDb('unittest');
-$core = Hashmark::getModule('Core', 'Mysqli', $db);
+$db = Hashmark::getModule('DbHelper')->openDb('unittest');
+$core = Hashmark::getModule('Core', '', $db);
 $cron = $core->getModule('Cron');
 
 $rndSampleTime = 0;

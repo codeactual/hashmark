@@ -36,22 +36,20 @@ class Hashmark_Partition extends Hashmark_Module_DbDependent
     {
         $cacheKey = __FUNCTION__ . $name;
 
-        if (!($output = $this->_cache->get($cacheKey, 'schema'))) {
-            $values = array('@name' => $name);
+        if (!($output = $this->_cache->load($cacheKey, 'schema'))) {
+            $name = $this->_db->quoteIdentifier($name);
 
-            $sql = "SHOW CREATE TABLE {$this->_dbName}`@name`";
+            $sql = "SHOW CREATE TABLE {$this->_dbName}{$name}";
 
-            $res = $this->_dbHelper->query($this->_db, $sql, $values);
+            $rows = $this->_db->fetchAll($sql);
 
-            if (!$this->_dbHelper->numRows($res)) {
+            if (!$rows) {
                 return false;
             }
 
-            $row = $this->_dbHelper->fetchRow($res);
+            $output = preg_replace('/( AUTO_INCREMENT=\d+)|( COMMENT.\'.*\')/', '', $rows[0][1]);
 
-            $output = preg_replace('/( AUTO_INCREMENT=\d+)|( COMMENT.\'.*\')/', '', $row[1]);
-
-            $this->_cache->set($cacheKey, $output, 'schema');
+            $this->_cache->save($output, $cacheKey, 'schema');
         }
 
         return $output;
@@ -68,7 +66,7 @@ class Hashmark_Partition extends Hashmark_Module_DbDependent
     {
         $cacheKey = __FUNCTION__ . $name;
 
-        if (!($exists = $this->_cache->get($cacheKey, 'tablelist'))) {
+        if (!($exists = $this->_cache->load($cacheKey, 'tablelist'))) {
             $dbName = ($this->_dbName ? '"' . $this->getDbName() . '"' : 'DATABASE()');
 
             $sql = 'SELECT `TABLE_NAME` '
@@ -76,11 +74,9 @@ class Hashmark_Partition extends Hashmark_Module_DbDependent
                  . 'WHERE `TABLE_NAME` = ? '
                  . "AND `TABLE_SCHEMA` = {$dbName}";
 
-            $res = $this->_dbHelper->query($this->_db, $sql, $name);
+            $exists = (1 == count($this->_db->fetchAll($sql, array($name))));
 
-            $exists = (1 == $this->_dbHelper->numRows($res));
-
-            $this->_cache->set($cacheKey, $exists, 'tablelist');
+            $this->_cache->save($exists, $cacheKey, 'tablelist');
         }
 
         return $exists;
@@ -95,27 +91,30 @@ class Hashmark_Partition extends Hashmark_Module_DbDependent
      */
     public function getTablesLike($expr)
     {
-        $cacheKey = __FUNCTION__ . $expr;
+        $cacheKey = __FUNCTION__
+                  . str_replace('%', '___', $expr);
 
-        if (!($tables = $this->_cache->get($cacheKey, 'tablelist'))) {
-            $dbName = ($this->_dbName ? 'FROM `' . $this->getDbName() . '`' : '');
-            $sql = "SHOW TABLES {$dbName} LIKE ?";
+        if (!($tables = $this->_cache->load($cacheKey, 'tablelist'))) {
+            $dbName = ($this->_dbName ? '"' . $this->getDbName() . '"' : 'DATABASE()');
+            $expr = $this->_db->quote($expr);
 
-            $res = $this->_dbHelper->query($this->_db, $sql, $expr);
+            $sql = 'SELECT `TABLE_NAME` '
+                 . 'FROM `INFORMATION_SCHEMA`.`TABLES` '
+                 . "WHERE `TABLE_NAME` LIKE {$expr} "
+                 . "AND `TABLE_SCHEMA` = {$dbName}";
 
-            if (!$this->_dbHelper->numRows($res)) {
+            $rows = $this->_db->fetchAll($sql);
+
+            if (!$rows) {
                 return false;
             }
 
             $tables = array();
-
-            while ($row = $this->_dbHelper->fetchRow($res)) {
-                $tables[] = $row[0];
+            foreach ($rows as $row) {
+                $tables[] = $row['TABLE_NAME'];
             }
 
-            $this->_dbHelper->freeResult($res);
-            
-            $this->_cache->set($cacheKey, $tables, 'tablelist');
+            $this->_cache->save($tables, $cacheKey, 'tablelist');
         }
 
         return $tables;
@@ -135,15 +134,13 @@ class Hashmark_Partition extends Hashmark_Module_DbDependent
         }
 
         foreach ($name as $key => $value) {
-            $name[$key] = $this->_dbName . '`' . $this->_dbHelper->escape($this->_db, $value, false) . '`';
+            $name[$key] = $this->_dbName . $this->_db->quoteIdentifier($value);
         }
 
-        $values = array('@list' => implode(',', $name));
+        $sql = 'DROP TABLE IF EXISTS ' . implode(',', $name);
 
-        $sql = 'DROP TABLE IF EXISTS @list';
-
-        $this->_dbHelper->query($this->_db, $sql, $values);
-
+        $this->_db->query($sql);
+        
         $this->_cache->removeGroup('tablelist');
     }
     
@@ -162,16 +159,13 @@ class Hashmark_Partition extends Hashmark_Module_DbDependent
              . 'WHERE `TABLE_NAME` = ? '
              . "AND `TABLE_SCHEMA` = {$dbName}";
 
-        $res = $this->_dbHelper->query($this->_db, $sql, $name);
+        $rows = $this->_db->fetchAll($sql, array($name));
 
-        if (!$this->_dbHelper->numRows($res)) {
+        if (!$rows) {
             return false;
         }
 
-        $row = $this->_dbHelper->fetchAssoc($res);
-        $this->_dbHelper->freeResult($res);
-
-        return $row;
+        return $rows[0];
     }
     
     /**
@@ -189,21 +183,13 @@ class Hashmark_Partition extends Hashmark_Module_DbDependent
              . "WHERE SUBSTR(`TABLE_NAME`, 1, 12) = '{$this->_baseConfig['mergetable_prefix']}' "
              . "AND `TABLE_SCHEMA` = {$dbName}";
 
-        $res = $this->_dbHelper->query($this->_db, $sql);
+        $rows = $this->_db->fetchAll($sql);
 
-        if (!$this->_dbHelper->numRows($res)) {
+        if (!$rows) {
             return false;
         }
 
-        $tables = array();
-
-        while ($scalar = $this->_dbHelper->fetchAssoc($res)) {
-            $tables[] = $scalar;
-        }
-
-        $this->_dbHelper->freeResult($res);
-
-        return $tables;
+        return $rows;
     }
 
     /**
@@ -465,7 +451,7 @@ class Hashmark_Partition extends Hashmark_Module_DbDependent
      *
      * @param int       $scalarId
      * @param mixed     $time       UNIX timestamp or DATETIME string;
-     *                              if unspecified, current timestamp used.
+     *                              if null/default, current timestamp used.
      * @param string    $interval   Interval code.
      * @return string   Full table name, not just unique part.
      * @see Config/Partition.php for default value and options.
@@ -515,9 +501,10 @@ class Hashmark_Partition extends Hashmark_Module_DbDependent
         // the scalar's sample count for every new sample row.
         $sampleCount = $this->getModule('Core')->getScalarSampleCount($scalarId);
 
-        $sql = "CREATE TABLE IF NOT EXISTS {$this->_dbName}`{$name}` {$definition} AUTO_INCREMENT=" . max(1, $sampleCount);
+        $sql = "CREATE TABLE IF NOT EXISTS {$this->_dbName}`{$name}` "
+             . "{$definition} AUTO_INCREMENT=" . max(1, $sampleCount);
 
-        $this->_dbHelper->query($this->_db, $sql);
+        $this->_db->query($sql);
         
         $this->_cache->removeGroup('tablelist');
     }
@@ -553,7 +540,7 @@ class Hashmark_Partition extends Hashmark_Module_DbDependent
         $sql = "CREATE TABLE IF NOT EXISTS {$this->_dbName}`{$mergeTableName}` {$definition} "
              . "ENGINE=MERGE UNION=({$union}) INSERT_METHOD=NO COMMENT='{$comment}'";
 
-        $this->_dbHelper->query($this->_db, $sql);
+        $this->_db->query($sql);
         
         $this->_cache->removeGroup('tablelist');
         
@@ -566,52 +553,31 @@ class Hashmark_Partition extends Hashmark_Module_DbDependent
      *      -   Only queries most recent partition.
      *
      * @param int       $scalarId
-     * @param string    $template
-     * @param mixed     ...         String or integer argument for every $template macro.
+     * @param string    $sql
+     * @param Array     $bind       Values bound to statement placeholders.
      * @return mixed    Result object/resource.
      * @throws Exception On query error.
      */
-    public function query($scalarId, $template)
+    public function queryCurrent($scalarId, $sql, $bind = array())
     {
-        $tableName = $this->getIntervalTableName($scalarId);
-        $isWrite = preg_match('/^\s*insert|replace/i', $template);
-        $tableExists = $this->tableExists($tableName);
-
-        if (!$tableExists && $isWrite) {
-            $type = $this->getModule('Core')->getScalarType($scalarId);
-            $this->createTable($scalarId, $tableName, $type);
-            $tableExists = true;
-        }
-
-        if (!$tableExists) {
-            return false;
-        }
-        
-        // Reorganize $args for final call into:
-        // query($this->_db, SQL w/expanded partition macro, ... list of template variables)
-        $args = func_get_args();
-        $args = array_slice($args, 2);
-        array_unshift($args, $this->_db, str_replace('~samples', $this->_dbName . '`' . $tableName . '`', $template));
-
-        return call_user_func_array(array($this->_dbHelper, 'query'), $args);
+        return $this->queryAtDate($scalarId, $sql, null, $bind);
     }
     
     /**
      * Partition-aware wrapper for Hashmark_DbHelper_*::query().
      *
-     *      -   Only queries one partition identified by $date.
-     *
      * @param int       $scalarId
-     * @param string    $template
-     * @param string    $date UNIX timestamp or DATETIME string.
-     * @param mixed     ...         String or integer argument for every $template macro.
+     * @param string    $sql
+     * @param string    $date       UNIX timestamp or DATETIME string;
+     *                              if null, current timestamp used.
+     * @param Array     $bind       Values bound to statement placeholders.
      * @return mixed    Result object/resource.
      * @throws Exception On query error.
      */
-    public function queryAtDate($scalarId, $template, $date)
+    public function queryAtDate($scalarId, $sql, $date, $bind = array())
     {
         $tableName = $this->getIntervalTableName($scalarId, $date);
-        $isWrite = preg_match('/^\s*insert|replace/i', $template);
+        $isWrite = preg_match('/^\s*insert|replace/i', $sql);
         $tableExists = $this->tableExists($tableName);
 
         if (!$tableExists && $isWrite) {
@@ -624,13 +590,9 @@ class Hashmark_Partition extends Hashmark_Module_DbDependent
             return false;
         }
 
-        // Reorganize $args for final call into:
-        // query($this->_db, SQL w/expanded partition macro, ... list of template variables)
-        $args = func_get_args();
-        $args = array_slice($args, 3);
-        array_unshift($args, $this->_db, str_replace('~samples', $this->_dbName . '`' . $tableName . '`', $template));
+        $sql = str_replace('~samples', $this->_dbName . '`' . $tableName . '`', $sql);
         
-        return call_user_func_array(array($this->_dbHelper, 'query'), $args);
+        return $this->_db->query($sql, $bind);
     }
     
     /**
@@ -639,29 +601,23 @@ class Hashmark_Partition extends Hashmark_Module_DbDependent
      *      -   Queries a merge table satisfying the given range.
      *
      * @param int       $scalarId
-     * @param string    $start          DATETIME string.
-     * @param string    $end            DATETIME string.
-     * @param string    $template
-     * @param mixed     ...         String or integer argument for every $template macro.
-     * @return mixed    Query result object/resource; false if no partition tables
-     *                  exist in the date rannge defined in $values.
+     * @param string    $start      DATETIME string.
+     * @param string    $end        DATETIME string.
+     * @param string    $sql
+     * @param Array     $bind       Values bound to statement placeholders.
+     * @return Zend_Db_Statement_*      New instance.
      * @throws Exception On query error.
      */
-    public function queryInRange($scalarId, $start, $end, $template)
+    public function queryInRange($scalarId, $start, $end, $sql, $bind = array())
     {
         $tableName = $this->getAnyTableWithRange($scalarId, $start, $end);
         if (!$tableName) {
-            $args = func_get_args();
             return false;
         }
+
+        $sql = str_replace('~samples', $this->_dbName . '`' . $tableName . '`', $sql);
         
-        // Reorganize $args for final call into:
-        // query($this->_db, SQL w/expanded partition macro, ... list of template variables)
-        $args = func_get_args();
-        $args = array_slice($args, 4);
-        array_unshift($args, $this->_db, str_replace('~samples', $this->_dbName . '`' . $tableName . '`', $template));
-        
-        return call_user_func_array(array($this->_dbHelper, 'query'), $args);
+        return $this->_db->query($sql, $bind);
     }
 
     /**
@@ -675,10 +631,10 @@ class Hashmark_Partition extends Hashmark_Module_DbDependent
         $name = 'samples_tmpcpy_' . Hashmark_Util::randomSha1();
 
         $sql = "CREATE TEMPORARY TABLE IF NOT EXISTS {$this->_dbName}`{$name}` LIKE {$this->_dbName}`{$src}`";
-        $this->_dbHelper->query($this->_db, $sql);
+        $this->_db->query($sql);
 
         $sql = "INSERT INTO {$this->_dbName}`{$name}` SELECT * FROM {$this->_dbName}`{$src}`";
-        $this->_dbHelper->query($this->_db, $sql);
+        $this->_db->query($sql);
 
         return $name;
     }
@@ -689,25 +645,24 @@ class Hashmark_Partition extends Hashmark_Module_DbDependent
      * @param string    $src        Name of table providing a definition.
      * @param string    $columns    Columns populated by $sql, ex.: `x`, `y`
      * @param string    $selectSql  Pre-escaped statement.
-     * @param Array     $values     DbHelper::query() compatible named macros.
+     * @param Array     $values     Hashmark_Module_DbDependent::expandSql() compatible macros.
      *
      *                              If $selectSql uses the ~samples macro, these
      *                              values are required: :scalarId, :start, :end
-     *      
      * @return string   Destination temporary table name.
      */
-    public function createTempFromQuery($src, $columns, $selectSql, $values)
+    public function createTempFromQuery($src, $columns, $selectSql, $values = array(), $scalarId = '', $start = '', $end = '')
     {
         $name = 'samples_tmp_' . Hashmark_Util::randomSha1();
 
         $createSql = "CREATE TEMPORARY TABLE IF NOT EXISTS {$this->_dbName}`{$name}` LIKE `{$src}`";
-        $this->_dbHelper->query($this->_db, $createSql);
+        $this->_db->query($createSql);
 
         $insertSql = "INSERT INTO {$this->_dbName}`{$name}` ({$columns}) {$selectSql}";
         if (false === strpos($insertSql, '~samples')) {
-            $this->_dbHelper->query($this->_db, $insertSql, $values);
+            $this->_db->query($insertSql, $values);
         } else {
-            $this->queryInRange($values[':scalarId'], $values[':start'], $values[':end'], $insertSql, $values);
+            $this->queryInRange($scalarId, $start, $end, $insertSql, $values);
         }
 
         return $name;

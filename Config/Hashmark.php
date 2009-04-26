@@ -23,14 +23,14 @@
  */
 $config = array();
 
-$config['Cache'] = array('default_type' => 'Static');
+$config['Cache'] = array('backEndName' => '',
+                         'frontEndOpts' => array(),
+                         'backEndOpts' => array());
 
 $config['Cron'] = array('merge_gc_max_count' => 30,
                         'merge_gc_max_days' => 10);
 
 $config['DbHelper'] = array();
-
-$config['DbHelper']['default_type'] = 'Mysqli';
 
 $config['DbHelper']['decimal_total_width'] = 20;    // Match DECIMAL(D,M) data types in Sql/Schema/hashmark.sql
 
@@ -44,19 +44,20 @@ $config['DbHelper']['div_precision_increment'] = 4;
 
 $config['DbHelper']['profile'] = array();
 
-$config['DbHelper']['profile']['cron'] = array('host' => '',
-                                               'sock' => '',
-                                               'port' => '',
-                                               'name' => 'hashmark',
-                                               'user' => '',
-                                               'pass' => '');
+$config['DbHelper']['profile']['cron'] = array('adapter' => 'Mysqli',
+                                               'params' => array('host' => '',
+                                                                 'port' => 3360,
+                                                                 'dbname' => 'hashmark',
+                                                                 'username' => '',
+                                                                 'password' => ''));
 
-$config['DbHelper']['profile']['unittest'] = array('host' => '',
-                                                   'sock' => '',
-                                                   'port' => '',
-                                                   'name' => 'hashmark_test',
-                                                   'user' => '',
-                                                   'pass' => '');
+$config['DbHelper']['profile']['unittest'] = array('adapter' => 'Mysqli',
+                                                   'params' => array('host' => '',
+                                                                     'port' => 3360,
+                                                                     'dbname' => 'hashmark_test',
+                                                                     'username' => '',
+                                                                     'password' => ''));
+
 /**
  * interval options:
  *

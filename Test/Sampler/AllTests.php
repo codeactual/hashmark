@@ -46,9 +46,9 @@ class Hashmark_AllTests_Sampler
             $typeName = basename($typeFile, '.php');
 
             if ('AllTests' != $typeName) {
-                // Ex. class file for 'Hashmark_Sampler_Mysql'
+                // Ex. class file for 'Hashmark_Sampler_ScalarValue'
                 require_once $dirname . '/../../Sampler/' . $typeName . '.php';
-                // Ex. class file for 'Hashmark_TestCase_Sampler_Mysql'
+                // Ex. class file for 'Hashmark_TestCase_Sampler_ScalarValue'
                 require_once $dirname . '/' . $typeName . '.php';
 
                 $suite->addTestSuite('Hashmark_TestCase_Sampler_' . $typeName);

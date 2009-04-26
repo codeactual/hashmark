@@ -15,6 +15,8 @@
  * @version     $Id: DbDependent.php 296 2009-02-13 05:03:11Z david $
 */
 
+require_once dirname(__FILE__) . '/../DbHelper.php';
+
 /**
  * Database-dependent module.
  *
@@ -27,7 +29,7 @@
 abstract class Hashmark_Module_DbDependent extends Hashmark_Module
 {
     /**
-     * @var mixed Database connection object/resource.
+     * @var Zend_Db_Adapter_*   Current instance.
      */
     protected $_db;
     
@@ -35,11 +37,6 @@ abstract class Hashmark_Module_DbDependent extends Hashmark_Module
      * @var string  Database selection in quoted form `<name>` w/ trailing period.
      */
     protected $_dbName;
-
-    /**
-     * @var Hashmark_DbHelper_*    Instance created in initModule().
-     */
-    protected $_dbHelper;
     
     /**
      * @var Array   SQL templates indexed by module base name, then template name
@@ -61,11 +58,6 @@ abstract class Hashmark_Module_DbDependent extends Hashmark_Module
         $class = get_class($this);
 
         $this->_db = $db;
-        $this->_dbHelper = Hashmark::getModule('DbHelper');
-
-        if (!$this->_dbHelper) {
-            return false;
-        }
 
         // Load SQL templates.
         if ($this->_type) {
@@ -98,7 +90,7 @@ abstract class Hashmark_Module_DbDependent extends Hashmark_Module
     /**
      * Public access to $_db.
      *
-     * @return mixed
+     * @return Zend_Db_Adapter_*    Current instance.
      */
     public function getDb()
     {
@@ -121,16 +113,6 @@ abstract class Hashmark_Module_DbDependent extends Hashmark_Module
     }
 
     /**
-     * Public access to $_dbHelper.
-     *
-     * @return Hashmark_DbHelper_*
-     */
-    public function getDbHelper()
-    {
-        return $this->_dbHelper;
-    }
-
-    /**
      * Public write access to $_dbName.
      *
      * @param string    $dbName
@@ -144,12 +126,56 @@ abstract class Hashmark_Module_DbDependent extends Hashmark_Module
             $this->_dbName = '';
         }
     }
+    
+    /**
+     * Escape strings without quoting them, ex. SQL function names.
+     *
+     * @param string $value     Raw string.
+     * @return string           Escaped string.
+     */
+    public function escape($value)
+    {
+        // Use quote() for native escaping but trim quotes.
+        return preg_replace('/(^\'|\'$)/', '', $this->_db->quote($value));
+    }
+
+    /**
+     * Expands :name and @name macros. Escapes/quotes mapped values.
+     *
+     * @param string    $sql   Statement with 0 or more macros.
+     * @param Array     $map        Assoc. array that maps macro names to their values.
+     *      Use ':' macro prefix to escape and quote the value (if string).
+     *      Use '@' macro prefix to only escape it.
+     *      Prefix is required.
+     *      Each value is escaped and quoted (if string).
+     * @return string
+     * @throws  Exception if any parameter cannot be converted to a string;
+     *          if query does not produce a valid result object/resource;
+     *          if a macro is missing a valid prefix.
+     */
+    public function expandSql($sql, $map)
+    {
+        // Ex. prevent macro :name from being being expanded before :nameSuffix.
+        uksort($map, array('Hashmark_Util', 'sortByStrlenReverse'));
+
+        foreach ($map as $macro => $value) {
+            if (':' == $macro[0]) {
+                $map[$macro] = $this->_db->quote($value);
+            } else if ('@' == $macro[0]) {
+                $map[$macro] = $this->escape($value);
+            } else {
+                throw new Exception("Macro '{$macro}' does not have a valid prefix character.",
+                                    HASHMARK_EXCEPTION_VALIDATION);
+            }
+        }
+        return str_replace(array_keys($map), array_values($map), $sql);
+    }
 
     /**
      * Return a Hashmark module instance (of the same type as this one)
      *
-     * @param string    $name   Module name, ex. 'Core', 'Cron, 'Client.
-     * @param string    $type   Ex. 'Mysql', implementation in Core/Mysql.php.
+     * @param string    $name   Module name, ex. 'Core', 'Cron, 'Client', 'Sampler'.
+     * @param string    $type   Ex. 'ScalarValue', implementation in Sampler/ScalarValue.php.
      * @return mixed    New instance.
      */
     public function getModule($name, $type = '')

@@ -31,18 +31,13 @@ abstract class Hashmark_TestCase extends PHPUnit_Framework_TestCase
     protected $backupGlobals = false;
 
     /**
-     * @var mixed   Database connection object/resource.
+     * @var Zend_Db_Adapter_*    Current instance.
      * @see setUp()
      */
     protected $_db;
-    
-    /**
-     * @var Hashmark_DbHelper_*    Instance created in setUp().
-     */
-    protected $_dbHelper;
 
     /**
-     * @var string  Test case type, ex. 'Mysql'.
+     * @var string  Test case type, ex. 'DbDependent' (Hashmark_Module_DbDependent).
      * @see setUp()
      */
     protected $_type;
@@ -54,12 +49,11 @@ abstract class Hashmark_TestCase extends PHPUnit_Framework_TestCase
      */
     protected function setUp()
     {
-        // Extract suffix (ex. 'Mysql') from class (ex. 'Hashmark_TestCase_Client_Mysql'). 
+        // Extract suffix (ex. 'DbDependent') from class (ex. 'Hashmark_TestCase_Module_DbDependent'). 
         $className = get_class($this);
 
         $this->_type = substr($className, strrpos($className, '_') + 1);
-        $this->_dbHelper = Hashmark::getModule('DbHelper');
-        $this->_db = $this->_dbHelper->openDb('unittest');
+        $this->_db = Hashmark::getModule('DbHelper')->openDb('unittest');
     }
     
     /**
@@ -67,9 +61,7 @@ abstract class Hashmark_TestCase extends PHPUnit_Framework_TestCase
      */
     protected function tearDown()
     {
-        if ($this->_dbHelper) {
-            $this->_dbHelper->closeDb($this->_db);
-        }
+        $this->_db->closeConnection();
     }
 
     /**

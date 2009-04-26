@@ -34,8 +34,8 @@ $sql = array();
 $sql['values'] = 'SELECT `end` AS `x`, '
                . '`value` AS `y` '
                . 'FROM ~samples '
-               . 'WHERE `end` >= :start '
-               . 'AND `end` <= :end ';
+               . 'WHERE `end` >= ? '
+               . 'AND `end` <= ? ';
 
 /**
  *  -   Self-join allows us to pull the most recent row from inside each
@@ -47,24 +47,24 @@ $sql['valuesAtInterval'] = 'SELECT `s1`.`end` AS `x`, '
                          . '`s1`.`value` AS `y` '
                          . 'FROM ~samples AS `s1` '
                          . 'LEFT JOIN ~samples AS `s2` '
-                         . 'ON DATE_FORMAT(`s1`.`end`, :format) = DATE_FORMAT(`s2`.`end`, :format) '
+                         . 'ON DATE_FORMAT(`s1`.`end`, ?) = DATE_FORMAT(`s2`.`end`, ?) '
                          . 'AND `s1`.`end` < `s2`.`end` '
-                         . 'AND `s2`.`end` >= :start '
-                         . 'AND `s2`.`end` <= :end '
-                         . 'WHERE `s1`.`end` >= :start '
-                         . 'AND `s1`.`end` <= :end '
+                         . 'AND `s2`.`end` >= ? '
+                         . 'AND `s2`.`end` <= ? '
+                         . 'WHERE `s1`.`end` >= ? '
+                         . 'AND `s1`.`end` <= ? '
                          . 'AND `s2`.`end` IS NULL ';
 
 $sql['valuesAgg'] = 'SELECT ROUND(@aggFunc(@distinct`value`), ' . $decimalRightWidth . ') AS `y` '
                   . 'FROM ~samples '
-                  . 'WHERE `end` >= :start '
-                  . 'AND `end` <= :end ';
+                  . 'WHERE `end` >= ? '
+                  . 'AND `end` <= ? ';
 
-$sql['valuesAggAtInterval'] = 'SELECT DATE_FORMAT(`end`, :format) AS `x`, '
+$sql['valuesAggAtInterval'] = 'SELECT DATE_FORMAT(`end`, ?) AS `x`, '
                             . 'ROUND(@aggFunc(@distinct`value`), '. $decimalRightWidth . ') AS `y` '
                             . 'FROM ~samples '
-                            . 'WHERE `end` >= :start '
-                            . 'AND `end` <= :end '
+                            . 'WHERE `end` >= ? '
+                            . 'AND `end` <= ? '
                             . 'GROUP BY `x` ';
         
 $sql['valuesNestedAggAtInterval'] = 'SELECT ROUND(@aggFunc(@distinct`y2`), ' . $decimalRightWidth . ') AS `y2` '
@@ -73,8 +73,8 @@ $sql['valuesNestedAggAtInterval'] = 'SELECT ROUND(@aggFunc(@distinct`y2`), ' . $
 $sql['valuesAggAtRecurrence'] = 'SELECT @recurFunc(`end`) AS `x`, '
                               . 'ROUND(@aggFunc(@distinct`value`), ' . $decimalRightWidth . ') AS `y` '
                               . 'FROM ~samples '
-                              . 'WHERE `end` >= :start '
-                              . 'AND `end` <= :end '
+                              . 'WHERE `end` >= ? '
+                              . 'AND `end` <= ? '
                               . 'GROUP BY @recurFunc(`end`) ';
 
 /**
@@ -88,12 +88,12 @@ $sql['changes'] = 'SELECT `s1`.`end` AS `x`, '
                 . 'FROM ~samples AS `s1` '
                 . 'INNER JOIN ~samples AS `s2` '
                 . 'ON `s1`.`id` - 1 = `s2`.`id` '
-                . 'AND `s2`.`end` >= :start '
-                . 'AND `s2`.`end` <= :end '
-                . 'WHERE `s1`.`end` >= :start '
-                . 'AND `s1`.`end` <= :end ';
+                . 'AND `s2`.`end` >= ? '
+                . 'AND `s2`.`end` <= ? '
+                . 'WHERE `s1`.`end` >= ? '
+                . 'AND `s1`.`end` <= ? ';
 
-$sql['changesAtInterval'] = 'SELECT DATE_FORMAT(`s1`.`x`, :format) AS `x`, '
+$sql['changesAtInterval'] = 'SELECT DATE_FORMAT(`s1`.`x`, ?) AS `x`, '
                           . '`s1`.`y` AS `y`, '
                           . '(`s1`.`y` - `s2`.`y`) AS `y2` '
                           . 'FROM ~valuesAtInterval AS `s1` '
@@ -108,15 +108,15 @@ $sql['changesAgg'] = 'SELECT ROUND(@aggFunc(@distinct(`s1`.`value` - `s2`.`value
                    . 'FROM ~samples AS `s1` '
                    . 'INNER JOIN ~samples AS `s2` '
                    . 'ON `s1`.`id` - 1 = `s2`.`id` '
-                   . 'AND `s2`.`end` >= :start '
-                   . 'AND `s2`.`end` <= :end '
-                   . 'WHERE `s1`.`end` >= :start '
-                   . 'AND `s1`.`end` <= :end ';
+                   . 'AND `s2`.`end` >= ? '
+                   . 'AND `s2`.`end` <= ? '
+                   . 'WHERE `s1`.`end` >= ? '
+                   . 'AND `s1`.`end` <= ? ';
         
-$sql['changesAggAtInterval'] = 'SELECT DATE_FORMAT(`x`, :format) AS `x`, '
+$sql['changesAggAtInterval'] = 'SELECT DATE_FORMAT(`x`, ?) AS `x`, '
                              . 'ROUND(@aggFunc(@distinct`y2`), ' . $decimalRightWidth . ') AS `y` '
                              . 'FROM ~changes '
-                             . 'GROUP BY DATE_FORMAT(`x`, :format) ';
+                             . 'GROUP BY DATE_FORMAT(`x`, ?) ';
         
 $sql['changesNestedAggAtInterval'] = 'SELECT ROUND(@aggFunc(@distinct`y`), ' . $decimalRightWidth . ') AS `y` '
                                    . 'FROM ~changesAggAtInterval ';
@@ -126,17 +126,17 @@ $sql['changesAggAtRecurrence'] = 'SELECT @recurFunc(`s1`.`end`) AS `x`, '
                                . 'FROM ~samples AS `s1` '
                                . 'INNER JOIN ~samples AS `s2` '
                                . 'ON `s1`.`id` - 1 = `s2`.`id` '
-                               . 'AND `s2`.`end` >= :start '
-                               . 'AND `s2`.`end` <= :end '
-                               . 'WHERE `s1`.`end` >= :start '
-                               . 'AND `s1`.`end` <= :end '
+                               . 'AND `s2`.`end` >= ? '
+                               . 'AND `s2`.`end` <= ? '
+                               . 'WHERE `s1`.`end` >= ? '
+                               . 'AND `s1`.`end` <= ? '
                                . 'GROUP BY @recurFunc(`s1`.`end`) ';
 
 $sql['frequency'] = 'SELECT `value` AS `x`, '
                   . 'COUNT(*) AS `y` '
                   . 'FROM ~samples '
-                  . 'WHERE `end` >= :start '
-                  . 'AND `end` <= :end '
+                  . 'WHERE `end` >= ? '
+                  . 'AND `end` <= ? '
                   . 'GROUP BY `x` ';
         
 /**
@@ -151,21 +151,21 @@ $sql['frequency'] = 'SELECT `value` AS `x`, '
                 . 'FROM ~samples AS `s1` '
                 . 'INNER JOIN ~samples AS `s2` '
                 . 'ON `s1`.`id` >= `s2`.`id` '
-                . 'AND `s2`.`end` >= :start '
-                . 'AND `s2`.`end` <= :end '
-                . 'WHERE `s1`.`end` >= :start '
-                . 'AND `s1`.`end` <= :end '
+                . 'AND `s2`.`end` >= ? '
+                . 'AND `s2`.`end` <= ? '
+                . 'WHERE `s1`.`end` >= ? '
+                . 'AND `s1`.`end` <= ? '
                 . 'GROUP BY `s1`.`id` ';
         
 /**
  *  -   Self-join allows us to aggregate inner sample values inserted
  *      on/before the current outer sample.
  */
- $sql['movingAtInterval'] = 'SELECT DATE_FORMAT(`s1`.`x`, :format) AS `x`, '
+ $sql['movingAtInterval'] = 'SELECT DATE_FORMAT(`s1`.`x`, ?) AS `x`, '
                           . '`s1`.`y` AS `y`, '
                           . '`s1`.`y2` AS `y2` '
                           . 'FROM ~moving AS `s1` '
                           . 'LEFT JOIN ~moving AS `s2` '
-                          . 'ON DATE_FORMAT(`s1`.`x`, :format) = DATE_FORMAT(`s2`.`x`, :format) '
+                          . 'ON DATE_FORMAT(`s1`.`x`, ?) = DATE_FORMAT(`s2`.`x`, ?) '
                           . 'AND `s1`.`x` < `s2`.`x` '
                           . 'WHERE `s2`.`x` IS NULL ';

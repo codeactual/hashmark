@@ -42,16 +42,7 @@ class Hashmark_AllTests_Cache
         // Hashmark_TestCase_Cache
         require_once $dirname . '/../Cache.php';
 
-        foreach (glob($dirname . '/../../Cache/*.php') as $typeFile) {
-            $typeName = basename($typeFile, '.php');
-
-            // Ex. class file for 'Hashmark_Cache_Apc'
-            require_once $dirname . '/../../Cache/' . $typeName . '.php';
-            // Ex. class file for 'Hashmark_TestCase_Cache_Apc'
-            require_once $dirname . '/' . $typeName . '.php';
-
-            $suite->addTestSuite('Hashmark_TestCase_Cache_' . $typeName);
-        }
+        $suite->addTestSuite('Hashmark_TestCase_Cache');
 
         return $suite;
     }

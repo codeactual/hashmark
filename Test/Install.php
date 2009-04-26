@@ -54,35 +54,38 @@ $sql = 'SELECT `TABLE_NAME` FROM `INFORMATION_SCHEMA`.`TABLES` '
 $profileList = array('cron', 'unittest');
 
 foreach ($profileList as $profile) {
-    $db = @$dbHelper->openDb($profile);
-    $openError = $dbHelper->openError($db);
-
     $testDetail = "with '{$profile}' profile in Config/DbHelper.php";
+    
+    $db = $dbHelper->openDb($profile);
 
-    if ($openError) {
-        echo "==> WARN: DB connection failed {$testDetail}: {$openError}.\n";
+    try {
+        $db->getConnection();
+    } catch (Exception $e) {
+        $openError = $db->getConnection()->error;
+        echo "====> WARN: DB connection failed {$testDetail}: {$openError}.\n";
         continue;
     }
+    
+    echo "pass: Connected to DB {$testDetail}\n";
 
-    echo "PASS: Connected to DB {$testDetail}\n";
-
-    $res = $dbHelper->query($db, $sql);
+    $rows = $db->fetchAll($sql);
 
     $expectedTableNum = count($expectedTableList);
+    $actualTableNum = count($rows);
 
-    if ($res->num_rows != $expectedTableNum) {
+    if ($actualTableNum != $expectedTableNum) {
         $actualTableList = array();
-        while($row = $res->fetch_row()) {
+        foreach ($rows as $row) {
             $actualTableList[] = $row[0];
         }
 
-        echo "==> FAIL: Found {$res->num_rows}/{$expectedTableNum} Hashmark tables. ",
+        echo "====> FAIL: Found {$actualTableNum}/{$expectedTableNum} Hashmark tables. ",
              'Missing: ' . implode(', ', array_diff($expectedTableList, $actualTableList)) . ".\n";
         
         continue;
     }
 
-    echo "PASS: Found all Hashmark tables {$testDetail}\n";
+    echo "pass: Found all Hashmark tables {$testDetail}\n";
 }
 
 // Remaining tests won't touch query-reliant code.
@@ -93,8 +96,8 @@ $mockDb = 1;
  * Module loading checks.
  *
  */
-$modList = array('Client' => '', 'Core' => '', 'Cache' => 'Static', 'Cron' => '',
-                 'Partition' => '', 'Sampler' => 'YahooWeather');
+$modList = array('BcMath' => '', 'Cache' => '', 'Client' => '', 'Core' => '', 'Cron' => '',
+                 'DbHelper' => '', 'Partition' => '', 'Sampler' => 'YahooWeather', 'Test' => 'FakeModuleType');
 
 foreach ($modList as $baseName => $typeName) {
     // Cache/Sampler modules don't use the DB argument,
@@ -109,9 +112,9 @@ foreach ($modList as $baseName => $typeName) {
 
     $testDetail = "{$className} module.\n";
     if ($inst instanceof $className) {
-        echo "PASS: Loaded {$testDetail}";
+        echo "pass: Loaded {$testDetail}";
     } else {
-        echo "FAIL: Could not load {$testDetail}";
+        echo "====> FAIL: Could not load {$testDetail}";
     }
 }
 
@@ -120,15 +123,6 @@ foreach ($modList as $baseName => $typeName) {
  * Misc. configuration value checks.
  *
  */
-$inst = Hashmark::getModule('Cache');
-$className = 'Hashmark_Cache_' . Hashmark::getConfig('Cache', '', 'default_type');
-$testDetail = "{$className} module chosen in Config/Cache.php.\n";
-if ($inst instanceof $className) {
-    echo "PASS: Loaded {$testDetail}";
-} else {
-    echo "FAIL: Could not load {$testDetail}";
-}
-
 $mockScalarId = 1234;
 $partitionTableName = Hashmark::getModule('Partition', '', $mockDb)->getIntervalTableName($mockScalarId);
 $testDetail = "partition name with '"
@@ -136,7 +130,7 @@ $testDetail = "partition name with '"
             . "' setting in Config/Partition.php.\n";
 
 if ($partitionTableName) {
-    echo "PASS: Built {$partitionTableName} {$testDetail}";
+    echo "pass: Built {$partitionTableName} {$testDetail}";
 } else {
-    echo "FAIL: Could not build {$testDetail}";
+    echo "====> FAIL: Could not build {$testDetail}";
 }

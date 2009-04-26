@@ -95,7 +95,7 @@ class Hashmark_Analyst_BasicDecimal extends Hashmark_Analyst
 
         $this->_partition = $partition;
 
-        $dbHelperConfig = $this->_dbHelper->getBaseConfig();
+        $dbHelperConfig = Hashmark::getConfig('DbHelper');
         $this->_divPrecisionIncr = $dbHelperConfig['div_precision_increment'];
 
         return true;
@@ -200,8 +200,155 @@ class Hashmark_Analyst_BasicDecimal extends Hashmark_Analyst
 
             $sql = "SET div_precision_increment = {$this->_divPrecisionIncr}";
 
-            $this->_dbHelper->query($this->_db, $sql);
+            $this->_db->query($sql);
         }
+    }
+    
+    /**
+     * Execute one or more SQL statements.
+     *
+     *  -   Results from each statement, except the last, are stored in a temp. table.
+     *  -   Subsequent statements can use those intermediate results via temp.
+     *      table macros in format: ~STATEMENT_ID
+     *  -   Supports 1 temp. table self-join per statement.
+     * 
+     * @param int       $scalarId
+     * @param mixed     $stmts      Keys = statement ID, ex. 'valuesAtInterval',
+     *                              Values = assoc. arrays of statement options.
+     *
+     *      Example:
+     *
+     *      array('statement ID #1' => array('sql' => 'SELECT ...',
+     *                                       'macros' => array('@a' => 'SUM',
+     *                                                         '@b' => 'MIN'),
+     *                                       'bind' => array(44, 10, 4),
+     *                                       'tmpcol' => '`x`, `y`'),
+     *            'statement ID #2' => array('sql' => 'SELECT ...',
+     *                                       'macros' => array('@a' => 'COUNT',
+     *                                                         '@b' => 'MAX'),
+     *                                       'bind' => array(10),
+     *                                       'tmpcol' => '`x`, `y`'),
+     *            ...)
+     *
+     *      macros:
+     *
+     *          Expanded w/ Hashmark_Module_DbDependent::expandSql().
+     *          Primarily used for SQL function names.
+     *
+     *      values:
+     *
+     *          Prepared statement '?' bind parameters.
+     *
+     *      tmpcol:
+     *
+     *          Required if that statement's results will be used,
+     *          via statement macros like ~STATEMENT_ID in a later statement.
+     *          It defines which `samples_analyst_temp` columns will be
+     *          inserted by the associated statement, and in what order,
+     *          via direct use in an INSERT INTO ... SELECT.
+     *
+     * @return Array        Found rows as associative arrays.
+     * @throws Exception    If $stmts does not contain any statements;
+     *                      if a statement tries to reopen a temp. table twice.
+     */
+    public function multiQuery($scalarId, $start, $end, $stmts)
+    {
+        /**
+         * Temporary tables created.
+         *
+         * Keys = statement IDs, ex. 'valuesAtInterval', values = table names.
+         */
+        $tempTables = array();
+
+        /**
+         * Temporary table copies created.
+         *
+         * Keys = statement IDs, ex. 'valuesAtInterval', values = table names.
+         */
+        $tempTableCopies = array();
+
+        if (is_array($stmts)) {
+            $stmtIds = array_keys($stmts);
+        } else {
+            throw new Exception('No SQL statements to execute.', HASHMARK_EXCEPTION_VALIDATION);
+        }
+            
+        $stmtCount = count($stmtIds);
+
+        for ($stmtNum = 0; $stmtNum < $stmtCount; $stmtNum++) {
+            $stmtId = $stmtIds[$stmtNum];
+            $currentStmt = $stmts[$stmtId];
+            $bind = (isset($currentStmt['bind']) ? $currentStmt['bind'] : array());
+
+            // Expand '@key'  macros.
+            if (isset($currentStmt['macros'])) {
+                $currentStmt['sql']= $this->expandSql($currentStmt['sql'], $currentStmt['macros']);
+            }
+
+            // Temp. tables available, created from prior queries.
+            foreach ($tempTables as $tmpStmtId => $tmpTable) {
+                // Count references in current statement to this temp. statement.
+                $stmtMacroCount = substr_count($currentStmt['sql'], '~' . $tmpStmtId);
+
+                // Support up to 2 statement references, ex. for self-joins.
+                if ($stmtMacroCount > 2) {
+                    throw new Exception("Statement {$stmtId} cannot use macro {$tmpStmtId} more than twice.",
+                                        HASHMARK_EXCEPTION_VALIDATION);
+                }
+
+                for ($uses = 0; $uses < $stmtMacroCount; $uses++) {
+                    // Avoid "ERROR 1137: Can't reopen table" by creating a temp table copy
+                    // for the second reference.
+                    if (1 == $uses) {
+                        if (!isset($tempTableCopies[$tmpStmtId])) {
+                            $tempTableCopies[$tmpStmtId] = $this->_partition->copyToTemp($tempTables[$tmpStmtId]);
+                        }
+
+                        // Use the copy's name instead.
+                        $tmpTable = $tempTableCopies[$tmpStmtId];
+                    }
+
+                    // Expand the statement ID macro with the temp. table name.
+                    $currentStmt['sql'] = preg_replace('/\~'. $tmpStmtId . '/',
+                                                      $this->_dbName . '`'. $tmpTable . '`',
+                                                      $currentStmt['sql'],
+                                                      1);
+                }
+            }
+                
+            // Last statement in sequence.
+            if ($stmtNum == ($stmtCount - 1)) {
+                if (false === strpos($currentStmt['sql'], '~samples')) {
+                    $res = $this->_db->query($currentStmt['sql'], $bind);
+                } else {
+                    $res = $this->_partition->queryInRange($scalarId,
+                                                           $start,
+                                                           $end,
+                                                           $currentStmt['sql'],
+                                                           $bind);
+                }
+            } else {
+                $tempTables[$stmtId] = $this->_partition->createTempFromQuery('samples_analyst_temp',
+                                                                             $currentStmt['tmpcol'],
+                                                                             $currentStmt['sql'],
+                                                                             $bind,
+                                                                             $scalarId,
+                                                                             $start,
+                                                                             $end);
+
+                // Ex. prevent table macro ~changes from being being expanded before
+                // ~changesAtInterval.
+                uksort($tempTables, array('Hashmark_Util', 'sortByStrlenReverse'));
+            }
+        }
+
+        $rows = $res->fetchAll();
+
+        if ($tempTables || $tempTableCopies) {
+            $this->_partition->dropTable(array_merge($tempTables, $tempTableCopies));
+        }
+
+        return $rows;
     }
 
     /**
@@ -217,26 +364,18 @@ class Hashmark_Analyst_BasicDecimal extends Hashmark_Analyst
      */
     public function values($scalarId, $limit, $start, $end)
     {
-        $values = array(':scalarId' => $scalarId, ':start' => $start, ':end' => $end);
-
         $sql = $this->getSql(__FUNCTION__)
              . ($limit ? 'LIMIT ' . intval($limit) : '');
        
-        $res = $this->query($sql, $values);
+        $bind = array($start, $end); 
+        $stmt = $this->_partition->queryInRange($scalarId, $start, $end, $sql, $bind);
 
-        if (!$res || !$this->_dbHelper->numRows($res)) {
+        $rows = $stmt->fetchAll();
+        if (!$rows) {
             return false;
         }
     
-        $samples = array();
-
-        while ($sample = $this->_dbHelper->fetchAssoc($res)) {
-            $samples[] = $sample;
-        }
-
-        $this->_dbHelper->freeResult($res);
-
-        return $samples;
+        return $rows;
     }
     
     /**
@@ -261,27 +400,18 @@ class Hashmark_Analyst_BasicDecimal extends Hashmark_Analyst
             throw new Exception('Invalid interval: ' . $interval, HASHMARK_EXCEPTION_VALIDATION);
         }
         
-        $values = array(':scalarId' => $scalarId, ':start' => $start, ':end' => $end,
-                        ':format' => $format);
-        
         $sql = $this->getSql(__FUNCTION__)
              . ($limit ? 'LIMIT ' . intval($limit) : '');
         
-        $res = $this->query($sql, $values);
+        $bind = array($format, $format, $start, $end, $start, $end);
+        $stmt = $this->_partition->queryInRange($scalarId, $start, $end, $sql, $bind);
 
-        if (!$res || !$this->_dbHelper->numRows($res)) {
+        $rows = $stmt->fetchAll();
+        if (!$rows) {
             return false;
         }
     
-        $samples = array();
-
-        while ($sample = $this->_dbHelper->fetchAssoc($res)) {
-            $samples[] = $sample;
-        }
-
-        $this->_dbHelper->freeResult($res);
-
-        return $samples;
+        return $rows;
     }
 
     /**
@@ -307,20 +437,19 @@ class Hashmark_Analyst_BasicDecimal extends Hashmark_Analyst
 
         $distinct = $distinct ? 'DISTINCT ' : '';
 
-        $values = array(':scalarId' => $scalarId, ':start' => $start, ':end' => $end,
-                        '@aggFunc' => $aggFunc, '@distinct' => $distinct);
-        
-        $res = $this->query($this->getSql(__FUNCTION__), $values);
+        $sql = $this->expandSql($this->getSql(__FUNCTION__),
+                                array('@aggFunc' => $aggFunc,
+                                      '@distinct' => $distinct));
 
-        if (!$res || !$this->_dbHelper->numRows($res)) {
+        $bind = array($start, $end);
+        $stmt = $this->_partition->queryInRange($scalarId, $start, $end, $sql, $bind);
+
+        $rows = $stmt->fetchAll();
+        if (!$rows) {
             return false;
         }
     
-        $aggregate = $this->_dbHelper->fetchAssoc($res);
-
-        $this->_dbHelper->freeResult($res);
-            
-        return $aggregate['y'];
+        return $rows[0]['y'];
     }
 
     /**
@@ -353,25 +482,20 @@ class Hashmark_Analyst_BasicDecimal extends Hashmark_Analyst
         $this->setDivPrecisionIncr(0);
         
         $distinct = $distinct ? 'DISTINCT ' : '';
-
-        $values = array(':scalarId' => $scalarId, ':start' => $start, ':end' => $end,
-                        ':format' => $format, '@aggFunc' => $aggFunc, '@distinct' => $distinct);
         
-        $res = $this->query($this->getSql(__FUNCTION__), $values);
+        $sql = $this->expandSql($this->getSql(__FUNCTION__),
+                                array('@aggFunc' => $aggFunc,
+                                      '@distinct' => $distinct));
 
-        if (!$res || !$this->_dbHelper->numRows($res)) {
+        $bind = array($format, $start, $end);
+        $stmt = $this->_partition->queryInRange($scalarId, $start, $end, $sql, $bind);
+
+        $rows = $stmt->fetchAll();
+        if (!$rows) {
             return false;
         }
     
-        $aggregates = array();
-
-        while ($aggregate = $this->_dbHelper->fetchAssoc($res)) {
-            $aggregates[] = $aggregate;
-        }
-
-        $this->_dbHelper->freeResult($res);
-        
-        return $aggregates;
+        return $rows;
     }
     
     /**
@@ -407,34 +531,29 @@ class Hashmark_Analyst_BasicDecimal extends Hashmark_Analyst
         
         $distinctOuter = $distinctOuter ? 'DISTINCT ' : '';
         $distinctInner = $distinctInner ? 'DISTINCT ' : '';
+                                
+        $querySet = array('valuesAggAtInterval' => array(),
+                          __FUNCTION__ => array());
 
-        // @valuesAggAtIntervalCols sets which temporary table columns are filled by
-        // $sql['valuesAggAtInterval'] results. See: Sql/BasicDecimal.php.
-        $values = array(':scalarId' => $scalarId, ':start' => $start, ':end' => $end,
-                        ':format' => $format, '@aggFuncOuter' => $aggFuncOuter,
-                        '@distinctOuter' => $distinctOuter, '@aggFuncInner' => $aggFuncInner,
-                        '@distinctInner' => $distinctInner, '@valuesAggAtIntervalCols' => '`grp`, `y2`');
-        
-        // Use str_replace() to resolve @aggFunc and @distinct macro conflicts.
-        $sql = array();
-        $sql['valuesAggAtInterval'] = str_replace(array('aggFunc', 'distinct'),
-                                                  array('aggFuncInner', 'distinctInner'),
-                                                  $this->getSql('valuesAggAtInterval'));
-        $sql['valuesNestedAggAtInterval'] = str_replace(array('aggFunc', 'distinct'),
-                                                        array('aggFuncOuter', 'distinctOuter'),
-                                                        $this->getSql(__FUNCTION__));
+        $querySet['valuesAggAtInterval']['sql'] = $this->getSql('valuesAggAtInterval');
+        $querySet['valuesAggAtInterval']['macros'] = array('@aggFunc' => $aggFuncInner,
+                                                           '@distinct' => $distinctInner);
+        $querySet['valuesAggAtInterval']['bind'] = array($format, $start, $end);
 
-        $res = $this->query($sql, $values);
+        // Set which temporary table columns are filled this query's results.
+        $querySet['valuesAggAtInterval']['tmpcol'] = '`grp`, `y2`';
 
-        if (!$res || !$this->_dbHelper->numRows($res)) {
+        $querySet[__FUNCTION__]['sql'] = $this->getSql(__FUNCTION__);
+        $querySet[__FUNCTION__]['macros'] = array('@aggFunc' => $aggFuncOuter,
+                                                  '@distinct' => $distinctOuter);
+
+        $rows = $this->multiQuery($scalarId, $start, $end, $querySet);
+
+        if (!$rows) {
             return false;
         }
-        
-        $aggregate = $this->_dbHelper->fetchAssoc($res);
-
-        $this->_dbHelper->freeResult($res);
-
-        return $aggregate['y2'];
+    
+        return $rows[0]['y2'];
     }
     
     /**
@@ -465,24 +584,20 @@ class Hashmark_Analyst_BasicDecimal extends Hashmark_Analyst
 
         $distinct = $distinct ? 'DISTINCT ' : '';
 
-        $values = array(':scalarId' => $scalarId, ':start' => $start, ':end' => $end,
-                        '@recurFunc' => $recurFunc, '@aggFunc' => $aggFunc, '@distinct' => $distinct);
-        
-        $res = $this->query($this->getSql(__FUNCTION__), $values);
+        $sql = $this->expandSql($this->getSql(__FUNCTION__),
+                                array('@recurFunc' => $recurFunc,
+                                      '@aggFunc' => $aggFunc,
+                                      '@distinct' => $distinct));
 
-        if (!$res || !$this->_dbHelper->numRows($res)) {
+        $bind = array($start, $end);
+        $stmt = $this->_partition->queryInRange($scalarId, $start, $end, $sql, $bind);
+
+        $rows = $stmt->fetchAll();
+        if (!$rows) {
             return false;
         }
     
-        $aggregates = array();
-
-        while ($row = $this->_dbHelper->fetchAssoc($res)) {
-            $aggregates[] = $row;
-        }
-
-        $this->_dbHelper->freeResult($res);
-
-        return $aggregates;
+        return $rows;
     }
    
     /**
@@ -498,26 +613,18 @@ class Hashmark_Analyst_BasicDecimal extends Hashmark_Analyst
      */
     public function changes($scalarId, $limit, $start, $end)
     {
-        $values = array(':scalarId' => $scalarId, ':start' => $start, ':end' => $end);
-
         $sql = $this->getSql(__FUNCTION__)
              . ($limit ? 'LIMIT ' . intval($limit) : '');
        
-        $res = $this->query($sql, $values);
+        $bind = array($start, $end, $start, $end);
+        $stmt = $this->_partition->queryInRange($scalarId, $start, $end, $sql, $bind);
 
-        if (!$res || !$this->_dbHelper->numRows($res)) {
+        $rows = $stmt->fetchAll();
+        if (!$rows) {
             return false;
         }
     
-        $samples = array();
-
-        while ($sample = $this->_dbHelper->fetchAssoc($res)) {
-            $samples[] = $sample;
-        }
-
-        $this->_dbHelper->freeResult($res);
-
-        return $samples;
+        return $rows;
     }
     
     /**
@@ -542,32 +649,28 @@ class Hashmark_Analyst_BasicDecimal extends Hashmark_Analyst
             throw new Exception('Invalid interval: ' . $interval, HASHMARK_EXCEPTION_VALIDATION);
         }
 
-        // @valuesAtInterval sets which temporary table columns are filled by
-        // $sql['valuesAtInterval'] results. See: Sql/BasicDecimal.php.
-        $values = array(':scalarId' => $scalarId, ':start' => $start, ':end' => $end,
-                        ':format' => $format, '@valuesAtIntervalCols' => '`x`, `y`');
-        
-        $sql = array();
-        $sql['valuesAtInterval'] = $this->getSql('valuesAtInterval')
-                                 . 'ORDER BY `s1`.`end` DESC ';
-        $sql['changesAtInterval'] = $this->getSql(__FUNCTION__)
-                                  . ($limit ? 'LIMIT ' . intval($limit) : '');
+        $querySet = array('valuesAtInterval' => array(),
+                          __FUNCTION__ => array());
 
-        $res = $this->query($sql, $values);
+        $querySet['valuesAtInterval']['sql'] = $this->getSql('valuesAtInterval')
+                                             . 'ORDER BY `s1`.`end` DESC ';
+        $querySet['valuesAtInterval']['bind'] = array($format, $format,
+                                                      $start, $end, $start, $end);
         
-        if (!$res || !$this->_dbHelper->numRows($res)) {
+        // Set which temporary table columns are filled this query's results.
+        $querySet['valuesAtInterval']['tmpcol'] = '`x`, `y`';
+
+        $querySet[__FUNCTION__]['sql'] = $this->getSql(__FUNCTION__)
+                                       . ($limit ? 'LIMIT ' . intval($limit) : '');
+        $querySet[__FUNCTION__]['bind'] = array($format);
+
+        $rows = $this->multiQuery($scalarId, $start, $end, $querySet);
+
+        if (!$rows) {
             return false;
         }
     
-        $samples = array();
-
-        while ($sample = $this->_dbHelper->fetchAssoc($res)) {
-            $samples[] = $sample;
-        }
-
-        $this->_dbHelper->freeResult($res);
-            
-        return $samples;
+        return $rows;
     }
     
     /**
@@ -593,20 +696,19 @@ class Hashmark_Analyst_BasicDecimal extends Hashmark_Analyst
 
         $distinct = $distinct ? 'DISTINCT ' : '';
 
-        $values = array(':scalarId' => $scalarId, ':start' => $start, ':end' => $end,
-                        '@aggFunc' => $aggFunc, '@distinct' => $distinct);
-        
-        $res = $this->query($this->getSql(__FUNCTION__), $values);
+        $sql = $this->expandSql($this->getSql(__FUNCTION__),
+                                array('@aggFunc' => $aggFunc,
+                                      '@distinct' => $distinct));
 
-        if (!$res || !$this->_dbHelper->numRows($res)) {
+        $bind = array($start, $end, $start, $end);
+        $stmt = $this->_partition->queryInRange($scalarId, $start, $end, $sql, $bind);
+
+        $rows = $stmt->fetchAll();
+        if (!$rows) {
             return false;
         }
     
-        $aggregate = $this->_dbHelper->fetchAssoc($res);
-
-        $this->_dbHelper->freeResult($res);
-
-        return $aggregate['y'];
+        return $rows[0]['y'];
     }
     
     /**
@@ -640,31 +742,27 @@ class Hashmark_Analyst_BasicDecimal extends Hashmark_Analyst
         
         $distinct = $distinct ? 'DISTINCT ' : '';
         
-        // @changesCols sets which temporary table columns are filled by
-        // $sql['changes'] results. See: Sql/BasicDecimal.php.
-        $values = array(':scalarId' => $scalarId, ':start' => $start, ':end' => $end,
-                        ':format' => $format, '@aggFunc' => $aggFunc, '@distinct' => $distinct,
-                        '@changesCols' => '`x`, `y`, `y2`, `id`');
-        
-        $sql = array();
-        $sql['changes'] = $this->getSql('changes');
-        $sql['changesAggAtInterval'] = $this->getSql(__FUNCTION__);
+        $querySet = array('changes' => array(),
+                          __FUNCTION__ => array());
 
-        $res = $this->query($sql, $values);
+        $querySet['changes']['sql'] = $this->getSql('changes');
+        $querySet['changes']['bind'] = array($start, $end, $start, $end);
+                        
+        // Set which temporary table columns are filled this query's results.
+        $querySet['changes']['tmpcol'] = '`x`, `y`, `y2`, `id`';
 
-        if (!$res || !$this->_dbHelper->numRows($res)) {
+        $querySet[__FUNCTION__]['sql'] = $this->getSql(__FUNCTION__);
+        $querySet[__FUNCTION__]['macros'] = array('@aggFunc' => $aggFunc,
+                                                  '@distinct' => $distinct);
+        $querySet[__FUNCTION__]['bind'] = array($format, $format);
+
+        $rows = $this->multiQuery($scalarId, $start, $end, $querySet);
+
+        if (!$rows) {
             return false;
         }
-
-        $aggregates = array();
-
-        while ($aggregate = $this->_dbHelper->fetchAssoc($res)) {
-            $aggregates[] = $aggregate;
-        }
-
-        $this->_dbHelper->freeResult($res);
-
-        return $aggregates;
+    
+        return $rows;
     }
     
     /**
@@ -701,36 +799,35 @@ class Hashmark_Analyst_BasicDecimal extends Hashmark_Analyst
         $distinctOuter = $distinctOuter ? 'DISTINCT ' : '';
         $distinctInner = $distinctInner ? 'DISTINCT ' : '';
 
-        // @changesCols and @changesAggAtIntervalCols set which temporary table
-        // columns are filled by their respective $sql statement results.
-        // See: Sql/BasicDecimal.php.
-        $values = array(':scalarId' => $scalarId, ':start' => $start, ':end' => $end,
-                        '@aggFuncOuter' => $aggFuncOuter, '@distinctOuter' => $distinctOuter,
-                        '@aggFuncInner' => $aggFuncInner, '@distinctInner' => $distinctInner,
-                        ':format' => $format, '@changesCols' => '`x`, `y`, `y2`, `id`',
-                        '@changesAggAtIntervalCols' => '`grp`, `y`');
+        $querySet = array('changes' => array(),
+                          'changesAggAtInterval' => array(),
+                          __FUNCTION__ => array());
         
-        // Use str_replace() to resolve @aggFunc and @distinct macro conflicts.
-        $sql = array();
-        $sql['changes'] = $this->getSql('changes');
-        $sql['changesAggAtInterval'] = str_replace(array('aggFunc', 'distinct'),
-                                                  array('aggFuncInner', 'distinctInner'),
-                                                  $this->getSql('changesAggAtInterval'));
-        $sql['changesNestedAggAtInterval'] = str_replace(array('aggFunc', 'distinct'),
-                                                        array('aggFuncOuter', 'distinctOuter'),
-                                                        $this->getSql(__FUNCTION__));
-        
-        $res = $this->query($sql, $values);
+        $querySet['changes']['sql'] = $this->getSql('changes');
+        $querySet['changes']['bind'] = array($start, $end, $start, $end);
 
-        if (!$res || !$this->_dbHelper->numRows($res)) {
+        // Set which temporary table columns are filled this query's results.
+        $querySet['changes']['tmpcol'] = '`x`, `y`, `y2`, `id`';
+
+        $querySet['changesAggAtInterval']['sql'] = $this->getSql('changesAggAtInterval');
+        $querySet['changesAggAtInterval']['macros'] = array('@aggFunc' => $aggFuncInner,
+                                                            '@distinct' => $distinctInner);
+        $querySet['changesAggAtInterval']['bind'] = array($format, $format);
+        
+        // Set which temporary table columns are filled this query's results.
+        $querySet['changesAggAtInterval']['tmpcol'] = '`grp`, `y`';
+
+        $querySet[__FUNCTION__]['sql'] = $this->getSql(__FUNCTION__);
+        $querySet[__FUNCTION__]['macros'] = array('@aggFunc' => $aggFuncOuter,
+                                                  '@distinct' => $distinctOuter);
+
+        $rows = $this->multiQuery($scalarId, $start, $end, $querySet);
+
+        if (!$rows) {
             return false;
         }
     
-        $aggregate = $this->_dbHelper->fetchAssoc($res);
-
-        $this->_dbHelper->freeResult($res);
-
-        return $aggregate['y'];
+        return $rows[0]['y'];
     }
     
     /**
@@ -760,24 +857,20 @@ class Hashmark_Analyst_BasicDecimal extends Hashmark_Analyst
        
         $distinct = $distinct ? 'DISTINCT ' : '';
         
-        $values = array(':scalarId' => $scalarId, ':start' => $start, ':end' => $end,
-                        '@recurFunc' => $recurFunc, '@aggFunc' => $aggFunc, '@distinct' => $distinct);
+        $sql = $this->expandSql($this->getSql(__FUNCTION__),
+                                array('@recurFunc' => $recurFunc,
+                                      '@aggFunc' => $aggFunc,
+                                      '@distinct' => $distinct));
 
-        $res = $this->query($this->getSql(__FUNCTION__), $values);
+        $bind = array($start, $end, $start, $end);
+        $stmt = $this->_partition->queryInRange($scalarId, $start, $end, $sql, $bind);
 
-        if (!$res || !$this->_dbHelper->numRows($res)) {
+        $rows = $stmt->fetchAll();
+        if (!$rows) {
             return false;
         }
     
-        $aggregates = array();
-
-        while ($aggregate = $this->_dbHelper->fetchAssoc($res)) {
-            $aggregates[] = $aggregate;
-        }
-
-        $this->_dbHelper->freeResult($res);
-
-        return $aggregates;
+        return $rows;
     }
     
     /**
@@ -794,27 +887,19 @@ class Hashmark_Analyst_BasicDecimal extends Hashmark_Analyst
      */
     public function frequency($scalarId, $limit, $start, $end, $descOrder)
     {
-        $values = array(':scalarId' => $scalarId, ':start' => $start, ':end' => $end);
-
         $sql = $this->getSql(__FUNCTION__)
              . 'ORDER BY `y` ' . ($descOrder ? 'DESC' : 'ASC')
              . ($limit ? ' LIMIT ' . intval($limit) : '');
        
-        $res = $this->query($sql, $values);
+        $bind = array($start, $end);
+        $stmt = $this->_partition->queryInRange($scalarId, $start, $end, $sql, $bind);
 
-        if (!$res || !$this->_dbHelper->numRows($res)) {
+        $rows = $stmt->fetchAll();
+        if (!$rows) {
             return false;
         }
     
-        $samples = array();
-
-        while ($sample = $this->_dbHelper->fetchAssoc($res)) {
-            $samples[] = $sample;
-        }
-
-        $this->_dbHelper->freeResult($res);
-
-        return $samples;
+        return $rows;
     }
     
     /**
@@ -842,27 +927,22 @@ class Hashmark_Analyst_BasicDecimal extends Hashmark_Analyst
 
         $distinct = $distinct ? 'DISTINCT ' : '';
         
-        $values = array(':scalarId' => $scalarId, ':start' => $start, ':end' => $end,
-                        '@aggFunc' => $aggFunc, '@distinct' => $distinct);
-        
         $sql = $this->getSql(__FUNCTION__)
              . ($limit ? ' LIMIT ' . intval($limit) : '');
        
-        $res = $this->query($sql, $values);
+        $sql = $this->expandSql($this->getSql(__FUNCTION__),
+                                array('@aggFunc' => $aggFunc,
+                                      '@distinct' => $distinct));
 
-        if (!$res || !$this->_dbHelper->numRows($res)) {
+        $bind = array($start, $end, $start, $end);
+        $stmt = $this->_partition->queryInRange($scalarId, $start, $end, $sql, $bind);
+
+        $rows = $stmt->fetchAll();
+        if (!$rows) {
             return false;
         }
     
-        $samples = array();
-
-        while ($sample = $this->_dbHelper->fetchAssoc($res)) {
-            $samples[] = $sample;
-        }
-
-        $this->_dbHelper->freeResult($res);
-
-        return $samples;
+        return $rows;
     }
     
     /**
@@ -899,31 +979,29 @@ class Hashmark_Analyst_BasicDecimal extends Hashmark_Analyst
         
         $this->setDivPrecisionIncr(0);
         
-        // @movingCols sets which temporary table columns are filled by
-        // $sql['moving'] results. See: Sql/BasicDecimal.php.
-        $values = array(':scalarId' => $scalarId, ':start' => $start, ':end' => $end,
-                        ':format' => $format, '@aggFunc' => $aggFunc, '@distinct' => $distinct,
-                        '@movingCols' => '`x`, `y`, `y2`');
-        
-        $sql = array();
-        $sql['moving'] = $this->getSql('moving');
-        $sql['movingAtInterval'] = $this->getSql(__FUNCTION__)
-                                 . ($limit ? 'LIMIT ' . intval($limit) : '');
+        $querySet = array('moving' => array(),
+                          __FUNCTION__ => array());
 
-        $res = $this->query($sql, $values);
-        
-        if (!$res || !$this->_dbHelper->numRows($res)) {
+        $querySet['moving']['sql'] = $this->getSql('moving');
+        $querySet['moving']['macros'] = array('@aggFunc' => $aggFunc,
+                                              '@distinct' => $distinct);
+        $querySet['moving']['bind'] = array($start, $end, $start, $end);
+
+        // Set which temporary table columns are filled this query's results.
+        $querySet['moving']['tmpcol'] = '`x`, `y`, `y2`';
+
+        $querySet[__FUNCTION__]['sql'] = $this->getSql(__FUNCTION__)
+                                       . ($limit ? 'LIMIT ' . intval($limit) : '');
+        $querySet[__FUNCTION__]['macros'] = array('@aggFunc' => $aggFunc,
+                                                  '@distinct' => $distinct);
+        $querySet[__FUNCTION__]['bind'] = array($format, $format, $format);
+
+        $rows = $this->multiQuery($scalarId, $start, $end, $querySet);
+
+        if (!$rows) {
             return false;
         }
     
-        $samples = array();
-
-        while ($sample = $this->_dbHelper->fetchAssoc($res)) {
-            $samples[] = $sample;
-        }
-
-        $this->_dbHelper->freeResult($res);
-            
-        return $samples;
+        return $rows;
     }
 }

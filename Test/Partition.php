@@ -771,7 +771,7 @@ class Hashmark_TestCase_Partition extends Hashmark_TestCase
      * @test
      * @group Partition
      * @group queriesCurrentPartition
-     * @group query
+     * @group queryCurrent
      * @group createScalar
      * @group getIntervalTableName
      * @group tableExists
@@ -786,7 +786,8 @@ class Hashmark_TestCase_Partition extends Hashmark_TestCase
         $tableName = $this->_partition->getIntervalTableName($scalarId);
 
         $this->assertFalse($this->_partition->tableExists($tableName));
-        $res = $this->_partition->query($scalarId, "INSERT INTO `{$tableName}` (`value`) VALUES (0.000)");
+        $sql = "INSERT INTO `{$tableName}` (`value`) VALUES (0.000)";
+        $res = $this->_partition->queryCurrent($scalarId, $sql);
         $this->assertFalse(empty($res));
         $this->assertTrue($this->_partition->tableExists($tableName));
     }
@@ -812,7 +813,8 @@ class Hashmark_TestCase_Partition extends Hashmark_TestCase
         $tableName = $this->_partition->getIntervalTableName($scalarId, $date);
 
         $this->assertFalse($this->_partition->tableExists($tableName));
-        $res = $this->_partition->queryAtDate($scalarId, "INSERT INTO `{$tableName}` (`value`) VALUES (0.000)", $date);
+        $sql = "INSERT INTO `{$tableName}` (`value`) VALUES (0.000)";
+        $res = $this->_partition->queryAtDate($scalarId, $sql, $date);
         $this->assertFalse(empty($res));
         $this->assertTrue($this->_partition->tableExists($tableName));
     }
@@ -875,14 +877,14 @@ class Hashmark_TestCase_Partition extends Hashmark_TestCase
         $scalarFields['type'] = 'decimal';
         $scalarId = $this->_core->createScalar($scalarFields);
 
-        $srcName = 'test_samples_ ' . $scalarId;
+        $srcName = 'test_samples_' . $scalarId;
         $this->_partition->createTable($scalarId, $srcName, 'decimal');
         $srcDef = str_replace('TABLE `' . $srcName,
                               '',
                               $this->_partition->getTableDefinition($srcName));
         
         $sql = "INSERT INTO `{$srcName}` (`value`) VALUES (1)";
-        $this->_dbHelper->rawQuery($this->_db, $sql, '', $this->_db);
+        $this->_db->query($sql);
 
         $destName = $this->_partition->copyToTemp($srcName);
         $destDef = str_replace('TEMPORARY TABLE `' . $destName,
@@ -903,11 +905,11 @@ class Hashmark_TestCase_Partition extends Hashmark_TestCase
     {
         $cron = Hashmark::getModule('Cron', '', $this->_db);
         
+        // Create a sample for the current time, for a new scalar.
         $srcName = 'samples_analyst_temp';
         $srcDef = str_replace('TABLE `' . $srcName,
                               '',
                               $this->_partition->getTableDefinition($srcName));
-
         $scalarFields = array();
         $scalarFields['name'] = self::randomString();
         $scalarFields['type'] = 'decimal';
@@ -915,15 +917,14 @@ class Hashmark_TestCase_Partition extends Hashmark_TestCase
         $jobId = $cron->startJob();
         $start = gmdate(HASHMARK_DATETIME_FORMAT);
         $end = $start;
-        
         $cron->createSample($scalarId, $jobId, 1, $start, $end);
 
-        // Trigger a DbHelper::query().
+        // Triggers a Hashmark_Partition::queryCurrent() in createTempFromQuery().
         $currentPartition = $this->_partition->getIntervalTableName($scalarId);
         $sql = "SELECT `end`, `value` FROM `{$currentPartition}`";
         $tempName = $this->_partition->createTempFromQuery($srcName,
                                                            '`x`, `y`',
-                                                           $sql, array());
+                                                           $sql);
         $destDef = str_replace('TEMPORARY TABLE `' . $tempName,
                                '',
                                $this->_partition->getTableDefinition($tempName));
@@ -932,16 +933,15 @@ class Hashmark_TestCase_Partition extends Hashmark_TestCase
         $exists = $this->_partition->tableExists($this->_mergeTablePrefix . "{$scalarId}_20080603_20081212");
         $this->assertTrue(empty($exists));
         
-        // Trigger a DbHelper::queryInRange().
+        // Triggers a Hashmark_Partition::queryInRange() in createTempFromQuery().
         $start = '2008-06-03 00:00:00';
         $end = '2008-12-12 00:00:00';
         $sql = 'SELECT `end`, `value` FROM ~samples';
-        $values = array(':scalarId' => $scalarId, ':start' => $start, ':end' => $end);
         $cron->createSample($scalarId, $jobId, 1, $start, $start);
         $cron->createSample($scalarId, $jobId, 1, $end, $end);
-        $tempName = $this->_partition->createTempFromQuery($srcName,
-                                                           '`x`, `y`',
-                                                           $sql, $values);
+        $tempName = $this->_partition->createTempFromQuery($srcName, '`x`, `y`',
+                                                           $sql, array(),
+                                                           $scalarId, $start, $end);
         $destDef = str_replace('TEMPORARY TABLE `' . $tempName,
                                '',
                                $this->_partition->getTableDefinition($tempName));
@@ -966,7 +966,7 @@ class Hashmark_TestCase_Partition extends Hashmark_TestCase
     {
         $scalarId = self::randomString();
         $expectedTableName = $this->_partition->getIntervalTableName($scalarId);
-        $this->_partition->query($scalarId, 'SELECT `id` FROM ~samples LIMIT 1');
+        $this->_partition->queryCurrent($scalarId, 'SELECT `id` FROM ~samples LIMIT 1');
         $this->assertFalse($this->_partition->tableExists($expectedTableName));
     }
     
@@ -984,7 +984,8 @@ class Hashmark_TestCase_Partition extends Hashmark_TestCase
     {
         $scalarId = self::randomString();
         $expectedTableName = $this->_partition->getIntervalTableName($scalarId);
-        $this->_partition->queryAtDate($scalarId, 'SELECT `id` FROM ~samples LIMIT 1', gmdate(HASHMARK_DATETIME_FORMAT));
+        $this->_partition->queryAtDate($scalarId, 'SELECT `id` FROM ~samples LIMIT 1',
+                                       gmdate(HASHMARK_DATETIME_FORMAT));
         $this->assertFalse($this->_partition->tableExists($expectedTableName));
     }
     
@@ -1004,7 +1005,7 @@ class Hashmark_TestCase_Partition extends Hashmark_TestCase
         $scalarFields['type'] = 'decimal';
         $scalarId = $this->_core->createScalar($scalarFields);
         $expectedTableName = $this->_partition->getIntervalTableName($scalarId);
-        $this->_partition->query($scalarId, 'INSERT INTO ~samples (`value`) VALUES (1)');
+        $this->_partition->queryCurrent($scalarId, 'INSERT INTO ~samples (`value`) VALUES (1)');
         $this->assertTrue($this->_partition->tableExists($expectedTableName));
     }
     

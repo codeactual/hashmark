@@ -16,104 +16,124 @@
 */
 
 /**
- * @abstract
  * @package     Hashmark-Test
  * @subpackage  Base
  */
-abstract class Hashmark_TestCase_Cache extends Hashmark_TestCase
+class Hashmark_TestCase_Cache extends Hashmark_TestCase
 {
     /**
      * @test
      * @group Cache
-     * @group setsGetsAndRemovesWithoutGroup
-     * @group set
-     * @group get
-     * @group remove
+     * @group isConfigured
      */
-    public function setsGetsAndRemovesWithoutGroup()
+    public function isConfigured()
     {
-        $cache = Hashmark::getModule('Cache', $this->_type);
-        $expectedKey = self::randomString();
-        $expectedValue = self::randomString();
-
-        $this->assertTrue($cache->set($expectedKey, $expectedValue));
-        $this->assertEquals($expectedValue, $cache->get($expectedKey));
-        
-        $expectedValue = self::randomString();
-        
-        $this->assertTrue($cache->set($expectedKey, $expectedValue));
-        $this->assertEquals($expectedValue, $cache->get($expectedKey));
-        
-        $this->assertTrue($cache->remove($expectedKey));
-        $this->assertFalse($cache->get($expectedKey));
+        $this->assertTrue(Hashmark::getModule('Cache')->isConfigured());
     }
 
     /**
      * @test
      * @group Cache
-     * @group setsGetsAndRemovesWithGroup
-     * @group set
-     * @group get
+     * @group persists
+     * @group save
+     * @group load
      * @group remove
      */
-    public function setsGetsAndRemovesWithGroup()
+    public function persists()
     {
-        $cache = Hashmark::getModule('Cache', $this->_type);
+        $cache = Hashmark::getModule('Cache');
+        $expectedKey = self::randomString();
+        $expectedValue = self::randomString();
+
+        // Verify write.
+        $this->assertTrue($cache->save($expectedValue, $expectedKey));
+        $this->assertEquals($expectedValue, $cache->load($expectedKey));
+        
+        $expectedValue = self::randomString();
+        
+        // Verify overwrite.
+        $this->assertTrue($cache->save($expectedValue, $expectedKey));
+        $this->assertEquals($expectedValue, $cache->load($expectedKey));
+        
+        // Verify delete.
+        $this->assertTrue($cache->remove($expectedKey));
+        $this->assertFalse($cache->load($expectedKey));
+    }
+
+    /**
+     * @test
+     * @group Cache
+     * @group persistsUsingGroupKey
+     * @group save
+     * @group load
+     * @group remove
+     */
+    public function persistsUsingGroupKey()
+    {
+        $cache = Hashmark::getModule('Cache');
+        
+        // Two keys will share group.
         $expectedKeys = array(self::randomString(), self::randomString());
         $expectedGroup = self::randomString();
        
         foreach ($expectedKeys as $expectedKey) {
             $expectedValue = self::randomString();
 
-            $this->assertTrue($cache->set($expectedKey, $expectedValue, $expectedGroup));
-            $this->assertFalse($cache->get($expectedKey));  // False positive check.
-            $this->assertEquals($expectedValue, $cache->get($expectedKey, $expectedGroup));
+            // Verify write.
+            $this->assertTrue($cache->save($expectedValue, $expectedKey, $expectedGroup));
+            $this->assertFalse($cache->load($expectedKey));  // False positive check.
+            $this->assertEquals($expectedValue, $cache->load($expectedKey, $expectedGroup));
 
             $expectedValue = self::randomString();
 
-            $this->assertTrue($cache->set($expectedKey, $expectedValue, $expectedGroup));
-            $this->assertFalse($cache->get($expectedKey));  // False positive check.
-            $this->assertEquals($expectedValue, $cache->get($expectedKey, $expectedGroup));
+            // Verify overwrite.
+            $this->assertTrue($cache->save($expectedValue, $expectedKey, $expectedGroup));
+            $this->assertFalse($cache->load($expectedKey));  // False positive check.
+            $this->assertEquals($expectedValue, $cache->load($expectedKey, $expectedGroup));
 
+            // Verify delete.
             $this->assertTrue($cache->remove($expectedKey, $expectedGroup));
-            $this->assertFalse($cache->get($expectedKey, $expectedGroup));
+            $this->assertFalse($cache->load($expectedKey, $expectedGroup));
         }
     }
     
     /**
      * @test
      * @group Cache
-     * @group invalidatesGroupMembers
-     * @group set
-     * @group get
-     * @group remove
+     * @group removesWholeGroup
+     * @group save
+     * @group load
+     * @group removeGroup
      */
-    public function invalidatesGroupMembers()
+    public function removesWholeGroup()
     {
-        $cache = Hashmark::getModule('Cache', $this->_type);
-        $affectedKeys = array(self::randomString(), self::randomString());
-        $affectedGroup = self::randomString();
-
-        // Assert this key/group is intact after $affectedGroup invalidation.
+        $cache = Hashmark::getModule('Cache');
+        
+        // Assert these are unaffected by the operations on subject keys/values/groups.
         $unaffectedKey = self::randomString();
         $unaffectedValue = self::randomString();
         $unaffectedGroup = self::randomString();
-        $this->assertTrue($cache->set($unaffectedKey, $unaffectedValue, $unaffectedGroup));
-        $this->assertEquals($unaffectedValue, $cache->get($unaffectedKey, $unaffectedGroup));
+        $this->assertTrue($cache->save($unaffectedValue, $unaffectedKey, $unaffectedGroup));
+        $this->assertEquals($unaffectedValue, $cache->load($unaffectedKey, $unaffectedGroup));
         
-        foreach ($affectedKeys as $affectedKey) {
-            $affectedValue = self::randomString();
+        // Two keys will share group.
+        $subjectKeys = array(self::randomString(), self::randomString());
+        $subjectGroup = self::randomString();
 
-            $this->assertTrue($cache->set($affectedKey, $affectedValue, $affectedGroup));
-            $this->assertEquals($affectedValue, $cache->get($affectedKey, $affectedGroup));
+        // Write to subject key/group.
+        foreach ($subjectKeys as $subjectKey) {
+            $subjectValue = self::randomString();
+            $this->assertTrue($cache->save($subjectValue, $subjectKey, $subjectGroup));
+            $this->assertEquals($subjectValue, $cache->load($subjectKey, $subjectGroup));
         }
         
-        $this->assertTrue($cache->removeGroup($affectedGroup));
-        
-        foreach ($affectedKeys as $affectedKey) {
-            $this->assertFalse($cache->get($affectedKey, $affectedGroup));
+        // Remove subject group.
+        $this->assertTrue($cache->removeGroup($subjectGroup));
+        foreach ($subjectKeys as $subjectKey) {
+            $this->assertFalse($cache->load($subjectKey, $subjectGroup));
         }
         
-        $this->assertEquals($unaffectedValue, $cache->get($unaffectedKey, $unaffectedGroup));
+        // Verify other group not touched.
+        $this->assertEquals($unaffectedValue, $cache->load($unaffectedKey, $unaffectedGroup));
     }
 }

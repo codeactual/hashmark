@@ -15,6 +15,12 @@
 */
 
 /**
+ * Auto-load ZF components.
+ */
+require_once 'Zend/Loader.php';
+Zend_Loader::registerAutoload();
+
+/**
  * Minimal set required by most modules creaed by getModule().
  */
 require_once dirname(__FILE__) . '/Module.php';
@@ -37,7 +43,7 @@ define('HASHMARK_EXCEPTION_SQL', 2);
 class Hashmark
 {
     /**
-     * Factory for Hashmark_Module implementations: Client, Core, Cron, etc.
+     * Factory for Hashmark_Module implementations: Client, Core, Cron, Sampler, etc.
      *
      *      -   Autoloads required scripts and config files (if they exist)
      *          based on naming conventions.
@@ -45,8 +51,8 @@ class Hashmark
      *          Hashmark::getModule($base, $type, $a, $b);
      *          Dependency list must match classes initModule() definition.
      *
-     * @param string    $base   Ex. 'Core', optional base class in Core.php.
-     * @param string    $type   Ex. 'Mysql', implementation in Core/Mysql.php.
+     * @param string    $base   Ex. 'Sampler', optional base class in Sampler.php.
+     * @param string    $type   Ex. 'ScalarValue', implementation in Sampler/ScalarValue.php.
      * @param mixed     ...     Variable-length list of arguments passed on to
      *                          instance's initModule().
      * @return mixed    New instance; false if instance's initModule()
@@ -150,8 +156,8 @@ class Hashmark
      *          then applies overrides defined in optional files discovered
      *          with standard Hashmark naming conventions inside Config/.
      * 
-     * @param string    $base   Ex. 'Core', optional base class in Core.php.
-     * @param string    $type   Ex. 'Mysql', implementation in Core/Mysql.php. Optional.
+     * @param string    $base   Ex. 'Sampler', optional base class in Sampler.php.
+     * @param string    $type   Ex. 'ScalarValue', implementation in Sampler/ScalarValue.php.
      * @param string    $key    If key exists in the config array, only the
      *                          associated value is returned, rather than whole
      *                          array. Optional.

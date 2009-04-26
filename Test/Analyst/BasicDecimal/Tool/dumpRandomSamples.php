@@ -25,7 +25,7 @@ $dirname = dirname(__FILE__);
 /**
  * For Hashmark::getModule().
  */
-require_once $dirname . '/../../../Hashmark.php';
+require_once $dirname . '/../../../bootstrap.php';
 
 /**
  * For hashmark_random_samples().
@@ -41,9 +41,8 @@ define('HASHMARK_DUMP_RANDOMSAMPLES_SQL_BUFFER_MAX', 10000);
 define('HASHMARK_DUMP_RANDOMSAMPLES_STARTDATE', '2008-01-01 00:00:00 UTC');
 define('HASHMARK_DUMP_RANDOMSAMPLES_ENDDATE', '2009-01-01 23:59:59 UTC');
 
-$dbHelper = Hashmark::getModule('DbHelper', 'Mysqli');
-$db = $dbHelper->openDb('unittest');
-$partition = Hashmark::getModule('Partition', 'Mysqli', $db);
+$db = Hashmark::getModule('DbHelper')->openDb('unittest');
+$partition = Hashmark::getModule('Partition', '', $db);
 
 // $tableDef is used for all sample CREATE TABLE statements.
 $baseTableDef = $partition->getPartitionDefinition(HASHMARK_DUMP_RANDOMSAMPLES_TYPE);

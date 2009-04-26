@@ -22,15 +22,14 @@
  */
 require_once dirname(__FILE__) . '/../../Hashmark.php';
 
-$dbHelper = Hashmark::getModule('DbHelper');
-$db = $dbHelper->openDb('unittest');
+$db = Hashmark::getModule('DbHelper')->openDb('unittest');
 
 $coreTables = array('categories', 'categories_milestones', 'categories_scalars',
                     'jobs', 'milestones', 'scalars');
 
 foreach ($coreTables as $table) {
-    $dbHelper->rawQuery($db, "TRUNCATE `{$table}`");
-    $dbHelper->rawQuery($db, "ALTER TABLE `{$table}` SET AUTO_INCREMENT = 1");
+    $db->query($db, "TRUNCATE `{$table}`");
+    $db->query($db, "ALTER TABLE `{$table}` SET AUTO_INCREMENT = 1");
 }
 
 $partition = Hashmark::getModule('Partition', '', $db);
@@ -40,5 +39,5 @@ $garbageTables = array_diff($partition->getTablesLike('%samples%'), $nonPartSamp
 
 if ($garbageTables) {
     $partition->dropTable($garbageTables);
-    $dbHelper->rawQuery($db, 'FLUSH TABLES');
+    $db->query($db, 'FLUSH TABLES');
 }
