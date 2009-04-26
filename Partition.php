@@ -47,7 +47,7 @@ class Hashmark_Partition extends Hashmark_Module_DbDependent
                 return false;
             }
 
-            $output = preg_replace('/( AUTO_INCREMENT=\d+)|( COMMENT.\'.*\')/', '', $rows[0][1]);
+            $output = preg_replace('/( AUTO_INCREMENT=\d+)|( COMMENT.\'.*\')/', '', $rows[0]['Create Table']);
 
             $this->_cache->save($output, $cacheKey, 'schema');
         }
@@ -220,7 +220,7 @@ class Hashmark_Partition extends Hashmark_Module_DbDependent
         $status = $this->getTableInfo($name);
         
         if ($status) {
-            return ($status['ENGINE'] == 'MRG_MyISAM');
+            return ($status['ENGINE'] == 'MRG_MYISAM');
         }
 
         return null;

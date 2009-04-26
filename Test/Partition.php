@@ -557,7 +557,7 @@ class Hashmark_TestCase_Partition extends Hashmark_TestCase
 
             $this->assertEquals($expectedMergeTableName, $actualMergeTableName);
             $status = $this->_partition->getTableInfo($actualMergeTableName);
-            $this->assertEquals('MRG_MyISAM', $status['ENGINE']);
+            $this->assertEquals('MRG_MYISAM', $status['ENGINE']);
             $this->assertEquals(1, preg_match(HASHMARK_DATETIME_PREG_PATTERN, $status['TABLE_COMMENT']));
         }
     }
