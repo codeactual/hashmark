@@ -12,7 +12,7 @@
  * @license     http://www.opensource.org/licenses/bsd-license.php New BSD License
  * @package     Hashmark
  * @subpackage  Base
- * @version     $Id: Partition.php 300 2009-02-13 05:51:17Z david $
+ * @version     $Id$
 */
 
 /**

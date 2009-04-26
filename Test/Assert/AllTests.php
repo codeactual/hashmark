@@ -12,7 +12,7 @@
  * @license     http://www.opensource.org/licenses/bsd-license.php New BSD License
  * @package     Hashmark-Test
  * @subpackage  Assert
- * @version     $Id: AllTests.php 263 2009-02-03 11:22:57Z david $
+ * @version     $Id$
 */
 
 /**
@@ -38,7 +38,7 @@ class Hashmark_AllTests_Assert
         $suite = new PHPUnit_Framework_TestSuite(__METHOD__);
 
         // Hashmark_TestCase_Assert
-        require_once dirname(__FILE__) . '/../Assert.php';
+        require_once HASHMARK_ROOT_DIR . '/Test/Assert.php';
 
         $suite->addTestSuite('Hashmark_TestCase_Assert');
 

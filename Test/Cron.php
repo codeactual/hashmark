@@ -12,7 +12,7 @@
  * @license     http://www.opensource.org/licenses/bsd-license.php New BSD License
  * @package     Hashmark-Test
  * @subpackage  Base
- * @version     $Id: Cron.php 294 2009-02-13 03:48:59Z david $
+ * @version     $Id$
 */
 
 /**
@@ -249,7 +249,7 @@ class Hashmark_TestCase_Cron extends Hashmark_TestCase
         }
         
         $time = time();
-        require dirname(__FILE__) . '/../Cron/Tool/runSamplers.php';
+        require HASHMARK_ROOT_DIR . '/Cron/Tool/runSamplers.php';
         
         foreach ($scheduledScalarIds as $scalarId) {
             $scalar = $this->_core->getScalarById($scalarId);
@@ -302,7 +302,7 @@ class Hashmark_TestCase_Cron extends Hashmark_TestCase
 
         $maxDays = 3;
         $maxCount = 2;
-        require dirname(__FILE__) . '/../Cron/Tool/gcMergeTables.php';
+        require HASHMARK_ROOT_DIR . '/Cron/Tool/gcMergeTables.php';
 
         for ($t = 0; $t < 5; $t++) {
             if ($t < 2) {

@@ -12,7 +12,7 @@
  * @license     http://www.opensource.org/licenses/bsd-license.php New BSD License
  * @package     Hashmark-Test
  * @subpackage  Hashmark_DbHelper
- * @version     $Id: AllTests.php 296 2009-02-13 05:03:11Z david $
+ * @version     $Id$
 */
 
 /**
@@ -33,14 +33,13 @@ class Hashmark_AllTests_DbHelper
      */
     public static function suite()
     {
-        $dirname = dirname(__FILE__);
         $suite = new PHPUnit_Framework_TestSuite(__METHOD__);
         
         // Hashmark_DbHelper
-        require_once $dirname . '/../../DbHelper.php';
+        require_once HASHMARK_ROOT_DIR . '/DbHelper.php';
 
         // Hashmark_TestCase_DbHelper
-        require_once $dirname . '/../DbHelper.php';
+        require_once HASHMARK_ROOT_DIR . '/Test/DbHelper.php';
 
         $suite->addTestSuite('Hashmark_TestCase_DbHelper');
 

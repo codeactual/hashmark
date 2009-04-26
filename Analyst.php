@@ -12,7 +12,7 @@
  * @license     http://www.opensource.org/licenses/bsd-license.php New BSD License
  * @package     Hashmark
  * @subpackage  Base
- * @version     $Id: Analyst.php 296 2009-02-13 05:03:11Z david $
+ * @version     $Id$
 */
 
 /**
@@ -22,7 +22,6 @@
  * of one or more scalars to extract an analytical result, ex. simple
  * aggregates or raw value/date lists.
  * 
- * @abstract
  * @package     Hashmark
  * @subpackage  Base
  */

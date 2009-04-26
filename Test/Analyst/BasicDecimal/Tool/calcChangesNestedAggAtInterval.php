@@ -12,7 +12,7 @@
  * @license     http://www.opensource.org/licenses/bsd-license.php New BSD License
  * @package     Hashmark-Test
  * @subpackage  Hashmark_Analyst_BasicDecimal
- * @version     $Id: calcChangesNestedAggAtInterval.php 298 2009-02-13 05:19:37Z david $
+ * @version     $Id$
 */
 
 $expValues = array();

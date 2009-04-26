@@ -11,7 +11,7 @@
  * @copyright   Copyright (c) 2008-2009, Code Actual LLC
  * @license     http://www.opensource.org/licenses/bsd-license.php New BSD License
  * @package     Hashmark
- * @version     $Id: Util.php 287 2009-02-10 23:40:56Z david $
+ * @version     $Id$
 */
 
 /**

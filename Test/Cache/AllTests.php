@@ -12,7 +12,7 @@
  * @license     http://www.opensource.org/licenses/bsd-license.php New BSD License
  * @package     Hashmark-Test
  * @subpackage  Hashmark_Cache
- * @version     $Id: AllTests.php 263 2009-02-03 11:22:57Z david $
+ * @version     $Id$
 */
 
 /**
@@ -33,14 +33,13 @@ class Hashmark_AllTests_Cache
      */
     public static function suite()
     {
-        $dirname = dirname(__FILE__);
         $suite = new PHPUnit_Framework_TestSuite(__METHOD__);
         
         // Hashmark_Cache
-        require_once $dirname . '/../../Cache.php';
+        require_once HASHMARK_ROOT_DIR . '/Cache.php';
 
         // Hashmark_TestCase_Cache
-        require_once $dirname . '/../Cache.php';
+        require_once HASHMARK_ROOT_DIR . '/Test/Cache.php';
 
         $suite->addTestSuite('Hashmark_TestCase_Cache');
 

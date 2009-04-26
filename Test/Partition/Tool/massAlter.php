@@ -12,7 +12,7 @@
  * @license     http://www.opensource.org/licenses/bsd-license.php New BSD License
  * @package     Hashmark-Test
  * @subpackage  Hashmark_Partition
- * @version     $Id: massAlter.php 281 2009-02-06 17:09:14Z david $
+ * @version     $Id$
 */
 
 $likeExpr = '';

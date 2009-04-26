@@ -12,7 +12,7 @@
  * @license     http://www.opensource.org/licenses/bsd-license.php New BSD License
  * @package     Hashmark-Test
  * @subpackage  Hashmark_Analyst_BasicDecimal
- * @version     $Id: calcChangesAtInterval.php 299 2009-02-13 05:35:03Z david $
+ * @version     $Id$
 */
 
 $sampleProviders = Hashmark_TestCase_Analyst_BasicDecimal::provideFullSamplesData();

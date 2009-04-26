@@ -12,7 +12,7 @@
  * @license     http://www.opensource.org/licenses/bsd-license.php New BSD License
  * @package     Hashmark-Test
  * @subpackage  Hashmark_Analyst
- * @version     $Id: AllTests.php 298 2009-02-13 05:19:37Z david $
+ * @version     $Id$
 */
 
 /**
@@ -33,19 +33,18 @@ class Hashmark_AllTests_Analyst
      */
     public static function suite()
     {
-        $dirname = dirname(__FILE__);
         $suite = new PHPUnit_Framework_TestSuite(__METHOD__);
         
         // Hashmark_Analyst
-        require_once $dirname . '/../../Analyst.php';
+        require_once HASHMARK_ROOT_DIR . '/Analyst.php';
         
-        foreach (glob($dirname . '/../../Analyst/*.php') as $typeFile) {
+        foreach (glob(HASHMARK_ROOT_DIR . '/Analyst/*.php') as $typeFile) {
             $typeName = basename($typeFile, '.php');
 
             // Ex. class file for 'Hashmark_Analyst_BasicDecimal'
-            require_once $dirname . '/../../Analyst/' . $typeName . '.php';
+            require_once $typeFile;
             // Ex. class file for 'Hashmark_TestCase_Analyst_BasicDecimal'
-            require_once $dirname . '/' . $typeName . '.php';
+            require_once HASHMARK_ROOT_DIR . '/Test/Analyst/' . $typeName . '.php';
 
             $suite->addTestSuite('Hashmark_TestCase_Analyst_' . $typeName);
         }

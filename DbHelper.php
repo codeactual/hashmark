@@ -18,7 +18,6 @@
 /**
  * Factory for database adapters, prepared statements, etc.
  *
- * @abstract
  * @package     Hashmark
  * @subpackage  Base
  */

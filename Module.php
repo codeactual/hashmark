@@ -12,13 +12,12 @@
  * @license     http://www.opensource.org/licenses/bsd-license.php New BSD License
  * @package     Hashmark
  * @subpackage  Base
- * @version     $Id: Module.php 296 2009-02-13 05:03:11Z david $
+ * @version     $Id$
 */
 
 /**
  * Base for all classes produced by Hashmark::getModule() factory.
  *
- * @abstract
  * @package     Hashmark
  * @subpackage  Base
 */

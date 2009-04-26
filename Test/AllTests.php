@@ -11,7 +11,7 @@
  * @copyright   Copyright (c) 2008-2009, Code Actual LLC
  * @license     http://www.opensource.org/licenses/bsd-license.php New BSD License
  * @package     Hashmark-Test
- * @version     $Id: AllTests.php 296 2009-02-13 05:03:11Z david $
+ * @version     $Id$
 */
 
 /**
@@ -35,16 +35,14 @@ class Hashmark_AllTests
     {
         $suite = new PHPUnit_Framework_TestSuite('Hashmark - All Tests');
 
-        $dirname = dirname(__FILE__);
-
         $required = array();
-        $required[] = $dirname . '/BcMath/AllTests.php';
-        $required[] = $dirname . '/Assert/AllTests.php';
-        $required[] = $dirname . '/Hashmark/AllTests.php';
-        $required[] = $dirname . '/Module/AllTests.php';
-        $required[] = $dirname . '/DbHelper/AllTests.php';
-        $required[] = $dirname . '/Cache/AllTests.php';
-        $dependents = glob($dirname . '/*/AllTests.php');
+        $required[] = HASHMARK_ROOT_DIR . '/Test/BcMath/AllTests.php';
+        $required[] = HASHMARK_ROOT_DIR . '/Test/Assert/AllTests.php';
+        $required[] = HASHMARK_ROOT_DIR . '/Test/Hashmark/AllTests.php';
+        $required[] = HASHMARK_ROOT_DIR . '/Test/Module/AllTests.php';
+        $required[] = HASHMARK_ROOT_DIR . '/Test/DbHelper/AllTests.php';
+        $required[] = HASHMARK_ROOT_DIR . '/Test/Cache/AllTests.php';
+        $dependents = glob(HASHMARK_ROOT_DIR . '/Test/*/AllTests.php');
         $sortedTestFiles = array_unique(array_merge($required, $dependents));
 
         foreach ($sortedTestFiles as $testTypeFile) {

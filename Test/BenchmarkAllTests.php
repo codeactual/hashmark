@@ -15,14 +15,17 @@
  * @copyright   Copyright (c) 2008-2009, Code Actual LLC
  * @license     http://www.opensource.org/licenses/bsd-license.php New BSD License
  * @package     Hashmark-Test
- * @version     $Id: BenchmarkAllTests.php 275 2009-02-04 15:05:06Z david $
+ * @version     $Id$
 */
 
-$dirname = dirname(__FILE__);
+/**
+ * Turns on logging/error-reporting, loads PHPUnit, etc.
+ */
+require_once dirname(__FILE__) . '/bootstrap.php';
 
 // Only use one module suite.
 if (2 == $argc) {
-    $moduleSuiteFile = $dirname . '/' . $argv[1] . '/AllTests.php';
+    $moduleSuiteFile = HASHMARK_ROOT_DIR . '/Test/' . $argv[1] . '/AllTests.php';
     if (is_readable($moduleSuiteFile)) {
         /**
          * Load script in prep. for addTestSuite().
@@ -33,14 +36,14 @@ if (2 == $argc) {
 } 
 
 if (!isset($suiteName)) {
-    require_once $dirname . '/AllTests.php';
+    require_once HASHMARK_ROOT_DIR . '/Test/AllTests.php';
     $suiteName = 'Hashmark_AllTests';
 }
 
 /**
  * For Hashmark_TestListener_Benchmark static data/methods.
  */
-require_once $dirname . '/Listener/Benchmark.php';
+require_once HASHMARK_ROOT_DIR . '/Test/Listener/Benchmark.php';
 
 define('HASHMARK_BENCHMARK_PRECISION', 4);
 define('HASHMARK_BENCHMARK_RANKLIMIT', 15);

@@ -12,7 +12,7 @@
  * @license     http://www.opensource.org/licenses/bsd-license.php New BSD License
  * @package     Hashmark-Test
  * @subpackage  Hashmark_Analyst_BasicDecimal
- * @version     $Id: BasicDecimal.php 300 2009-02-13 05:51:17Z david $
+ * @version     $Id$
 */
 
 /**
@@ -424,7 +424,7 @@ class Hashmark_TestCase_Analyst_BasicDecimal extends Hashmark_TestCase
         static $expProviders;
 
         if (!$expProviders) {
-            require_once dirname(__FILE__) . '/BasicDecimal/Data/provider.php';
+            require_once HASHMARK_ROOT_DIR . '/Test/Analyst/BasicDecimal/Data/provider.php';
         }
 
         if (!$name) {
@@ -445,7 +445,7 @@ class Hashmark_TestCase_Analyst_BasicDecimal extends Hashmark_TestCase
      */
     public function hasGeneratedProviderData()
     {
-        $this->assertTrue(is_readable(dirname(__FILE__) . '/BasicDecimal/Data/provider.php'),
+        $this->assertTrue(is_readable(HASHMARK_ROOT_DIR . '/Test/Analyst/BasicDecimal/Data/provider.php'),
                           'Generate data: php -f Test/Analyst/BasicDecimal/Tool/writeProviderData.php');
     }
     

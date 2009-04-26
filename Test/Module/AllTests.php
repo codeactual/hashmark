@@ -12,7 +12,7 @@
  * @license     http://www.opensource.org/licenses/bsd-license.php New BSD License
  * @package     Hashmark-Test
  * @subpackage  Hashmark_Module
- * @version     $Id: AllTests.php 263 2009-02-03 11:22:57Z david $
+ * @version     $Id$
 */
 
 /**
@@ -33,22 +33,21 @@ class Hashmark_AllTests_Module
      */
     public static function suite()
     {
-        $dirname = dirname(__FILE__);
         $suite = new PHPUnit_Framework_TestSuite(__METHOD__);
 
         // Hashmark_Module
-        require_once $dirname . '/../../Module.php';
+        require_once HASHMARK_ROOT_DIR . '/Module.php';
 
         // Hashmark_TestCase_Module
-        require_once $dirname . '/../Module.php';
+        require_once HASHMARK_ROOT_DIR . '/Test/Module.php';
 
-        foreach (glob($dirname . '/../../Module/*.php') as $typeFile) {
+        foreach (glob(HASHMARK_ROOT_DIR . '/Module/*.php') as $typeFile) {
             $typeName = basename($typeFile, '.php');
 
             // Ex. class file for 'Hashmark_Module_DbDependent'
-            require_once $dirname . '/../../Module/' . $typeName . '.php';
+            require_once $typeFile;
             // Ex. class file for 'Hashmark_TestCase_Module_DbDependent'
-            require_once $dirname . '/' . $typeName . '.php';
+            require_once HASHMARK_ROOT_DIR . '/Test/Module/' . $typeName . '.php';
 
             $suite->addTestSuite('Hashmark_TestCase_Module_' . $typeName);
         }

@@ -12,7 +12,7 @@
  * @license     http://www.opensource.org/licenses/bsd-license.php New BSD License
  * @package     Hashmark-Test
  * @subpackage  Hashmark_Core
- * @version     $Id: AllTests.php 294 2009-02-13 03:48:59Z david $
+ * @version     $Id$
 */
 
 /**
@@ -33,14 +33,13 @@ class Hashmark_AllTests_Core
      */
     public static function suite()
     {
-        $dirname = dirname(__FILE__);
         $suite = new PHPUnit_Framework_TestSuite(__METHOD__);
         
         // Hashmark_Core
-        require_once $dirname . '/../../Core.php';
+        require_once HASHMARK_ROOT_DIR . '/Core.php';
 
         // Hashmark_TestCase_Core
-        require_once $dirname . '/../Core.php';
+        require_once HASHMARK_ROOT_DIR . '/Test/Core.php';
         
         $suite->addTestSuite('Hashmark_TestCase_Core');
 

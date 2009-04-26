@@ -14,7 +14,7 @@
  * @license     http://www.opensource.org/licenses/bsd-license.php New BSD License
  * @package     Hashmark-Test
  * @subpackage  Hashmark_Core
- * @version     $Id: provideDecrementValues.php 263 2009-02-03 11:22:57Z david $
+ * @version     $Id$
 */
 
 $data = array(array('start' => '0', 'delta' => '0', 'sum' => '0'),

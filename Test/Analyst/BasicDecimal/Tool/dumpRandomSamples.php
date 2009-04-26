@@ -17,22 +17,21 @@
  * @license     http://www.opensource.org/licenses/bsd-license.php New BSD License
  * @package     Hashmark-Test
  * @subpackage  Hashmark_Analyst_BasicDecimal
- * @version     $Id: dumpRandomSamples.php 298 2009-02-13 05:19:37Z david $
+ * @version     $Id$
 */
-
-$dirname = dirname(__FILE__);
 
 /**
  * For Hashmark::getModule().
  */
-require_once $dirname . '/../../../bootstrap.php';
+require_once dirname(__FILE__) . '/../../../bootstrap.php';
 
 /**
  * For hashmark_random_samples().
  */
-require_once $dirname . '/randomSamples.php';
+require_once HASHMARK_ROOT_DIR. '/Test/Analyst/BasicDecimal/Tool/randomSamples.php';
 
-define('HASHMARK_DUMP_RANDOMSAMPLES_FILE', $dirname . '/../Data/randomSamples.sql');
+define('HASHMARK_DUMP_RANDOMSAMPLES_FILE',
+       HASHMARK_ROOT_DIR . '/Test/Analyst/BasicDecimal/Data/randomSamples.sql');
 define('HASHMARK_DUMP_RANDOMSAMPLES_TYPE', 'decimal');
 define('HASHMARK_DUMP_RANDOMSAMPLES_SCALARS', 1);
 define('HASHMARK_DUMP_RANDOMSAMPLES_COUNT', 100000);

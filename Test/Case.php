@@ -12,13 +12,12 @@
  * @license     http://www.opensource.org/licenses/bsd-license.php New BSD License
  * @package     Hashmark-Test
  * @subpackage  Base
- * @version     $Id: Case.php 294 2009-02-13 03:48:59Z david $
+ * @version     $Id$
 */
 
 /**
  * Base class for all module test classes.
  *
- * @abstract
  * @package     Hashmark-Test
  * @subpackage  Base
  */
@@ -87,7 +86,7 @@ abstract class Hashmark_TestCase extends PHPUnit_Framework_TestCase
     {
         static $data;
 
-        require_once dirname(__FILE__) . '/Core/Data/' . __FUNCTION__ . '.php';
+        require_once HASHMARK_ROOT_DIR . '/Test/Core/Data/' . __FUNCTION__ . '.php';
 
         return $data;
     }
@@ -102,7 +101,7 @@ abstract class Hashmark_TestCase extends PHPUnit_Framework_TestCase
     {
         static $data;
 
-        require_once dirname(__FILE__) . '/Core/Data/' . __FUNCTION__ . '.php';
+        require_once HASHMARK_ROOT_DIR . '/Test/Core/Data/' . __FUNCTION__ . '.php';
 
         return $data;
     }

@@ -12,7 +12,7 @@
  * @license     http://www.opensource.org/licenses/bsd-license.php New BSD License
  * @package     Hashmark
  * @subpackage  Hashmark_Sampler
- * @version     $Id: StockPrice.php 263 2009-02-03 11:22:57Z david $
+ * @version     $Id$
  */
 
 /**

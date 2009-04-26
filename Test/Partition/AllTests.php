@@ -12,7 +12,7 @@
  * @license     http://www.opensource.org/licenses/bsd-license.php New BSD License
  * @package     Hashmark-Test
  * @subpackage  Hashmark_Partition
- * @version     $Id: AllTests.php 294 2009-02-13 03:48:59Z david $
+ * @version     $Id$
 */
 
 /**
@@ -33,14 +33,13 @@ class Hashmark_AllTests_Partition
      */
     public static function suite()
     {
-        $dirname = dirname(__FILE__);
         $suite = new PHPUnit_Framework_TestSuite(__METHOD__);
         
         // Hashmark_Partition
-        require_once $dirname . '/../../Partition.php';
+        require_once HASHMARK_ROOT_DIR . '/Partition.php';
 
         // Hashmark_TestCase_Partition
-        require_once $dirname . '/../Partition.php';
+        require_once HASHMARK_ROOT_DIR . '/Test/Partition.php';
 
         $suite->addTestSuite('Hashmark_TestCase_Partition');
 

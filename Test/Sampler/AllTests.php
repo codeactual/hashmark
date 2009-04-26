@@ -12,7 +12,7 @@
  * @license     http://www.opensource.org/licenses/bsd-license.php New BSD License
  * @package     Hashmark-Test
  * @subpackage  Hashmark_Sampler
- * @version     $Id: AllTests.php 263 2009-02-03 11:22:57Z david $
+ * @version     $Id$
 */
 
 /**
@@ -33,23 +33,22 @@ class Hashmark_AllTests_Sampler
      */
     public static function suite()
     {
-        $dirname = dirname(__FILE__);
         $suite = new PHPUnit_Framework_TestSuite(__METHOD__);
         
         // Hashmark_Sampler
-        require_once $dirname . '/../../Sampler.php';
+        require_once HASHMARK_ROOT_DIR . '/Sampler.php';
 
         // Hashmark_TestCase_Sampler
-        require_once $dirname . '/../Sampler.php';
+        require_once HASHMARK_ROOT_DIR . '/Test/Sampler.php';
 
-        foreach (glob($dirname . '/*.php') as $typeFile) {
-            $typeName = basename($typeFile, '.php');
+        foreach (glob(HASHMARK_ROOT_DIR . '/Test/Sampler/T*.php') as $typeTestFile) {
+            $typeName = basename($typeTestFile, '.php');
 
             if ('AllTests' != $typeName) {
                 // Ex. class file for 'Hashmark_Sampler_ScalarValue'
-                require_once $dirname . '/../../Sampler/' . $typeName . '.php';
+                require_once HASHMARK_ROOT_DIR . '/Sampler/' . $typeName . '.php';
                 // Ex. class file for 'Hashmark_TestCase_Sampler_ScalarValue'
-                require_once $dirname . '/' . $typeName . '.php';
+                require_once $typeTestFile;
 
                 $suite->addTestSuite('Hashmark_TestCase_Sampler_' . $typeName);
             }

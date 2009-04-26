@@ -11,21 +11,34 @@
  * @copyright   Copyright (c) 2008-2009, Code Actual LLC
  * @license     http://www.opensource.org/licenses/bsd-license.php New BSD License
  * @package     Hashmark
- * @version     $Id: Hashmark.php 291 2009-02-11 16:30:32Z david $
+ * @version     $Id$
 */
+
+/**
+ * Avoid repeated dirname().
+ */
+define('HASHMARK_ROOT_DIR', dirname(__FILE__));
 
 /**
  * Auto-load ZF components.
  */
-require_once 'Zend/Loader.php';
+require_once HASHMARK_ROOT_DIR . '/Zend/Loader.php';
 Zend_Loader::registerAutoload();
+
+// In case a script is invoked from a non-root dir
+// (since ZF uses relative paths for dependencies).
+$includePath = ini_get('include_path');
+if (false === strpos($includePath, HASHMARK_ROOT_DIR)) {
+    ini_set('include_path', $includePath  . ':' . HASHMARK_ROOT_DIR);
+}
+unset($includePath);
 
 /**
  * Minimal set required by most modules creaed by getModule().
  */
-require_once dirname(__FILE__) . '/Module.php';
-require_once dirname(__FILE__) . '/Module/DbDependent.php';
-require_once dirname(__FILE__) . '/Util.php';
+require_once HASHMARK_ROOT_DIR . '/Module.php';
+require_once HASHMARK_ROOT_DIR . '/Module/DbDependent.php';
+require_once HASHMARK_ROOT_DIR . '/Util.php';
 
 /**
  * Exception codes used in Hashmark_Module implementations.
@@ -70,8 +83,6 @@ class Hashmark
          */
         static $moduleCache = array();
         
-        $dirname = dirname(__FILE__);
-
         $baseConfig = self::getConfig($base);
         $typeConfig = null;
         
@@ -84,7 +95,7 @@ class Hashmark
         
         // Cache miss: load base/type classes and configs.
         if (!isset($moduleCache[$moduleId])) {
-            $baseClassFile = $dirname . "/{$base}.php";
+            $baseClassFile = HASHMARK_ROOT_DIR . "/{$base}.php";
             if (!is_readable($baseClassFile)) {
                 throw new Exception("File not found for class Hashmark_{$base}.");
             }
@@ -92,7 +103,7 @@ class Hashmark
 
             if ($type) {
                 // Apply external module paths defined in the base config file.
-                $modulePaths = array("{$dirname}/{$base}");
+                $modulePaths = array(HASHMARK_ROOT_DIR . "/{$base}");
                 if (!empty($baseConfig['ext_module_paths'])) {
                     $modulePaths = array_merge($baseConfig['ext_module_paths'], $modulePaths);
                 }
@@ -186,10 +197,8 @@ class Hashmark
          */
         static $typeConfigCache = array();
         
-        $dirname = dirname(__FILE__);
-
         if (!isset($defaultConfigCache)) {
-            $defaultConfigFile = $dirname . '/Config/Hashmark.php';
+            $defaultConfigFile = HASHMARK_ROOT_DIR . '/Config/Hashmark.php';
             if (!is_readable($defaultConfigFile)) {
                 throw new Exception("Default config file missing: {$defaultConfigFile}.");
             }
@@ -212,7 +221,7 @@ class Hashmark
                 $config = array();
             }
 
-            $baseConfigFile = $dirname . "/Config/{$base}.php";
+            $baseConfigFile = HASHMARK_ROOT_DIR . "/Config/{$base}.php";
 
             if (is_readable($baseConfigFile)) {
                 require_once $baseConfigFile;   // May update $config
@@ -223,7 +232,7 @@ class Hashmark
         }
                     
         // Apply external module paths defined in the base config file.
-        $configPaths = array("{$dirname}/Config/{$base}");
+        $configPaths = array(HASHMARK_ROOT_DIR . "/Config/{$base}");
         if (!empty($baseConfigCache[$base]['ext_config_paths'])) {
             $configPaths = array_merge($baseConfigCache[$base]['ext_config_paths'], $configPaths);
         }

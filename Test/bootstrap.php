@@ -13,7 +13,7 @@
  * @copyright   Copyright (c) 2008-2009, Code Actual LLC
  * @license     http://www.opensource.org/licenses/bsd-license.php New BSD License
  * @package     Hashmark-Test
- * @version     $Id: bootstrap.php 263 2009-02-03 11:22:57Z david $
+ * @version     $Id$
 */
 
 ini_set('error_reporting', E_ALL);
@@ -35,7 +35,7 @@ require_once dirname(__FILE__) . '/../Hashmark.php';
 /**
  * For Hashmark_TestCase
  */
-require_once dirname(__FILE__) . '/Case.php';
+require_once HASHMARK_ROOT_DIR . '/Test/Case.php';
 
 /**
  * Ex. forces Hashmark_DbHelper::openDb() to always use the 'unittest' profile.

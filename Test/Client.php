@@ -12,7 +12,7 @@
  * @license     http://www.opensource.org/licenses/bsd-license.php New BSD License
  * @package     Hashmark-Test
  * @subpackage  Base
- * @version     $Id: Client.php 294 2009-02-13 03:48:59Z david $
+ * @version     $Id$
 */
 
 /**

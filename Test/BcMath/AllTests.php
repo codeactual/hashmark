@@ -12,7 +12,7 @@
  * @license     http://www.opensource.org/licenses/bsd-license.php New BSD License
  * @package     Hashmark-Test
  * @subpackage  Hashmark_BcMath
- * @version     $Id: AllTests.php 263 2009-02-03 11:22:57Z david $
+ * @version     $Id$
 */
 
 /**
@@ -33,14 +33,13 @@ class Hashmark_AllTests_BcMath
      */
     public static function suite()
     {
-        $dirname = dirname(__FILE__);
         $suite = new PHPUnit_Framework_TestSuite(__METHOD__);
 
         // Hashmark_BcMath
-        require_once $dirname . '/../../BcMath.php';
+        require_once HASHMARK_ROOT_DIR . '/BcMath.php';
 
         // Hashmark_TestCase_BcMath
-        require_once $dirname . '/../BcMath.php';
+        require_once HASHMARK_ROOT_DIR . '/Test/BcMath.php';
 
         $suite->addTestSuite('Hashmark_TestCase_BcMath');
 

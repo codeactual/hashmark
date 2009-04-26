@@ -12,7 +12,7 @@
  * @license     http://www.opensource.org/licenses/bsd-license.php New BSD License
  * @package     Hashmark
  * @subpackage  Hashmark_Module
- * @version     $Id: DbDependent.php 296 2009-02-13 05:03:11Z david $
+ * @version     $Id$
 */
 
 require_once dirname(__FILE__) . '/../DbHelper.php';
@@ -22,7 +22,6 @@ require_once dirname(__FILE__) . '/../DbHelper.php';
  *
  * Automates SQL template/helper loading and exposes DB properties.
  *
- * @abstract
  * @package     Hashmark
  * @subpackage  Hashmark_Module
  */
@@ -61,9 +60,9 @@ abstract class Hashmark_Module_DbDependent extends Hashmark_Module
 
         // Load SQL templates.
         if ($this->_type) {
-            $templateFile = dirname(__FILE__) . "/../Sql/{$this->_base}/{$this->_type}.php";
+            $templateFile = HASHMARK_ROOT_DIR . "/Sql/{$this->_base}/{$this->_type}.php";
         } else {
-            $templateFile = dirname(__FILE__) . "/../Sql/{$this->_base}.php";
+            $templateFile = HASHMARK_ROOT_DIR . "/Sql/{$this->_base}.php";
         }
         if (!isset(self::$_sql[$this->_base]) && is_readable($templateFile)) {
             require $templateFile;

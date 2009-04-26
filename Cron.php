@@ -12,7 +12,7 @@
  * @license     http://www.opensource.org/licenses/bsd-license.php New BSD License
  * @package     Hashmark
  * @subpackage  Base
- * @version     $Id: Cron.php 296 2009-02-13 05:03:11Z david $
+ * @version     $Id$
 */
 
 /**

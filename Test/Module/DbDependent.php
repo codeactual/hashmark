@@ -12,7 +12,7 @@
  * @license     http://www.opensource.org/licenses/bsd-license.php New BSD License
  * @package     Hashmark-Test
  * @subpackage  Hashmark_Module
- * @version     $Id: DbDependent.php 297 2009-02-13 05:04:37Z david $
+ * @version     $Id$
 */
 
 /**

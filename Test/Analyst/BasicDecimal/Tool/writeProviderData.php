@@ -13,35 +13,33 @@
  * @license     http://www.opensource.org/licenses/bsd-license.php New BSD License
  * @package     Hashmark-Test
  * @subpackage  Hashmark_Analyst_BasicDecimal
- * @version     $Id: writeProviderData.php 299 2009-02-13 05:35:03Z david $
+ * @version     $Id$
 */
 
 if (!function_exists('bccomp')) {
     die("\nbcmath unavailable. Aborting.\n");
 }
 
-$dirname = dirname(__FILE__);
-
 /**
  * Turns on logging/error-reporting, Hashmark, Hashmark_TestCase, etc.
  */
-require_once $dirname . '/../../../bootstrap.php';
+require_once dirname(__FILE__) . '/../../../bootstrap.php';
 
 /**
  * Loads dependencies of most calc* generator scripts.
  */
-require_once $dirname . '/../../../../BcMath.php';
-require_once $dirname . '/../../../../Config/DbHelper.php';
-require_once $dirname . '/../../../../Analyst.php';
-require_once $dirname . '/../../../../Analyst/BasicDecimal.php';
-require_once $dirname . '/../../../../Test/Analyst/BasicDecimal.php';
+require_once HASHMARK_ROOT_DIR . '/BcMath.php';
+require_once HASHMARK_ROOT_DIR . '/Config/DbHelper.php';
+require_once HASHMARK_ROOT_DIR . '/Analyst.php';
+require_once HASHMARK_ROOT_DIR . '/Analyst/BasicDecimal.php';
+require_once HASHMARK_ROOT_DIR . '/Test/Analyst/BasicDecimal.php';
 
 $expProviders = array();
         
 $required = array();
-$required[] = $dirname . '/calcValuesAggAtInterval.php';
-$required[] = $dirname . '/calcChanges.php';
-$dependents = glob($dirname . '/calc*.php');
+$required[] = HASHMARK_ROOT_DIR . '/Test/Analyst/BasicDecimal/Tool/calcValuesAggAtInterval.php';
+$required[] = HASHMARK_ROOT_DIR . '/Test/Analyst/BasicDecimal/Tool/calcChanges.php';
+$dependents = glob(HASHMARK_ROOT_DIR . '/Test/Analyst/BasicDecimal/Tool/calc*.php');
 $sortedCalcFiles = array_unique(array_merge($required, $dependents));
 
 foreach ($sortedCalcFiles as $calcFile) {
@@ -54,5 +52,5 @@ foreach ($sortedCalcFiles as $calcFile) {
     $expProviders[$calcName] = $expValues;
 }
 
-file_put_contents($dirname . '/../Data/provider.php',
+file_put_contents(HASHMARK_ROOT_DIR . '/Test/Analyst/BasicDecimal/Data/provider.php',
                   "<?php\n\$expProviders = " . var_export($expProviders, true) . ';');

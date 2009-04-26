@@ -11,7 +11,7 @@
  * @copyright   Copyright (c) 2008-2009, Code Actual LLC
  * @license     http://www.opensource.org/licenses/bsd-license.php New BSD License
  * @package     Hashmark-Test
- * @version     $Id: BcMath.php 296 2009-02-13 05:03:11Z david $
+ * @version     $Id$
  */
 
 /**

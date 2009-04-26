@@ -12,7 +12,7 @@
  * @license     http://www.opensource.org/licenses/bsd-license.php New BSD License
  * @package     Hashmark
  * @subpackage  Base
- * @version     $Id: Sampler.php 263 2009-02-03 11:22:57Z david $
+ * @version     $Id$
  */
         
 /**
@@ -22,7 +22,6 @@
  * Other methods like getName() allow a front-end to simply glob() for available
  * samplers and their properties, rather than maintain them in a DB.
  *
- * @abstract
  * @package     Hashmark
  * @subpackage  Base
  */
