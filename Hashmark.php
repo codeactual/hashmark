@@ -20,10 +20,12 @@
 define('HASHMARK_ROOT_DIR', dirname(__FILE__));
 
 /**
- * Auto-load ZF components.
+ * Auto-load ZF components if not already embedded in ZF dependent app.
  */
-require_once HASHMARK_ROOT_DIR . '/Zend/Loader.php';
-Zend_Loader::registerAutoload();
+if (!class_exists('Zend_Loader_Autoloader')) {
+    require_once HASHMARK_ROOT_DIR . '/Zend/Loader/Autoloader.php';
+    Zend_Loader_Autoloader::getInstance();
+}
 
 // In case a script is invoked from a non-root dir
 // (since ZF uses relative paths for dependencies).
