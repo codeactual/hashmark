@@ -24,25 +24,47 @@
 class Hashmark_DbHelper extends Hashmark_Module
 {
     /**
+     * Factory for Zend adapter wrappers.
+     *
+     * @param string    $name       'Mysqli' or 'Pdo'.
+     * @param Array     $config     Constructor argument
+     * @return Zend_Db_Adapter_*    New instance.
+     * return 
+     */
+    public function getAdapter($name, $config)
+    {
+        require_once HASHMARK_ROOT_DIR . "/DbAdapter/{$name}.php";
+        $className = "Hashmark_DbAdapter_{$name}";
+        return new $className($config);
+    }
+
+    /**
      * Configure new database adapter that will open a connection on-demand.
      *
      *      -   Mainly for the Cron and unit test classes.
      *
      * @param string    $profileName
-     * @return Zend_Db_Adapter_*    Current instance; otherwise false.
+     * @return Zend_Db_Adapter_*    New instance.
+     * @throws Exception If profile or adapter name is unrecognized.
      */
     public function openDb($profileName)
     {
+        $allowedAdapters = array('Mysqli', 'Pdo');
+
         if (defined('HASHMARK_TEST_MODE')) {
             $profileName = 'unittest';
         }
 
         if (!isset($this->_baseConfig['profile'][$profileName])) {
-            return false;
+            throw new Exception("Database profile '{$profileName}' is not available.");
         }
 
-        $className = 'Zend_Db_Adapter_' . $this->_baseConfig['profile'][$profileName]['adapter'];
-        return new $className($this->_baseConfig['profile'][$profileName]['params']);
+        if (!in_array($this->_baseConfig['profile'][$profileName]['adapter'], $allowedAdapters)) {
+            throw new Exception("Database adapter '{$this->_baseConfig['profile'][$profileName]['adapter']}' is not allowed.");
+        }
+
+        return $this->getAdapter($this->_baseConfig['profile'][$profileName]['adapter'],
+                                  $this->_baseConfig['profile'][$profileName]['params']);
     }
     
     /**
@@ -50,15 +72,14 @@ class Hashmark_DbHelper extends Hashmark_Module
      *
      * @param mixed     $link           Database connection object/resource.
      * @param string    $adapterName    Ex. 'Mysqli'
-     * @return Zend_Db_Adapter_*    Current instance; otherwise false.
+     * @return Zend_Db_Adapter_*        New instance.
+     * @throws Exception If adapter name is unrecognized.
      */
     public function reuseDb($link, $adapterName)
     {
-        $className = 'Zend_Db_Adapter_' . $adapterName;
         $config = array('host' => '', 'username' => '', 'password' => '', 'dbname' => '');
-        $dbAdapter = new $className($config);
+        $dbAdapter = $this->getAdapter($adapterName, $config);
         $dbAdapter->setConnection($link);
-
         return $dbAdapter;
     }
 }
