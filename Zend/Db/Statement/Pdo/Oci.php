@@ -37,8 +37,9 @@ require_once 'Zend/Db/Statement/Pdo.php';
  * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
-class Zend_Db_Statement_Pdo_Ibm extends Zend_Db_Statement_Pdo
+class Zend_Db_Statement_Pdo_Oci extends Zend_Db_Statement_Pdo
 {
+
     /**
     * Returns an array containing all of the result set rows.
     *
@@ -55,7 +56,7 @@ class Zend_Db_Statement_Pdo_Ibm extends Zend_Db_Statement_Pdo
     {
         $data = parent::fetchAll($style, $col);
         $results = array();
-        $remove = $this->_adapter->foldCase('ZEND_DB_ROWNUM');
+        $remove = $this->_adapter->foldCase('zend_db_rownum');
 
         foreach ($data as $row) {
             if (is_array($row) && array_key_exists($remove, $row)) {
@@ -65,30 +66,4 @@ class Zend_Db_Statement_Pdo_Ibm extends Zend_Db_Statement_Pdo
         }
         return $results;
     }
-
-    /**
-     * Binds a parameter to the specified variable name.
-     *
-     * @param mixed $parameter Name the parameter, either integer or string.
-     * @param mixed $variable  Reference to PHP variable containing the value.
-     * @param mixed $type      OPTIONAL Datatype of SQL parameter.
-     * @param mixed $length    OPTIONAL Length of SQL parameter.
-     * @param mixed $options   OPTIONAL Other options.
-     * @return bool
-     * @throws Zend_Db_Statement_Exception
-     */
-    public function _bindParam($parameter, &$variable, $type = null, $length = null, $options = null)
-    {
-        try {
-            if (($type === null) && ($length === null) && ($options === null)) {
-                return $this->_stmt->bindParam($parameter, $variable);
-            } else {
-                return $this->_stmt->bindParam($parameter, $variable, $type, $length, $options);
-            }
-        } catch (PDOException $e) {
-            require_once 'Zend/Db/Statement/Exception.php';
-            throw new Zend_Db_Statement_Exception($e->getMessage());
-        }
-    }
-
 }
