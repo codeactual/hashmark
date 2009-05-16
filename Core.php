@@ -18,7 +18,7 @@
 /**
  * Core behaviors supporting front-ends.
  *
- * CRUD operations for scalars, jobs, categories, etc.
+ * CRUD operations for scalars, milestones, categories, etc.
  *
  * @package     Hashmark
  * @subpackage  Base
@@ -45,28 +45,6 @@ class Hashmark_Core extends Hashmark_Module_DbDependent
         return array('Unscheduled', 'Scheduled', 'Running');
     }
     
-    /**
-     * Return all `jobs` fields associated with an ID.
-     *
-     * @param int       $id
-     * @return Array    Assoc. of fields; otherwise false.
-     * @throws Exception On query error.
-     */
-    public function getJobById($id)
-    {
-        $sql = 'SELECT * '
-             . "FROM {$this->_dbName}`jobs` "
-             . 'WHERE `id` = ?';
-
-        $rows = $this->_db->fetchAll($sql, array($id));
-        
-        if (!$rows) {
-            return false;
-        }
-
-        return $rows[0];
-    }
-
     /**
      * Add `scalars` row.
      *

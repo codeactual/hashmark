@@ -37,7 +37,6 @@ $cron = $core->getModule('Cron');
 
 $rndSampleTime = 0;
 $createScalarTime = 0;
-$startJobTime = 0;
 $createSampleTime = 0;
 $totalSampleCnt = 0;
 
@@ -60,16 +59,14 @@ for ($scalars = 0; $scalars < HASHMARK_CREATESAMPLES_SCALARS; $scalars++) {
     $createScalarTime += $end - $start;
 
     $start = microtime(true);
-    $jobId = $cron->startJob();
     $end = microtime(true);
-    $startJobTime += $end - $start;
 
     $sampleCnt = count($samples);
     $start = microtime(true);
     foreach ($samples as $timeData => $value) {
         list($time) = explode('=', $timeData);
         
-        $cron->createSample($scalarId, $jobId, $value, $time, $time);
+        $cron->createSample($scalarId, $value, $time, $time);
     }
     $end = microtime(true);
     $createSampleTime += $end - $start;
@@ -80,14 +77,12 @@ for ($scalars = 0; $scalars < HASHMARK_CREATESAMPLES_SCALARS; $scalars++) {
 
 $rndSampleRate = sprintf('%0.4f', round(($totalSampleCnt / $rndSampleTime) * 60, 4));
 $createScalarRate = sprintf('%0.4f', round(($totalSampleCnt / $createScalarTime) * 60, 4));
-$startJobRate = sprintf('%0.4f', round(($totalSampleCnt / $startJobTime) * 60, 4));
 $createSampleRate = sprintf('%0.4f', round(($totalSampleCnt / $createSampleTime) * 60, 4));
-$timerTotal = $rndSampleTime + $createSampleTime + $startJobTime + $createSampleTime;
+$timerTotal = $rndSampleTime + $createSampleTime + $createSampleTime;
 $timerTotal = sprintf('%0.4f', round($timerTotal, 4));
 
 echo "\ntotalSampleCnt: {$totalSampleCnt} rows\n";
 echo "timerTotal: {$timerTotal} secs\n";
 echo "randomSampleRate: {$rndSampleRate} rows/min\n";
 echo "createScalar: {$createScalarRate} rows/min\n";
-echo "startJob: {$startJobRate} rows/min\n";
 echo "createSample: {$createSampleRate} rows/min\n";

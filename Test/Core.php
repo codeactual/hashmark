@@ -32,31 +32,6 @@ class Hashmark_TestCase_Core extends Hashmark_TestCase
         
         $this->_core = Hashmark::getModule('Core', '', $this->_db);
     }
-
-    /**
-     * @test
-     * @group Core
-     * @group getsJobById
-     * @group getJobById
-     * @group startJob
-     */
-    public function getsJobById()
-    {
-        $cron = Hashmark::getModule('Cron', '', $this->_db);
-        
-        // False positive check.
-        $this->assertFalse($this->_core->getJobById(''));
-        $this->assertFalse($this->_core->getJobById(0));
-        $this->assertFalse($this->_core->getJobById(-1));
-
-        $expectedId = $cron->startJob();
-
-        $job = $this->_core->getJobById($expectedId);
-
-        $this->assertEquals($expectedId, $job['id']);
-        $this->assertNotEquals(HASHMARK_DATETIME_EMPTY, $job['start']);
-        $this->assertEquals(HASHMARK_DATETIME_EMPTY, $job['end']);
-    }
     
     /**
      * @test

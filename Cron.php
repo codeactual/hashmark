@@ -27,52 +27,16 @@
 class Hashmark_Cron extends Hashmark_Module_DbDependent
 {
     /**
-     * Add new row to `jobs`.
-     *
-     * @return int  Inserted row ID.
-     * @throws Exception On query error.
-     */
-    public function startJob()
-    {
-        $sql = "INSERT INTO {$this->_dbName}`jobs` "
-             . '(`start`) '
-             . 'VALUES (UTC_TIMESTAMP())';
-
-        $this->_db->query($sql);
-        
-        return $this->_db->lastInsertId();
-    }
-    
-    /**
-     * Register the end of a job.
-     *
-     * @param int       $id
-     * @return boolean  True on success.
-     * @throws Exception On query error.
-     */
-    public function endJob($id)
-    {
-        $sql = "UPDATE {$this->_dbName}`jobs` "
-             . 'SET `end` = UTC_TIMESTAMP() '
-             . 'WHERE `id` = ?';
-
-        $stmt = $this->_db->query($sql, array($id));
-        
-        return (1 == $stmt->rowCount());
-    }
-
-    /**
      * Add new row to `samples`.
      *
      * @param int       $scalarId
-     * @param int       $jobId 
      * @param string    $value
      * @param mixed     $start  UNIX timestamp or DATETIME string.
      * @param mixed     $end    UNIX timestamp or DATETIME string.
      * @return boolean  True on success.
      * @throws Exception On query error.
      */
-    public function createSample($scalarId, $jobId, $value, $start, $end)
+    public function createSample($scalarId, $value, $start, $end)
     {
         $start = Hashmark_Util::toDatetime($start);
         $end = Hashmark_Util::toDatetime($end);
@@ -96,12 +60,12 @@ class Hashmark_Cron extends Hashmark_Module_DbDependent
         $this->_db->query($sql, array($value, $end, $scalarId));
         
         $sql = 'INSERT INTO ~samples '
-             . '(`job_id`, `value`, `start`, `end`) '
-             . 'VALUES (?, ?, ?, ?)';
+             . '(`value`, `start`, `end`) '
+             . 'VALUES (?, ?, ?)';
         
         // queryAtDate() instead of queryCurrent() so unit tests can
         // create backdated samples.
-        $bind = array($jobId, $value, $start, $end);
+        $bind = array($value, $start, $end);
         $stmt = $this->getModule('Partition')->queryAtDate($scalarId, $sql, $end, $bind);
 
         return (1 == $stmt->rowCount());

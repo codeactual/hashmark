@@ -25,7 +25,7 @@ require_once dirname(__FILE__) . '/../../Hashmark.php';
 $db = Hashmark::getModule('DbHelper')->openDb('unittest');
 
 $coreTables = array('categories', 'categories_milestones', 'categories_scalars',
-                    'jobs', 'milestones', 'scalars');
+                    'milestones', 'scalars');
 
 foreach ($coreTables as $table) {
     $db->query($db, "TRUNCATE `{$table}`");

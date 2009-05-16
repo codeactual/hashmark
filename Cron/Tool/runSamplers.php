@@ -28,8 +28,6 @@ if (empty($scheduledScalars)) {
     exit;
 }
 
-$jobId = $cron->startJob();
-
 // Reuse previously loaded sampler objects since they have no properties.
 $cache = array();
 
@@ -70,10 +68,8 @@ foreach ($scheduledScalars as $scalar) {
         continue;
     }
 
-    if (!$cron->createSample($scalar['id'], $jobId, $value, $start, $end)) {
+    if (!$cron->createSample($scalar['id'], $value, $start, $end)) {
         $cron->setSamplerStatus($scalar['id'], 'Scheduled',
-                                "Could not save sample: j={$jobId} st={$start} en={$end} v={$value}");
+                                "Could not save sample: start={$start} end={$end} value={$value}");
     }
 }
-
-$cron->endJob($jobId);

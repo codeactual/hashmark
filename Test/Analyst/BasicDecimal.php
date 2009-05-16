@@ -480,13 +480,11 @@ class Hashmark_TestCase_Analyst_BasicDecimal extends Hashmark_TestCase
      * @group decimal
      * @group createScalar
      * @group createSample
-     * @group startJob
      */
     public function findsValues()
     {
         $scalarFields = array('name' => self::randomString(), 'type' => 'decimal');
         $scalarId = $this->_core->createScalar($scalarFields);
-        $jobId = $this->_cron->startJob();
 
         $sampleProvider = self::provideFullSamplesData('provideValuesSamples');
         $this->assertFalse(empty($sampleProvider));
@@ -500,7 +498,7 @@ class Hashmark_TestCase_Analyst_BasicDecimal extends Hashmark_TestCase
                 $expValues[$end] = $value;
             }
 
-            $this->_cron->createSample($scalarId, $jobId, $value, $end, $end);
+            $this->_cron->createSample($scalarId, $value, $end, $end);
         }
 
         $actValues = $this->_analyst->values($scalarId, 50, $sampleProvider['rangeStart'], $sampleProvider['rangeEnd']);
@@ -520,7 +518,6 @@ class Hashmark_TestCase_Analyst_BasicDecimal extends Hashmark_TestCase
      * @group decimal
      * @group createScalar
      * @group createSample
-     * @group startJob
      */
     public function findsValuesAtInterval()
     {
@@ -538,7 +535,6 @@ class Hashmark_TestCase_Analyst_BasicDecimal extends Hashmark_TestCase
             foreach ($sampleSets as $samples) {
                 $scalarFields = array('name' => self::randomString(), 'type' => 'decimal');
                 $scalarId = $this->_core->createScalar($scalarFields);
-                $jobId = $this->_cron->startJob();
 
                 $expValues = array();
 
@@ -549,7 +545,7 @@ class Hashmark_TestCase_Analyst_BasicDecimal extends Hashmark_TestCase
                         $expValues[$end] = $value;
                     }
 
-                    $this->_cron->createSample($scalarId, $jobId, $value, $end, $end);
+                    $this->_cron->createSample($scalarId, $value, $end, $end);
                 }
 
                 $actValues = $this->_analyst->valuesAtInterval($scalarId, 50, $sampleProvider['rangeStart'], $sampleProvider['rangeEnd'], $sampleProvider['interval']);
@@ -573,13 +569,11 @@ class Hashmark_TestCase_Analyst_BasicDecimal extends Hashmark_TestCase
      * @group decimal
      * @group createScalar
      * @group createSample
-     * @group startJob
      */
     public function findsValuesAgg()
     {
         $scalarFields = array('name' => self::randomString(), 'type' => 'decimal');
         $scalarId = $this->_core->createScalar($scalarFields);
-        $jobId = $this->_cron->startJob();
 
         $sampleProvider = self::provideFullSamplesData('provideValuesSamples');
         $this->assertFalse(empty($sampleProvider));
@@ -589,7 +583,7 @@ class Hashmark_TestCase_Analyst_BasicDecimal extends Hashmark_TestCase
 
         foreach ($sampleProvider['samples'] as $sample) {
             list($end, $value) = $sample;
-            $this->_cron->createSample($scalarId, $jobId, $value, $end, $end);
+            $this->_cron->createSample($scalarId, $value, $end, $end);
         }
 
         foreach (self::$_aggFunctions as $aggFunc) {
@@ -611,7 +605,6 @@ class Hashmark_TestCase_Analyst_BasicDecimal extends Hashmark_TestCase
      * @group decimal
      * @group createScalar
      * @group createSample
-     * @group startJob
      */
     public function findsValuesAggAtInterval()
     {
@@ -633,11 +626,10 @@ class Hashmark_TestCase_Analyst_BasicDecimal extends Hashmark_TestCase
             foreach ($sampleSets as $samples) {
                 $scalarFields = array('name' => self::randomString(), 'type' => 'decimal');
                 $scalarId = $this->_core->createScalar($scalarFields);
-                $jobId = $this->_cron->startJob();
 
                 foreach ($samples as $sample) {
                     list($end, $value) = $sample;
-                    $this->_cron->createSample($scalarId, $jobId, $value, $end, $end);
+                    $this->_cron->createSample($scalarId, $value, $end, $end);
                 }
 
                 foreach (self::$_aggFunctions as $aggFunc) {
@@ -667,7 +659,6 @@ class Hashmark_TestCase_Analyst_BasicDecimal extends Hashmark_TestCase
      * @group decimal
      * @group createScalar
      * @group createSample
-     * @group startJob
      */
     public function findsValuesNestedAggsAtInterval()
     {
@@ -683,11 +674,10 @@ class Hashmark_TestCase_Analyst_BasicDecimal extends Hashmark_TestCase
 
             $scalarFields = array('name' => self::randomString(), 'type' => 'decimal');
             $scalarId = $this->_core->createScalar($scalarFields);
-            $jobId = $this->_cron->startJob();
 
             foreach ($sampleProvider['samples'] as $sample) {
                 list($end, $value) = $sample;
-                $this->_cron->createSample($scalarId, $jobId, $value, $end, $end);
+                $this->_cron->createSample($scalarId, $value, $end, $end);
             }
 
             foreach (self::$_aggFunctions as $aggFuncOuter) {
@@ -720,7 +710,6 @@ class Hashmark_TestCase_Analyst_BasicDecimal extends Hashmark_TestCase
      * @group decimal
      * @group createScalar
      * @group createSample
-     * @group startJob
      */
     public function findsValuesAggAtRecurrence()
     {
@@ -736,11 +725,10 @@ class Hashmark_TestCase_Analyst_BasicDecimal extends Hashmark_TestCase
 
             $scalarFields = array('name' => self::randomString(), 'type' => 'decimal');
             $scalarId = $this->_core->createScalar($scalarFields);
-            $jobId = $this->_cron->startJob();
 
             foreach ($sampleProvider['samples'] as $sample) {
                 list($end, $value) = $sample;
-                $this->_cron->createSample($scalarId, $jobId, $value, $end, $end);
+                $this->_cron->createSample($scalarId, $value, $end, $end);
             }
 
             foreach (Hashmark_Analyst_BasicDecimal::getRecurFunctions() as $recurFunc) {
@@ -769,7 +757,6 @@ class Hashmark_TestCase_Analyst_BasicDecimal extends Hashmark_TestCase
      * @group decimal
      * @group createScalar
      * @group createSample
-     * @group startJob
      */
     public function findsChanges()
     {
@@ -785,11 +772,10 @@ class Hashmark_TestCase_Analyst_BasicDecimal extends Hashmark_TestCase
 
             $scalarFields = array('name' => self::randomString(), 'type' => 'decimal');
             $scalarId = $this->_core->createScalar($scalarFields);
-            $jobId = $this->_cron->startJob();
 
             foreach ($sampleProvider['samples'] as $sample) {
                 list($end, $value) = $sample;
-                $this->_cron->createSample($scalarId, $jobId, $value, $end, $end);
+                $this->_cron->createSample($scalarId, $value, $end, $end);
             }
 
             $errorMsg = "data={$sampleProviderName}";
@@ -812,7 +798,6 @@ class Hashmark_TestCase_Analyst_BasicDecimal extends Hashmark_TestCase
      * @group decimal
      * @group createScalar
      * @group createSample
-     * @group startJob
      */
     public function findsChangesAtInterval()
     {
@@ -828,11 +813,10 @@ class Hashmark_TestCase_Analyst_BasicDecimal extends Hashmark_TestCase
 
             $scalarFields = array('name' => self::randomString(), 'type' => 'decimal');
             $scalarId = $this->_core->createScalar($scalarFields);
-            $jobId = $this->_cron->startJob();
 
             foreach ($sampleProvider['samples'] as $sample) {
                 list($end, $value) = $sample;
-                $this->_cron->createSample($scalarId, $jobId, $value, $end, $end);
+                $this->_cron->createSample($scalarId, $value, $end, $end);
             }
 
             $actValues = $this->_analyst->changesAtInterval($scalarId, 50, $sampleProvider['rangeStart'], $sampleProvider['rangeEnd'], $sampleProvider['interval']);
@@ -855,7 +839,6 @@ class Hashmark_TestCase_Analyst_BasicDecimal extends Hashmark_TestCase
      * @group decimal
      * @group createScalar
      * @group createSample
-     * @group startJob
      */
     public function findsChangesAgg()
     {
@@ -871,11 +854,10 @@ class Hashmark_TestCase_Analyst_BasicDecimal extends Hashmark_TestCase
 
             $scalarFields = array('name' => self::randomString(), 'type' => 'decimal');
             $scalarId = $this->_core->createScalar($scalarFields);
-            $jobId = $this->_cron->startJob();
 
             foreach ($sampleProvider['samples'] as $sample) {
                 list($end, $value) = $sample;
-                $this->_cron->createSample($scalarId, $jobId, $value, $end, $end);
+                $this->_cron->createSample($scalarId, $value, $end, $end);
             }
 
             foreach (self::$_aggFunctions as $aggFunc) {
@@ -898,7 +880,6 @@ class Hashmark_TestCase_Analyst_BasicDecimal extends Hashmark_TestCase
      * @group decimal
      * @group createScalar
      * @group createSample
-     * @group startJob
      */
     public function findsChangesAggAtInterval()
     {
@@ -917,11 +898,10 @@ class Hashmark_TestCase_Analyst_BasicDecimal extends Hashmark_TestCase
 
             $scalarFields = array('name' => self::randomString(), 'type' => 'decimal');
             $scalarId = $this->_core->createScalar($scalarFields);
-            $jobId = $this->_cron->startJob();
 
             foreach ($sampleProvider['samples'] as $sample) {
                 list($end, $value) = $sample;
-                $this->_cron->createSample($scalarId, $jobId, $value, $end, $end);
+                $this->_cron->createSample($scalarId, $value, $end, $end);
             }
 
             foreach (self::$_aggFunctions as $aggFunc) {
@@ -950,7 +930,6 @@ class Hashmark_TestCase_Analyst_BasicDecimal extends Hashmark_TestCase
      * @group decimal
      * @group createScalar
      * @group createSample
-     * @group startJob
      */
     public function findsChangesNestedAggsAtInterval()
     {
@@ -966,11 +945,10 @@ class Hashmark_TestCase_Analyst_BasicDecimal extends Hashmark_TestCase
 
             $scalarFields = array('name' => self::randomString(), 'type' => 'decimal');
             $scalarId = $this->_core->createScalar($scalarFields);
-            $jobId = $this->_cron->startJob();
 
             foreach ($sampleProvider['samples'] as $sample) {
                 list($end, $value) = $sample;
-                $this->_cron->createSample($scalarId, $jobId, $value, $end, $end);
+                $this->_cron->createSample($scalarId, $value, $end, $end);
             }
 
             foreach (self::$_aggFunctions as $aggFuncOuter) {
@@ -1003,7 +981,6 @@ class Hashmark_TestCase_Analyst_BasicDecimal extends Hashmark_TestCase
      * @group decimal
      * @group createScalar
      * @group createSample
-     * @group startJob
      */
     public function findsChangesAggAtRecurrence()
     {
@@ -1019,11 +996,10 @@ class Hashmark_TestCase_Analyst_BasicDecimal extends Hashmark_TestCase
 
             $scalarFields = array('name' => self::randomString(), 'type' => 'decimal');
             $scalarId = $this->_core->createScalar($scalarFields);
-            $jobId = $this->_cron->startJob();
 
             foreach ($sampleProvider['samples'] as $sample) {
                 list($end, $value) = $sample;
-                $this->_cron->createSample($scalarId, $jobId, $value, $end, $end);
+                $this->_cron->createSample($scalarId, $value, $end, $end);
             }
 
             foreach (Hashmark_Analyst_BasicDecimal::getRecurFunctions() as $recurFunc) {
@@ -1052,7 +1028,6 @@ class Hashmark_TestCase_Analyst_BasicDecimal extends Hashmark_TestCase
      * @group decimal
      * @group createScalar
      * @group createSample
-     * @group startJob
      */
     public function findsFrequencies()
     {
@@ -1068,11 +1043,10 @@ class Hashmark_TestCase_Analyst_BasicDecimal extends Hashmark_TestCase
         
             $scalarFields = array('name' => self::randomString(), 'type' => 'decimal');
             $scalarId = $this->_core->createScalar($scalarFields);
-            $jobId = $this->_cron->startJob();
 
             foreach ($sampleProvider['samples'] as $sample) {
                 list($end, $value) = $sample;
-                $this->_cron->createSample($scalarId, $jobId, $value, $end, $end);
+                $this->_cron->createSample($scalarId, $value, $end, $end);
             }
 
             $errorMsg = "data={$sampleProviderName}} ASC";
@@ -1101,7 +1075,6 @@ class Hashmark_TestCase_Analyst_BasicDecimal extends Hashmark_TestCase
      * @group decimal
      * @group createScalar
      * @group createSample
-     * @group startJob
      */
     public function findsMoving()
     {
@@ -1117,11 +1090,10 @@ class Hashmark_TestCase_Analyst_BasicDecimal extends Hashmark_TestCase
         
             $scalarFields = array('name' => self::randomString(), 'type' => 'decimal');
             $scalarId = $this->_core->createScalar($scalarFields);
-            $jobId = $this->_cron->startJob();
 
             foreach ($sampleProvider['samples'] as $sample) {
                 list($end, $value) = $sample;
-                $this->_cron->createSample($scalarId, $jobId, $value, $end, $end);
+                $this->_cron->createSample($scalarId, $value, $end, $end);
             }
 
             foreach (self::$_aggFunctions as $aggFunc) {
@@ -1148,7 +1120,6 @@ class Hashmark_TestCase_Analyst_BasicDecimal extends Hashmark_TestCase
      * @group decimal
      * @group createScalar
      * @group createSample
-     * @group startJob
      */
     public function findsMovingAtInterval()
     {
@@ -1167,11 +1138,10 @@ class Hashmark_TestCase_Analyst_BasicDecimal extends Hashmark_TestCase
 
             $scalarFields = array('name' => self::randomString(), 'type' => 'decimal');
             $scalarId = $this->_core->createScalar($scalarFields);
-            $jobId = $this->_cron->startJob();
 
             foreach ($sampleProvider['samples'] as $sample) {
                 list($end, $value) = $sample;
-                $this->_cron->createSample($scalarId, $jobId, $value, $end, $end);
+                $this->_cron->createSample($scalarId, $value, $end, $end);
             }
 
             foreach (self::$_aggFunctions as $aggFunc) {

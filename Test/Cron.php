@@ -33,44 +33,6 @@ class Hashmark_TestCase_Cron extends Hashmark_TestCase
         $this->_cron = Hashmark::getModule('Cron', '', $this->_db);
         $this->_core = Hashmark::getModule('Core', '', $this->_db);
     }
-
-    /**
-     * @test
-     * @group Cron
-     * @group startsJob
-     * @group startJob
-     * @group getJobById
-     */
-    public function startsJob()
-    {
-        $expectedId = $this->_cron->startJob();
-        
-        $job = $this->_core->getJobById($expectedId);
-
-        $this->assertEquals($expectedId, $job['id']);
-        $this->assertNotEquals(HASHMARK_DATETIME_EMPTY, $job['start']);
-        $this->assertEquals(HASHMARK_DATETIME_EMPTY, $job['end']);
-    }
-    
-    /**
-     * @test
-     * @group Cron
-     * @group endsJob
-     * @group endJob
-     * @group getJobById
-     */
-    public function endsJob()
-    {
-        $expectedId = $this->_cron->startJob();
-        
-        $this->assertTrue($this->_cron->endJob($expectedId));
-
-        $job = $this->_core->getJobById($expectedId);
-
-        $this->assertEquals($expectedId, $job['id']);
-        $this->assertNotEquals(HASHMARK_DATETIME_EMPTY, $job['start']);
-        $this->assertNotEquals(HASHMARK_DATETIME_EMPTY, $job['end']);
-    }
     
     /**
      * @test
@@ -80,7 +42,6 @@ class Hashmark_TestCase_Cron extends Hashmark_TestCase
      * @group getSample
      * @group createScalar
      * @group getScalarById
-     * @group startJob
      */
     public function createsSampleAndUpdatesScalar()
     {
@@ -95,19 +56,16 @@ class Hashmark_TestCase_Cron extends Hashmark_TestCase
 
             $expectedScalarId = $this->_core->createScalar($expectedScalar);
 
-            $expectedJobId = $this->_cron->startJob();
-
             $expectedStart = gmdate(HASHMARK_DATETIME_FORMAT, time() - 5);
             $expectedEnd = gmdate(HASHMARK_DATETIME_FORMAT);
 
-            $sampleCreated = $this->_cron->createSample($expectedScalarId, $expectedJobId,
-                                                        $value, $expectedStart, $expectedEnd);
+            $sampleCreated = $this->_cron->createSample($expectedScalarId, $value,
+                                                        $expectedStart, $expectedEnd);
             $this->assertTrue($sampleCreated);
 
             $sample = $this->_cron->getLatestSample($expectedScalarId);
 
             // Ensure samples table got updated.
-            $this->assertEquals($expectedJobId, $sample['job_id']);
             $this->assertEquals($expectedStart, $sample['start']);
             $this->assertEquals($expectedEnd, $sample['end']);
             $this->assertEquals($value, $sample['value']);
@@ -122,8 +80,8 @@ class Hashmark_TestCase_Cron extends Hashmark_TestCase
             $this->assertEquals(1, $scalar['sample_count']);
             
             // Ensure sample sequence is increasing in scalars and samples table.
-            $sampleCreated = $this->_cron->createSample($expectedScalarId, $expectedJobId,
-                                                        $value, $expectedStart, $expectedEnd);
+            $sampleCreated = $this->_cron->createSample($expectedScalarId, $value, 
+                                                        $expectedStart, $expectedEnd);
             $this->assertTrue($sampleCreated);
             $nextSample = $this->_cron->getLatestSample($expectedScalarId);
             $this->assertEquals(2, $nextSample['id']);

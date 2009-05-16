@@ -316,8 +316,7 @@ class Hashmark_TestCase_Partition extends Hashmark_TestCase
     {
         $expectedTables = array('scalar%' => 'scalars',
                                 'catego%' => 'categories',
-                                '%estones' => 'milestones',
-                                'jobs' => 'jobs');
+                                '%estones' => 'milestones');
 
         foreach ($this->_core->getValidScalarTypes() as $type) {
             $expectedTables["%_{$type}"] = "samples_{$type}";
@@ -914,10 +913,9 @@ class Hashmark_TestCase_Partition extends Hashmark_TestCase
         $scalarFields['name'] = self::randomString();
         $scalarFields['type'] = 'decimal';
         $scalarId = $this->_core->createScalar($scalarFields);
-        $jobId = $cron->startJob();
         $start = gmdate(HASHMARK_DATETIME_FORMAT);
         $end = $start;
-        $cron->createSample($scalarId, $jobId, 1, $start, $end);
+        $cron->createSample($scalarId, 1, $start, $end);
 
         // Triggers a Hashmark_Partition::queryCurrent() in createTempFromQuery().
         $currentPartition = $this->_partition->getIntervalTableName($scalarId);
@@ -937,8 +935,8 @@ class Hashmark_TestCase_Partition extends Hashmark_TestCase
         $start = '2008-06-03 00:00:00';
         $end = '2008-12-12 00:00:00';
         $sql = 'SELECT `end`, `value` FROM ~samples';
-        $cron->createSample($scalarId, $jobId, 1, $start, $start);
-        $cron->createSample($scalarId, $jobId, 1, $end, $end);
+        $cron->createSample($scalarId, 1, $start, $start);
+        $cron->createSample($scalarId, 1, $end, $end);
         $tempName = $this->_partition->createTempFromQuery($srcName, '`x`, `y`',
                                                            $sql, array(),
                                                            $scalarId, $start, $end);

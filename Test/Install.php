@@ -38,7 +38,7 @@ if (!$dbHelper) {
  * 
  */
 $expectedTableList = array('categories', 'categories_milestones', 'categories_scalars',
-                           'jobs', 'milestones', 'samples_string', 'samples_decimal',
+                           'milestones', 'samples_string', 'samples_decimal',
                            'samples_analyst_temp', 'scalars');
 
 $expectedTableSql = $expectedTableList;
