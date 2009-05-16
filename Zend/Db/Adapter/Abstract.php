@@ -17,7 +17,7 @@
  * @subpackage Adapter
  * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
- * @version    $Id: Abstract.php 15189 2009-04-27 01:56:32Z matthew $
+ * @version    $Id: Abstract.php 15240 2009-04-28 16:42:37Z mikaelkael $
  */
 
 
@@ -431,23 +431,6 @@ abstract class Zend_Db_Adapter_Abstract
     {
         $this->_defaultStmtClass = $class;
         return $this;
-    }
-
-    /**
-     * Executes an SQL statement and return the number of affected rows
-     *
-     * @param  mixed  $sql  The SQL statement with placeholders.
-     *                      May be a string or Zend_Db_Select.
-     * @return Zend_Db_Statement_Interface
-     */
-    public function exec($sql)
-    {
-        // is the $sql a Zend_Db_Select object?
-        if ($sql instanceof Zend_Db_Select) {
-            $sql = $sql->assemble();
-        }
-
-        return $this->getConnection()->exec($sql);
     }
 
     /**
