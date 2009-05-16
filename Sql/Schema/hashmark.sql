@@ -16,6 +16,47 @@
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
+-- Table structure for table `agents`
+--
+
+DROP TABLE IF EXISTS `agents`;
+SET @saved_cs_client     = @@character_set_client;
+SET character_set_client = utf8;
+CREATE TABLE `agents` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `type` enum('Sampler','Alert') COLLATE utf8_unicode_ci NOT NULL DEFAULT 'Sampler',
+  `classname` varchar(30) COLLATE utf8_unicode_ci NOT NULL DEFAULT '' COMMENT 'PHP class',
+  PRIMARY KEY (`id`),
+  KEY `idx_list` (`type`,`classname`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci COMMENT='Classes available to visit scalars';
+SET character_set_client = @saved_cs_client;
+
+--
+-- Table structure for table `agents_scalars`
+--
+
+DROP TABLE IF EXISTS `agents_scalars`;
+SET @saved_cs_client     = @@character_set_client;
+SET character_set_client = utf8;
+CREATE TABLE `agents_scalars` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `agent_id` int(10) unsigned NOT NULL DEFAULT '0',
+  `scalar_id` int(10) unsigned NOT NULL DEFAULT '0',
+  `config` text COLLATE utf8_unicode_ci NOT NULL COMMENT 'Serialized PHP array',
+  `error` varchar(255) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',
+  `status` enum('Unscheduled','Scheduled','Running') COLLATE utf8_unicode_ci NOT NULL DEFAULT 'Unscheduled',
+  `frequency` int(10) unsigned NOT NULL DEFAULT '0' COMMENT 'Minutes',
+  `start` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
+  PRIMARY KEY (`id`),
+  KEY `agent_id` (`agent_id`),
+  KEY `scalar_id` (`scalar_id`),
+  KEY `idx_scheduled` (`agent_id`,`scalar_id`,`status`,`frequency`,`start`),
+  CONSTRAINT `ibfk_agents_scalars_agent_id` FOREIGN KEY (`agent_id`) REFERENCES `agents` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `ibfk_agents_scalars_scalar_id` FOREIGN KEY (`scalar_id`) REFERENCES `scalars` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci COMMENT='Scalar visitors';
+SET character_set_client = @saved_cs_client;
+
+--
 -- Table structure for table `categories`
 --
 
@@ -41,7 +82,11 @@ SET character_set_client = utf8;
 CREATE TABLE `categories_milestones` (
   `category_id` int(10) unsigned NOT NULL DEFAULT '0',
   `milestone_id` int(10) unsigned NOT NULL DEFAULT '0',
-  PRIMARY KEY (`category_id`,`milestone_id`)
+  PRIMARY KEY (`category_id`,`milestone_id`),
+  KEY `category_id` (`category_id`),
+  KEY `milestone_id` (`milestone_id`),
+  CONSTRAINT `ibfk_categories_milestones_category_id` FOREIGN KEY (`category_id`) REFERENCES `categories` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `ibfk_categories_milestones_milestone_id` FOREIGN KEY (`milestone_id`) REFERENCES `milestones` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci COMMENT='Category-milestone, many-to-many';
 SET character_set_client = @saved_cs_client;
 
@@ -55,7 +100,11 @@ SET character_set_client = utf8;
 CREATE TABLE `categories_scalars` (
   `category_id` int(10) unsigned NOT NULL DEFAULT '0',
   `scalar_id` int(10) unsigned NOT NULL DEFAULT '0',
-  PRIMARY KEY (`category_id`,`scalar_id`)
+  PRIMARY KEY (`category_id`,`scalar_id`),
+  KEY `category_id` (`category_id`),
+  KEY `scalar_id` (`scalar_id`),
+  CONSTRAINT `ibfk_categories_scalars_category_id` FOREIGN KEY (`category_id`) REFERENCES `categories` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `ibfk_categories_scalars_scalar_id` FOREIGN KEY (`scalar_id`) REFERENCES `scalars` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci COMMENT='Category-scalar, many-to-many';
 SET character_set_client = @saved_cs_client;
 
@@ -140,17 +189,11 @@ CREATE TABLE `scalars` (
   `value` varchar(255) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',
   `type` enum('decimal','string') COLLATE utf8_unicode_ci NOT NULL DEFAULT 'decimal',
   `description` varchar(100) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',
-  `last_inline_change` datetime NOT NULL DEFAULT '0000-00-00 00:00:00' COMMENT 'Last value change from client module use',
-  `last_sample_change` datetime NOT NULL DEFAULT '0000-00-00 00:00:00' COMMENT 'Last update from cron/sampler result',
-  `sampler_error` varchar(255) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',
-  `sampler_status` enum('Unscheduled','Scheduled','Running') COLLATE utf8_unicode_ci NOT NULL DEFAULT 'Unscheduled',
-  `sampler_name` varchar(30) COLLATE utf8_unicode_ci NOT NULL DEFAULT '' COMMENT 'Ex. PHP class name',
-  `sampler_frequency` int(10) unsigned NOT NULL DEFAULT '0' COMMENT 'Minutes',
-  `sampler_start` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
+  `last_inline_change` datetime NOT NULL DEFAULT '0000-00-00 00:00:00' COMMENT 'Last update from client module use',
+  `last_agent_change` datetime NOT NULL DEFAULT '0000-00-00 00:00:00' COMMENT 'Last update from cron-triggered agent',
   `sample_count` int(10) unsigned NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
-  KEY `idx_get` (`name`,`value`),
-  KEY `idx_scheduled` (`sampler_name`,`sampler_status`,`sampler_frequency`,`sampler_start`,`last_sample_change`)
+  KEY `idx_get` (`name`,`value`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci COMMENT='Tracked data points';
 SET character_set_client = @saved_cs_client;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -163,4 +206,4 @@ SET character_set_client = @saved_cs_client;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2009-05-16 18:17:43
+-- Dump completed on 2009-05-16 21:06:47
