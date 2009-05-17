@@ -2,7 +2,7 @@
 // vim: fenc=utf-8:ft=php:ai:si:ts=4:sw=4:et:
 
 /**
- * Hashmark_Sampler_Test
+ * Hashmark_Agent_Test
  *
  * @filesource
  * @link        http://code.google.com/p/hashmark/
@@ -11,7 +11,7 @@
  * @copyright   Copyright (c) 2008-2009, Code Actual LLC
  * @license     http://www.opensource.org/licenses/bsd-license.php New BSD License
  * @package     Hashmark
- * @subpackage  Hashmark_Sampler
+ * @subpackage  Agent
  * @version     $Id$
  */
 
@@ -19,12 +19,12 @@
  * Class for unit tests.
  *
  * @package     Hashmark
- * @subpackage  Hashmark_Sampler
+ * @subpackage  Agent
  */
-class Hashmark_Sampler_Test extends Hashmark_Sampler
+class Hashmark_Agent_Test implements Hashmark_Agent
 {
     /**
-     * @see Abstract parent signature docs.
+     * @see Parent/interface signature docs.
      */
     public static function getName()
     {
@@ -32,17 +32,17 @@ class Hashmark_Sampler_Test extends Hashmark_Sampler
     }
 
     /**
-     * @see Abstract parent signature docs.
+     * @see Parent/interface signature docs.
      */
     public static function getDescription()
     {
-        return 'Unit test sampler';
+        return 'Unit test agent';
     }
 
     /**
-     * @see Abstract parent signature docs.
+     * @see Parent/interface signature docs.
      */
-    public static function run($params = array())
+    public static function run($agent = array())
     {
         return '1234';
     }

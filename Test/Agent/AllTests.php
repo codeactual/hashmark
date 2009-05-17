@@ -2,7 +2,7 @@
 // vim: fenc=utf-8:ft=php:ai:si:ts=4:sw=4:et:
 
 /**
- * Hashmark_AllTests_Sampler
+ * Hashmark_AllTests_Agent
  *
  * @filesource
  * @link        http://code.google.com/p/hashmark/
@@ -11,7 +11,7 @@
  * @copyright   Copyright (c) 2008-2009, Code Actual LLC
  * @license     http://www.opensource.org/licenses/bsd-license.php New BSD License
  * @package     Hashmark-Test
- * @subpackage  Hashmark_Sampler
+ * @subpackage  Hashmark_Agent
  * @version     $Id$
 */
 
@@ -22,9 +22,9 @@ require_once dirname(__FILE__) . '/../bootstrap.php';
 
 /**
  * @package     Hashmark-Test
- * @subpackage  Hashmark_Sampler
+ * @subpackage  Hashmark_Agent
  */
-class Hashmark_AllTests_Sampler
+class Hashmark_AllTests_Agent
 {
     /**
      * Auto-discover all tests.
@@ -35,22 +35,22 @@ class Hashmark_AllTests_Sampler
     {
         $suite = new PHPUnit_Framework_TestSuite(__METHOD__);
         
-        // Hashmark_Sampler
-        require_once HASHMARK_ROOT_DIR . '/Sampler.php';
+        // Hashmark_Agent
+        require_once HASHMARK_ROOT_DIR . '/Agent.php';
+        
+        // Hashmark_TestCase_Agent
+        require_once HASHMARK_ROOT_DIR . '/Test/Agent.php';
 
-        // Hashmark_TestCase_Sampler
-        require_once HASHMARK_ROOT_DIR . '/Test/Sampler.php';
-
-        foreach (glob(HASHMARK_ROOT_DIR . '/Test/Sampler/T*.php') as $typeTestFile) {
+        foreach (glob(HASHMARK_ROOT_DIR . '/Test/Agent/T*.php') as $typeTestFile) {
             $typeName = basename($typeTestFile, '.php');
 
             if ('AllTests' != $typeName) {
-                // Ex. class file for 'Hashmark_Sampler_ScalarValue'
-                require_once HASHMARK_ROOT_DIR . '/Sampler/' . $typeName . '.php';
-                // Ex. class file for 'Hashmark_TestCase_Sampler_ScalarValue'
+                // Ex. class file for 'Hashmark_Agent_ScalarValue'
+                require_once HASHMARK_ROOT_DIR . '/Agent/' . $typeName . '.php';
+                // Ex. class file for 'Hashmark_TestCase_Agent_ScalarValue'
                 require_once $typeTestFile;
 
-                $suite->addTestSuite('Hashmark_TestCase_Sampler_' . $typeName);
+                $suite->addTestSuite('Hashmark_TestCase_Agent_' . $typeName);
             }
         }
 

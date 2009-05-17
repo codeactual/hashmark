@@ -2,7 +2,7 @@
 // vim: fenc=utf-8:ft=php:ai:si:ts=4:sw=4:et:
 
 /**
- * Hashmark_TestCase_Sampler_Test
+ * Hashmark_TestCase_Agent_Test
  *
  * @filesource
  * @link        http://code.google.com/p/hashmark/
@@ -11,51 +11,51 @@
  * @copyright   Copyright (c) 2008-2009, Code Actual LLC
  * @license     http://www.opensource.org/licenses/bsd-license.php New BSD License
  * @package     Hashmark-Test
- * @subpackage  Hashmark_Sampler
+ * @subpackage  Hashmark_Agent
  * @version     $Id$
 */
 
 /**
  * @package     Hashmark-Test
- * @subpackage  Hashmark_Sampler
+ * @subpackage  Hashmark_Agent
  */
-class Hashmark_TestCase_Sampler_Test extends Hashmark_TestCase_Sampler
+class Hashmark_TestCase_Agent_Test extends Hashmark_TestCase_Agent
 {
     /**
      * @test
-     * @group Sampler
+     * @group Agent
      * @group Test
-     * @group getsSamplerName
+     * @group getsAgentName
      * @group getName
      */
-    public function getsSamplerName()
+    public function getsAgentName()
     {
-        $this->assertEquals('Test', Hashmark::getModule('Sampler', 'Test')->getName());
+        $this->assertEquals('Test', Hashmark::getModule('Agent', 'Test')->getName());
     }
     
     /**
      * @test
-     * @group Sampler
+     * @group Agent
      * @group Test
-     * @group getsSamplerDescription
+     * @group getsAgentDescription
      * @group getDescription
      */
-    public function getsSamplerDescription()
+    public function getsAgentDescription()
     {
-        $this->assertEquals('Unit test sampler', Hashmark::getModule('Sampler', 'Test')->getDescription());
+        $this->assertEquals('Unit test agent', Hashmark::getModule('Agent', 'Test')->getDescription());
     }
     
     /**
      * @test
-     * @group Sampler
+     * @group Agent
      * @group Test
-     * @group runsSampler
+     * @group runsAgent
      * @group run
      */
-    public function runsSampler()
+    public function runsAgent()
     {
         $fakeScalarId = 1;
-        $sample = Hashmark::getModule('Sampler', 'Test')->run($fakeScalarId);
+        $sample = Hashmark::getModule('Agent', 'Test')->run($fakeScalarId);
         $this->assertEquals('1234', $sample);
     }
 }

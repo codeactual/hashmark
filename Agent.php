@@ -2,7 +2,7 @@
 // vim: fenc=utf-8:ft=php:ai:si:ts=4:sw=4:et:
 
 /**
- * Hashmark_Sampler
+ * Hashmark_Agent
  *
  * @filesource
  * @link        http://code.google.com/p/hashmark/
@@ -16,36 +16,34 @@
  */
         
 /**
- * Base class for sample acquiring classes.
- *
- * Implementations live in Sampler/. Each defines a new data source in run().
- * Other methods like getName() allow a front-end to simply glob() for available
- * samplers and their properties, rather than maintain them in a DB.
+ * Interface of cron-triggered agents.
  *
  * @package     Hashmark
  * @subpackage  Base
  */
-abstract class Hashmark_Sampler extends Hashmark_Module
+interface Hashmark_Agent
 {
     /**
      * Return the human-readable name.
      *
      * @return string
      */
-    abstract public static function getName();
+    public static function getName();
 
     /**
      * Return the description text.
      *
      * @return string
      */
-    abstract public static function getDescription();
+    public static function getDescription();
 
     /**
-     * Return the new scalar/sample value using an arbitrary data source.
+     * Perform the agent's task, ex. sampling a data source, or testing for an
+     * alert state and responding.
      *
-     * @param array     $params     Optional, sampler-specific config array.
-     * @return string   New value; null on error.
+     * @param Array     $agent  Agent-specific fields, ex. scalar ID, configs,
+     *                          last run time, etc.
+     * @return mixed    Agent-specific.
      */
-    abstract public static function run($params = array());
+    public static function run($agent = array());
 }

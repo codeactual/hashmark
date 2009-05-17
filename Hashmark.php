@@ -58,7 +58,7 @@ define('HASHMARK_EXCEPTION_SQL', 2);
 class Hashmark
 {
     /**
-     * Factory for Hashmark_Module implementations: Client, Core, Cron, Sampler, etc.
+     * Factory for Hashmark_Module implementations: Client, Core, Cron, Agent, etc.
      *
      *      -   Autoloads required scripts and config files (if they exist)
      *          based on naming conventions.
@@ -66,8 +66,9 @@ class Hashmark
      *          Hashmark::getModule($base, $type, $a, $b);
      *          Dependency list must match classes initModule() definition.
      *
-     * @param string    $base   Ex. 'Sampler', optional base class in Sampler.php.
-     * @param string    $type   Ex. 'ScalarValue', implementation in Sampler/ScalarValue.php.
+     * @param string    $base   Base class, ex. 'Agent' in Agent.php.
+     * @param string    $type   Optional class subtype, ex. 'ScalarValue'
+     *                          in Agent/ScalarValue.php.
      * @param mixed     ...     Variable-length list of arguments passed on to
      *                          instance's initModule().
      * @return mixed    New instance; false if instance's initModule()
@@ -98,10 +99,9 @@ class Hashmark
         // Cache miss: load base/type classes and configs.
         if (!isset($moduleCache[$moduleId])) {
             $baseClassFile = HASHMARK_ROOT_DIR . "/{$base}.php";
-            if (!is_readable($baseClassFile)) {
-                throw new Exception("File not found for class Hashmark_{$base}.");
+            if (is_readable($baseClassFile)) {
+                require_once $baseClassFile;
             }
-            require_once $baseClassFile;
 
             if ($type) {
                 // Apply external module paths defined in the base config file.
@@ -137,7 +137,8 @@ class Hashmark
             }
 
             $moduleCache[$moduleId] = new $instClass($base, $baseConfig, $type,
-                                               self::getConfig($base, $type), $cache);
+                                                     self::getConfig($base, $type),
+                                                     $cache);
         }
         
         $inst = clone $moduleCache[$moduleId];
@@ -169,8 +170,8 @@ class Hashmark
      *          then applies overrides defined in optional files discovered
      *          with standard Hashmark naming conventions inside Config/.
      * 
-     * @param string    $base   Ex. 'Sampler', optional base class in Sampler.php.
-     * @param string    $type   Ex. 'ScalarValue', implementation in Sampler/ScalarValue.php.
+     * @param string    $base   Ex. 'Agent', optional base class in Agent.php.
+     * @param string    $type   Ex. 'ScalarValue', implementation in Agent/ScalarValue.php.
      * @param string    $key    If key exists in the config array, only the
      *                          associated value is returned, rather than whole
      *                          array. Optional.

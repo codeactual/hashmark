@@ -16,8 +16,8 @@ fi
 # -d    Source directories
 # -t    Target directory
 
-sourceFiles="Module.php,Module/DbDependent.php,Analyst.php,BcMath,php,Cache.php,Client.php,Core.php,Cron.php,DbHelper.php,Hashmark.php,Module.php,Partition.php,Sampler.php,Test.php,Util.php,Test/Case.php"
-sourceDirs="Config,Cron,Module,Sampler,Sql,Test"
+sourceFiles="Module.php,Module/DbDependent.php,Agent.php,Analyst.php,BcMath,php,Cache.php,Client.php,Core.php,Cron.php,DbHelper.php,Hashmark.php,Module.php,Partition.php,Test.php,Util.php,Test/Case.php"
+sourceDirs="Agent,Config,Cron,Module,Sql,Test"
 
 phpdoc \
 -ue \

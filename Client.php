@@ -52,7 +52,6 @@ class Hashmark_Client extends Hashmark_Module_DbDependent
         if ($newSample) {
             $sql = "UPDATE {$this->_dbName}`scalars` "
                  . 'SET `value` = ?, '
-                 . '`last_sample_change` = UTC_TIMESTAMP(), '
                  . '`last_inline_change` = UTC_TIMESTAMP() '
                  . 'WHERE `name` = ?';
 
@@ -175,7 +174,6 @@ class Hashmark_Client extends Hashmark_Module_DbDependent
         if ($newSample) {
             $sql = "UPDATE {$this->_dbName}`scalars` "
                  . "SET `value` = {$sum}, "
-                 . '`last_sample_change` = UTC_TIMESTAMP(), '
                  . '`last_inline_change` = UTC_TIMESTAMP() '
                  . 'WHERE `name` = ? '
                  . 'AND `type` = "decimal"';

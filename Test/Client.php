@@ -123,7 +123,6 @@ class Hashmark_TestCase_Client extends Hashmark_TestCase
         $scalar = $this->_core->getScalarById($expectedId);
         $this->assertEquals($value, $scalar['value']);
         $time = time();
-        $this->assertLessThan(5, abs(strtotime($scalar['last_sample_change'] . ' UTC') - $time));
         $this->assertLessThan(5, abs(strtotime($scalar['last_inline_change'] . ' UTC') - $time));
 
         // Ensure scalar change w/ get().
@@ -245,7 +244,6 @@ class Hashmark_TestCase_Client extends Hashmark_TestCase
         $scalar = $this->_core->getScalarById($expectedId);
         $this->assertDecimalEquals($value['sum'], $scalar['value']);
         $time = time();
-        $this->assertLessThan(5, abs(strtotime($scalar['last_sample_change'] . ' UTC') - $time));
         $this->assertLessThan(5, abs(strtotime($scalar['last_inline_change'] . ' UTC') - $time));
 
         // Ensure scalar change w/ get().
@@ -293,7 +291,6 @@ class Hashmark_TestCase_Client extends Hashmark_TestCase
         $scalar = $this->_core->getScalarById($expectedId);
         $this->assertDecimalEquals($value['sum'], $scalar['value']);
         $time = time();
-        $this->assertLessThan(5, abs(strtotime($scalar['last_sample_change'] . ' UTC') - $time));
         $this->assertLessThan(5, abs(strtotime($scalar['last_inline_change'] . ' UTC') - $time));
 
         // Ensure scalar change w/ get().

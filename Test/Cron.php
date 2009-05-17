@@ -74,9 +74,7 @@ class Hashmark_TestCase_Cron extends Hashmark_TestCase
             // Ensure associated scalar got updated.
             $scalar = $this->_core->getScalarById($expectedScalarId);
             $this->assertEquals($value, $scalar['value']);
-            $this->assertEquals($expectedEnd, $scalar['last_sample_change']);
-            $this->assertTrue(empty($scalar['sampler_error']));
-            $this->assertEquals('Scheduled', $scalar['sampler_status']);
+            $this->assertEquals($expectedEnd, $scalar['last_agent_change']);
             $this->assertEquals(1, $scalar['sample_count']);
             
             // Ensure sample sequence is increasing in scalars and samples table.
@@ -91,131 +89,161 @@ class Hashmark_TestCase_Cron extends Hashmark_TestCase
     /**
      * @test
      * @group Cron
-     * @group setsSamplerStatus
-     * @group setSamplerStatus
+     * @group setsScalarAgentStatus
+     * @group setScalarAgentStatus
+     * @group createAgent
      * @group createScalar
-     * @group getValidScalarTypes
-     * @group getScalarById
+     * @group getScalarAgentById
      */
-    public function setsSamplerStatus()
+    public function setsScalarAgentStatus()
     {
-        $expectedScalar = array();
+        $agentId = $this->_core->createAgent(self::randomString());
 
-        foreach ($this->_core->getValidScalarTypes() as $type) {
-            $expectedScalar['name'] = self::randomString();
-            $expectedScalar['type'] = $type;
-
-            $expectedScalarId = $this->_core->createScalar($expectedScalar);
+        $scalar = array();
+        $scalar['name'] = self::randomString();
+        $scalar['type'] = 'decimal';;
+        $scalarId = $this->_core->createScalar($scalar);
             
-            $this->_cron->setSamplerStatus($expectedScalarId, 'Running');
-            $scalar = $this->_core->getScalarById($expectedScalarId);
-            $this->assertEquals('Running', $scalar['sampler_status']);
-            $this->assertEquals('', $scalar['sampler_error']);
-
-            $this->_cron->setSamplerStatus($expectedScalarId, 'Unscheduled', '<error message>');
-            $scalar = $this->_core->getScalarById($expectedScalarId);
-            $this->assertEquals('Unscheduled', $scalar['sampler_status']);
-            $this->assertEquals('<error message>', $scalar['sampler_error']);
-
-            $this->_cron->setSamplerStatus($expectedScalarId, 'Scheduled');
-            $scalar = $this->_core->getScalarById($expectedScalarId);
-            $this->assertEquals('Scheduled', $scalar['sampler_status']);
-            $this->assertEquals('', $scalar['sampler_error']);
-        }
+        $scalarAgentId = $this->_core->createScalarAgent($scalarId, $agentId, 0);
+            
+        // Only change status and error, leaving default lastrun. 
+        $status = 'Scheduled';
+        $error = self::randomString();
+        $this->_cron->setScalarAgentStatus($scalarAgentId, $status, $error);
+        $scalarAgent = $this->_core->getScalarAgentById($scalarAgentId);
+        $this->assertEquals($status, $scalarAgent['status']);
+        $this->assertEquals($error, $scalarAgent['error']);
+        $this->assertEquals(HASHMARK_DATETIME_EMPTY, $scalarAgent['lastrun']);
+        
+        // Change all three.
+        $status = 'Scheduled';
+        $error = self::randomString();
+        $lastrun = time();
+        $this->_cron->setScalarAgentStatus($scalarAgentId, $status, $error, $lastrun);
+        $scalarAgent = $this->_core->getScalarAgentById($scalarAgentId);
+        $this->assertEquals($status, $scalarAgent['status']);
+        $this->assertEquals($error, $scalarAgent['error']);
+        $this->assertEquals($lastrun, strtotime($scalarAgent['lastrun'] . ' UTC'));
     }
     
     /**
      * @test
      * @group Cron
-     * @group getsScheduledSamples
-     * @group getScheduledSamplers
+     * @group getsScheduledAgents
+     * @group getScheduledAgents
      * @group createScalar
      */
-    public function getsScheduledSamples()
+    public function getsScheduledAgents()
     {
-        foreach (self::provideScalarsWithScheduledSamplers() as $scalarFields) {
-            $expectedScalarId = $this->_core->createScalar($scalarFields);
+        $scalar = array();
+        $scalar['name'] = self::randomString();
+        $scalar['type'] = 'decimal';
+        $scalarId = $this->_core->createScalar($scalar);
 
-            $scheduledScalars = $this->_cron->getScheduledSamplers();
+        $agentId = $this->_core->createAgent(self::randomString());
 
-            $scheduledScalarIds = array();
-            foreach ($scheduledScalars as $scalar) {
-                $scheduledScalarIds[] = $scalar['id'];
+        $time = time();
+        $expectedIds = array();
+
+        $expectedIds[] = $this->_core->createScalarAgent($scalarId, $agentId,
+                                                           0, 'Scheduled', '',
+                                                           $time);
+        $expectedIds[] = $this->_core->createScalarAgent($scalarId, $agentId,
+                                                           1440, 'Scheduled');
+
+        $scheduledAgents = $this->_cron->getScheduledAgents();
+
+        foreach ($scheduledAgents as $scalarAgent) {
+            // Ignore records created outside this test.
+            if ($scalarId == $scalarAgent['scalar_id']) {
+                $actualIds[] = $scalarAgent['id'];
             }
-
-            $this->assertTrue(in_array($expectedScalarId, $scheduledScalarIds));
         }
+                
+        $this->assertEquals($expectedIds, $actualIds);
     }        
    
     /**
      * @test
      * @group Cron
-     * @group avoidsUnscheduledSamples
-     * @group getScheduledSamplers
+     * @group avoidsUnscheduledAgents
+     * @group getScheduledAgents
      * @group createScalar
      */
-    public function avoidsUnscheduledSamples()
+    public function avoidsUnscheduledAgents()
     {
-        $fieldsToTamper = array('sampler_name', 'sampler_status', 'sampler_frequency', 'sampler_start');
-        
-        foreach (self::provideScalarsWithScheduledSamplers() as $scalarFields) {
-            foreach ($fieldsToTamper as $tamperField) {
-                switch ($tamperField) {
-                    case 'sampler_name':
-                        $scalarFields[$tamperField] = '';
-                        break;
-                    case 'sampler_status':
-                        $scalarFields[$tamperField] = 'Unscheduled';
-                        break;
-                    case 'sampler_frequency':
-                        $scalarFields[$tamperField] = '1440';
-                        break;
-                    case 'sampler_start':
-                        $scalarFields[$tamperField] = gmdate(HASHMARK_DATETIME_FORMAT, time() + 1400);
-                        break;
-                    default:
-                        $this->assertTrue(false);
-                        break;
-                }
+        $scalar = array();
+        $scalar['name'] = self::randomString();
+        $scalar['type'] = 'decimal';
+        $scalarId = $this->_core->createScalar($scalar);
 
-                $expectedScalarId = $this->_core->createScalar($scalarFields);
+        $agentId = $this->_core->createAgent(self::randomString());
 
-                $scheduledScalars = $this->_cron->getScheduledSamplers();
+        $time = time();
+        $unexpectedIds = array();
 
-                $scheduledScalarIds = array();
-                foreach ($scheduledScalars as $scalar) {
-                    $scheduledScalarIds[] = $scalar['id'];
-                }
+        $unexpectedIds[] = $this->_core->createScalarAgent($scalarId, $agentId,
+                                                           0, 'Unscheduled', '',
+                                                           $time);
+        // Won't start until tomorrow.
+        $unexpectedIds[] = $this->_core->createScalarAgent($scalarId, $agentId,
+                                                           0, 'Scheduled', '',
+                                                           $time + 1400);
 
-                $this->assertFalse(in_array($expectedScalarId, $scheduledScalarIds));
+        $scheduledAgents = $this->_cron->getScheduledAgents();
+
+        $actualIds = array();
+        foreach ($scheduledAgents as $scalarAgent) {
+            // Ignore records created outside this test.
+            if ($scalarId == $scalarAgent['scalar_id']) {
+                $msg = sprintf('scalar: %d, agent: %d, join id: %d',
+                               $scalarId, $agentId, $scalarAgent['id']);
+                $this->assertTrue(false, $msg);
+                return;
             }
         }
+                
+        $this->assertTrue(true);
     }        
     
     /**
      * @test
      * @group Cron
-     * @group runsSamplers
-     * @group runSamplers
+     * @group runsAgents
+     * @group runAgents
      */
-    public function runsSamplers()
+    public function runsAgents()
     {
         $scheduledScalarIds = array();
 
-        foreach (self::provideScalarsWithScheduledSamplers() as $scalarFields) {
-            $scheduledScalarIds[] = $this->_core->createScalar($scalarFields);
+        $scalar = array();
+        $scalar['name'] = self::randomString();
+        $scalar['type'] = 'decimal';
+        $scalar['value'] = '1234';
+        $scalarId = $this->_core->createScalar($scalar);
+
+        $agent = $this->_core->getAgentByName('ScalarValue');
+        if ($agent) {
+            $agentId = $agent['id'];
+        } else {
+            $agentId = $this->_core->createAgent('ScalarValue');
         }
+
+        // Agent is scheduled to run immediately (0 frequency).
+        $scalarAgentId = $this->_core->createScalarAgent($scalarId, $agentId,
+                                                         0, 'Scheduled');
+
+        require HASHMARK_ROOT_DIR . '/Cron/Tool/runAgents.php';
         
-        $time = time();
-        require HASHMARK_ROOT_DIR . '/Cron/Tool/runSamplers.php';
+        // Assert scalar value changed in last 60 seconds.
+        $scalar = $this->_core->getScalarById($scalarId);
+        $this->assertEquals($scalar['value'], $scalar['value']);
         
-        foreach ($scheduledScalarIds as $scalarId) {
-            $scalar = $this->_core->getScalarById($scalarId);
-            $this->assertEquals('Scheduled', $scalar['sampler_status']);
-            $this->assertLessThan(60, abs(strtotime($scalar['last_sample_change'] . ' UTC') - $time));
-            $this->assertEquals('', $scalar['sampler_error']);
-            $this->assertEquals('1234', $scalar['value']);
-        }
+        // Assert scalar agent is ready for future run.
+        $scalarAgent = $this->_core->getScalarAgentById($scalarAgentId);
+        $this->assertEquals('Scheduled', $scalarAgent['status']);
+        $this->assertEquals('', $scalarAgent['error']);
+        $this->assertLessThan(5, abs(strtotime($scalarAgent['lastrun'] . ' UTC') - time()));
     }
     
     /**
@@ -235,13 +263,13 @@ class Hashmark_TestCase_Cron extends Hashmark_TestCase
             $partition->dropTable($priorMergeTables);
         }
 
-        $scalarFields = array();
-        $scalarFields['name'] = self::randomString();
-        $scalarFields['type'] = 'decimal';
-        $scalarId = $this->_core->createScalar($scalarFields);
+        $scalar = array();
+        $scalar['name'] = self::randomString();
+        $scalar['type'] = 'decimal';
+        $scalarId = $this->_core->createScalar($scalar);
 
         $regTableName = 'test_samples_' . self::randomString();
-        $partition->createTable($scalarId, $regTableName, $scalarFields['type']);
+        $partition->createTable($scalarId, $regTableName, $scalar['type']);
 
         $now = time();
         $start = '2008-04-01 01:45:59';

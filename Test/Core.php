@@ -36,6 +36,138 @@ class Hashmark_TestCase_Core extends Hashmark_TestCase
     /**
      * @test
      * @group Core
+     * @group createsAgentAndGetsById
+     * @group getAgentById
+     * @group createAgent
+     */
+    public function createsAgentAndGetsById()
+    {
+        // False positive check.
+        $this->assertFalse($this->_core->getAgentById(''));
+        $this->assertFalse($this->_core->getAgentById(0));
+        $this->assertFalse($this->_core->getAgentById(-1));
+
+        $expectedName = self::randomString();
+        $expectedId = $this->_core->createAgent($expectedName);
+
+        $agent = $this->_core->getAgentById($expectedId);
+        $this->assertEquals($expectedId, $agent['id']);
+        $this->assertEquals($expectedName, $agent['name']);
+    }
+    
+    /**
+     * @test
+     * @group Core
+     * @group createsAgentAndGetsByName
+     * @group getAgentByName
+     * @group createAgent
+     */
+    public function createsAgentAndGetsByName()
+    {
+        // False positive check.
+        $this->assertFalse($this->_core->getAgentByName(''));
+        $this->assertFalse($this->_core->getAgentByName(0));
+        $this->assertFalse($this->_core->getAgentByName(-1));
+
+        $expectedName = self::randomString();
+        $expectedId = $this->_core->createAgent($expectedName);
+
+        $agent = $this->_core->getAgentByName($expectedName);
+        $this->assertEquals($expectedId, $agent['id']);
+        $this->assertEquals($expectedName, $agent['name']);
+    }
+
+    /**
+     * @test
+     * @group Core
+     * @group deletesAgent
+     * @group deleteAgent
+     * @group createAgent
+     * @group getAgentById
+     */
+    public function deletesAgent()
+    {
+        $expectedId = $this->_core->createAgent(self::randomString());
+        $this->assertTrue($this->_core->deleteAgent($expectedId));
+        $this->assertFalse($this->_core->getAgentById($expectedId));
+    }
+    
+    /**
+     * @test
+     * @group Core
+     * @group createsScalarAgentAndGetsById
+     * @group getScalarAgentById
+     * @group createScalarAgent
+     */
+    public function createsScalarAgentAndGetsById()
+    {
+        // False positive check.
+        $this->assertFalse($this->_core->getScalarAgentById(''));
+        $this->assertFalse($this->_core->getScalarAgentById(0));
+        $this->assertFalse($this->_core->getScalarAgentById(-1));
+
+        $agentId = $this->_core->createAgent(self::randomString());
+
+        $scalar = array();
+        $scalar['name'] = self::randomString();
+        $scalar['type'] = 'decimal';
+        $scalarId = $this->_core->createScalar($scalar);
+        
+        // Rely on some defaults. 
+        $frequency = 0;
+        $scalarAgentId = $this->_core->createScalarAgent($scalarId, $agentId, $frequency);
+        $scalarAgent = $this->_core->getScalarAgentById($scalarAgentId);
+        $this->assertEquals($scalarAgentId, $scalarAgent['id']);
+        $this->assertEquals(HASHMARK_DATETIME_EMPTY, $scalarAgent['start']);
+        $this->assertTrue(empty($scalarAgent['error']));
+        $this->assertEquals($frequency, $scalarAgent['frequency']);
+        $this->assertEquals('Unscheduled', $scalarAgent['status']);
+        $this->assertEquals('', $scalarAgent['config']);
+        $this->assertEquals(HASHMARK_DATETIME_EMPTY, $scalarAgent['start']);
+
+        // Define all fields.
+        $frequency = 0;
+        $status = 'Running';
+        $config = array('c' => 3, 'a' => 1, 'b' => 2);
+        $start = gmdate(HASHMARK_DATETIME_FORMAT);
+        $scalarAgentId = $this->_core->createScalarAgent($scalarId, $agentId, $frequency,
+                                                         $status, $config, $start);
+        $scalarAgent = $this->_core->getScalarAgentById($scalarAgentId);
+        $this->assertEquals($scalarAgentId, $scalarAgent['id']);
+        $this->assertEquals($start, $scalarAgent['start']);
+        $this->assertTrue(empty($scalarAgent['error']));
+        $this->assertEquals($frequency, $scalarAgent['frequency']);
+        $this->assertEquals($status, $scalarAgent['status']);
+        $this->assertEquals($config, $scalarAgent['config']);
+        $this->assertEquals($start, $scalarAgent['start']);
+    }
+    
+    /**
+     * @test
+     * @group Core
+     * @group deletesScalarAgent
+     * @group deleteScalarAgent
+     * @group createScalarAgent
+     * @group getAgentById
+     */
+    public function deletesScalarAgent()
+    {
+        $agentId = $this->_core->createAgent(self::randomString());
+
+        $scalar = array();
+        $scalar['name'] = self::randomString();
+        $scalar['type'] = 'string';
+        $scalarId = $this->_core->createScalar($scalar);
+
+        $expectedId = $this->_core->createScalarAgent($scalarId, $agentId, 0);
+
+        $this->assertTrue($this->_core->deleteScalarAgent($expectedId));
+        $this->assertFalse($this->_core->getScalarAgentById($expectedId));
+    }
+    
+    /**
+     * @test
+     * @group Core
      * @group createsScalarAndGetsById
      * @group getScalarById
      * @group createScalar
@@ -66,12 +198,7 @@ class Hashmark_TestCase_Core extends Hashmark_TestCase
             $this->assertEquals($expectedFields['value'], $scalar['value']);
             $this->assertEquals($expectedFields['description'], $scalar['description']);
             $this->assertEquals(HASHMARK_DATETIME_EMPTY, $scalar['last_inline_change']);
-            $this->assertEquals(HASHMARK_DATETIME_EMPTY, $scalar['last_sample_change']);
-            $this->assertEquals(HASHMARK_DATETIME_EMPTY, $scalar['sampler_start']);
-            $this->assertTrue(empty($scalar['sampler_error']));
-            $this->assertEquals('Unscheduled', $scalar['sampler_status']);
-            $this->assertTrue(empty($scalar['sampler_name']));
-            $this->assertEquals(0, $scalar['sampler_frequency']);
+            $this->assertEquals(HASHMARK_DATETIME_EMPTY, $scalar['last_agent_change']);
             $this->assertEquals(0, $scalar['sample_count']);
         }
     }
@@ -104,12 +231,7 @@ class Hashmark_TestCase_Core extends Hashmark_TestCase
             $this->assertEquals($expectedFields['value'], $scalar['value']);
             $this->assertEquals($expectedFields['description'], $scalar['description']);
             $this->assertEquals(HASHMARK_DATETIME_EMPTY, $scalar['last_inline_change']);
-            $this->assertEquals(HASHMARK_DATETIME_EMPTY, $scalar['last_sample_change']);
-            $this->assertEquals(HASHMARK_DATETIME_EMPTY, $scalar['sampler_start']);
-            $this->assertTrue(empty($scalar['sampler_error']));
-            $this->assertEquals('Unscheduled', $scalar['sampler_status']);
-            $this->assertTrue(empty($scalar['sampler_name']));
-            $this->assertEquals(0, $scalar['sampler_frequency']);
+            $this->assertEquals(HASHMARK_DATETIME_EMPTY, $scalar['last_agent_change']);
             $this->assertEquals(0, $scalar['sample_count']);
         }
     }
@@ -187,13 +309,13 @@ class Hashmark_TestCase_Core extends Hashmark_TestCase
      */
     public function changesScalarCategory()
     {
-        $scalarFields = array();
+        $scalar = array();
         
         foreach ($this->_core->getValidScalarTypes() as $type) {
-            $scalarFields['name'] = self::randomString();
-            $scalarFields['type'] = $type;
+            $scalar['name'] = self::randomString();
+            $scalar['type'] = $type;
 
-            $scalarId = $this->_core->createScalar($scalarFields);
+            $scalarId = $this->_core->createScalar($scalar);
 
             $categoryName = self::randomString();
             $categoryDescript = self::randomString();
@@ -205,40 +327,6 @@ class Hashmark_TestCase_Core extends Hashmark_TestCase
 
             $this->assertTrue($this->_core->unsetScalarCategory($scalarId, $categoryId));
             $this->assertFalse($this->_core->scalarHasCategory($scalarId, $categoryId));
-        }
-    }
-
-    /**
-     * @test
-     * @group Core
-     * @group createsScalarsWithScheduledSamplers
-     * @group createScalar
-     * @group getScalarById
-     * @group getValidSampleStatuses
-     */
-    public function createsScalarsWithScheduledSamplers()
-    {
-        $statuses = $this->_core->getValidSampleStatuses();
-
-        foreach (self::provideScalarsWithScheduledSamplers() as $expectedFields) {
-            foreach ($statuses as $status) {
-                $expectedFields['sampler_status'] = $status;
-
-                $expectedScalarId = $this->_core->createScalar($expectedFields);
-
-                $scalar = $this->_core->getScalarById($expectedScalarId);
-
-                $this->assertEquals($expectedScalarId, $scalar['id']);
-                $this->assertEquals($expectedFields['name'], $scalar['name']);
-                $this->assertEquals($expectedFields['type'], $scalar['type']);
-                $this->assertEquals($expectedFields['description'], $scalar['description']);
-                $this->assertEquals(HASHMARK_DATETIME_EMPTY, $scalar['last_inline_change']);
-                $this->assertEquals(HASHMARK_DATETIME_EMPTY, $scalar['last_sample_change']);
-                $this->assertEquals($expectedFields['sampler_start'], $scalar['sampler_start']);
-                $this->assertEquals($expectedFields['sampler_status'], $scalar['sampler_status']);
-                $this->assertEquals($expectedFields['sampler_name'], $scalar['sampler_name']);
-                $this->assertEquals($expectedFields['sampler_frequency'], $scalar['sampler_frequency']);
-            }
         }
     }
 
@@ -470,7 +558,6 @@ class Hashmark_TestCase_Core extends Hashmark_TestCase
         $expectedId = $this->_core->createMilestone($expectedName, $expectedWhen);
         $this->assertTrue($this->_core->deleteMilestone($expectedId));
 
-        $milestone = $this->_core->getMilestoneById($expectedId);
-        $this->assertFalse($milestone);
+        $this->assertFalse($this->_core->getMilestoneById($expectedId));
     }
 }

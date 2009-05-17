@@ -27,7 +27,7 @@
 class Hashmark_Cron extends Hashmark_Module_DbDependent
 {
     /**
-     * Add new row to `samples`.
+     * Add new row to `samples` and update `scalars` statistics.
      *
      * @param int       $scalarId
      * @param string    $value
@@ -41,19 +41,10 @@ class Hashmark_Cron extends Hashmark_Module_DbDependent
         $start = Hashmark_Util::toDatetime($start);
         $end = Hashmark_Util::toDatetime($end);
 
-        /**
-         *      -   Synchronize value from latest Cron-obtained value.
-         *      -   Record time of sync.
-         *      -   Reset any past sampler error to flag successful write.
-         *      -   Flip sampler status from "Running" back to "Scheduled".
-         *      -   Increment the count used to seed sample partition table AUTO_INCREMENT
-         *          values for `id`.
-         */
+        // `sample_count` seeds AUTO_INCREMENT `id` values in sample partitions
         $sql = "UPDATE {$this->_dbName}`scalars` "
              . 'SET `value` = ?, '
-             . '`last_sample_change` = ?, '
-             . '`sampler_error` = "", '
-             . '`sampler_status` = "Scheduled", '
+             . '`last_agent_change` = ?, '
              . '`sample_count` = `sample_count` + 1 '
              . 'WHERE `id` = ?';
 
@@ -93,59 +84,66 @@ class Hashmark_Cron extends Hashmark_Module_DbDependent
     }
 
     /**
-     * Update a scalar's sampler status/error message.
+     * Update an scalar's agent status and error message.
      *
-     * @param int       $scalarId
-     * @param string    $status     New `scalars`.`sampler_status` ENUM value, ex. 'Scheduled'.
-     * @param string    $error      New `scalars`.`sampler_error` message.
+     * @param int       $id         `agents_scalars`.`id`
+     * @param string    $status     Ex. 'Scheduled'.
+     * @param string    $error      Optional error message.
+     * @param mixed     $lastrun    Optional UNIX timestamp or DATETIME string.
      * @return boolean  True on success.
      * @throws Exception On query error.
      */
-    public function setSamplerStatus($scalarId, $status, $error = '')
+    public function setScalarAgentStatus($id, $status, $error = '', $lastrun = '')
     {
-        if ($error) {
-            // Expecting error strings that exceed column length, ex. Exception
-            // messages with debugging info.
-            mb_internal_encoding('UTF-8');
-            $error = mb_substr($error, 0, 255);
+        if ($lastrun) {
+            if (is_int($lastrun)) {
+                $lastrun = gmdate(HASHMARK_DATETIME_FORMAT, $lastrun);
+            }
+
+            $sql = "UPDATE {$this->_dbName}`agents_scalars` "
+                 . 'SET `status` = ?, '
+                 . '`error` = ?, '
+                 . '`lastrun` = ? '
+                 . 'WHERE `id` = ?';
+    
+            $stmt = $this->_db->query($sql, array($status, $error, $lastrun, $id));
+        } else {
+            $sql = "UPDATE {$this->_dbName}`agents_scalars` "
+                 . 'SET `status` = ?, '
+                 . '`error` = ? '
+                 . 'WHERE `id` = ?';
+    
+            $stmt = $this->_db->query($sql, array($status, $error, $id));
         }
-
-        $sql = "UPDATE {$this->_dbName}`scalars` "
-             . 'SET `sampler_status` = ?, '
-             . '`sampler_error` = ? '
-             . 'WHERE `id` = ?';
-
-        $stmt = $this->_db->query($sql, array($status, $error, $scalarId));
         
         return (1 == $stmt->rowCount());
     }
     
     /**
-     * Find scalar samplers which are due right now.
+     * Find scalar agents which are due to run right now.
      *  
-     *   -  Due = Based on their frequency and last update, or have never ran.
-     *   -  Only returns `scalars` fields necessary for resampling: `id`,
-     *      `sampler_name`, `sampler_status`
+     *   -  Due: Based on frequency, last run time, and if they've
+     *      successfully ran before.
      *
      * @return Array    Assoc. of fields; otherwise false.
      * @throws Exception On query error.
      */
-    public function getScheduledSamplers()
+    public function getScheduledAgents()
     {
         // "Running" means it's scheduled but the last run didn't finish.
-        $statusMatch = '(`sampler_status` IN ("Scheduled", "Running"))';
+        $statusMatch = '(`status` IN ("Scheduled", "Running"))';
         // Recurrence interval has been reached.
-        $isDue = '(`last_sample_change` + INTERVAL `sampler_frequency` MINUTE <= UTC_TIMESTAMP())';
+        $isDue = '(`lastrun` + INTERVAL `frequency` MINUTE <= UTC_TIMESTAMP())';
         // Start date/time has been reached or none was specified.
-        $canStart = '(`sampler_start` = ? OR `sampler_start` <= UTC_TIMESTAMP())';
-        $hasNeverFinished = '`last_sample_change` = ?';
+        $canStart = '(`start` = ? OR `start` <= UTC_TIMESTAMP())';
+        $hasNeverFinished = '`lastrun` = ?';
 
-        $sql = 'SELECT `id`, `sampler_name`, `sampler_status` '
-             . "FROM {$this->_dbName}`scalars` "
+        $sql = 'SELECT `map`.`id`, `agent_id`, `scalar_id`, `config`, `status`, `name` '
+             . "FROM {$this->_dbName}`agents_scalars` AS `map` "
+             . "JOIN {$this->_dbName}`agents` AS `agent` ON `map`.`agent_id` = `agent`.`id` "
              . "WHERE {$statusMatch} "
-             . "AND ({$isDue} OR {$hasNeverFinished}) "
              . "AND {$canStart} "
-             . 'AND `sampler_name` != ""';
+             . "AND ({$isDue} OR {$hasNeverFinished}) ";
 
         $rows = $this->_db->fetchAll($sql, array(HASHMARK_DATETIME_EMPTY, HASHMARK_DATETIME_EMPTY));
 

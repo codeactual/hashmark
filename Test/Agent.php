@@ -2,7 +2,7 @@
 // vim: fenc=utf-8:ft=php:ai:si:ts=4:sw=4:et:
 
 /**
- * Hashmark_TestCase_Sampler
+ * Hashmark_TestCase_Agent
  *
  * @filesource
  * @link        http://code.google.com/p/hashmark/
@@ -19,12 +19,12 @@
  * @package     Hashmark-Test
  * @subpackage  Base
  */
-abstract class Hashmark_TestCase_Sampler extends Hashmark_TestCase
+abstract class Hashmark_TestCase_Agent extends Hashmark_TestCase
 {
     /**
      * @test
-     * @group Sampler
-     * @group runsSampler
+     * @group Agent
+     * @group runsAgent
      */
-    abstract public function runsSampler();
+    abstract public function runsAgent();
 }

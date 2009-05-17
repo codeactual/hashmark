@@ -205,35 +205,6 @@ abstract class Hashmark_TestCase extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * Provide fields of scalars scheduled for sampling.
-     *
-     * @return Array    Test method argument sets.
-     */
-    public static function provideScalarsWithScheduledSamplers()
-    {
-        static $data;
-
-        if (!$data) {
-            foreach (Hashmark_Core::getValidScalarTypes() as $type) {
-                $argSet = array();
-                $argSet['name'] = self::randomString();
-                $argSet['type'] = $type;
-                $argSet['description'] = self::randomString();
-                $argSet['sampler_status'] = 'Scheduled';
-                $argSet['sampler_name'] = 'Test';
-                $argSet['sampler_start'] = gmdate(HASHMARK_DATETIME_FORMAT);
-            
-                // 0-minute frequencies will make them due to run immediately.
-                $argSet['sampler_frequency'] = 0;
-                
-                $data[] = $argSet;
-            }
-        }
-
-        return $data;
-    }
-
-    /**
      * Return a random decimal string. Based on DECIMAL(M,D) configuration.
      *
      * @see DECIMAL type, http://dev.mysql.com/doc/refman/5.0/en/numeric-type-overview.html#id4944739

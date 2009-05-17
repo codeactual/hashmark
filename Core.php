@@ -34,16 +34,6 @@ class Hashmark_Core extends Hashmark_Module_DbDependent
     {
         return array('decimal', 'string');
     }
-
-    /**
-     * Return all valid `scalars`.`sampler_status` ENUM values.
-     *
-     * @return Array
-     */
-    public static function getValidSampleStatuses()
-    {
-        return array('Unscheduled', 'Scheduled', 'Running');
-    }
     
     /**
      * Add `scalars` row.
@@ -53,18 +43,13 @@ class Hashmark_Core extends Hashmark_Module_DbDependent
      *      Required:
      *
      *      'name'
-     *      'type':                 See getValidScalarTypes() for options.
+     *      'type':         See getValidScalarTypes() for options.
      *
      *      Optional:
      *
-     *      'value':                Initial value.
+     *      'value':         Initial value.
      *      'description'
-     *      'sampler_frequency':    Recurrence interval in minutes.
-     *      'sampler_start':        Earliest possible sampling as UNIX timestamp or DATETIME string.
-     *      'sampler_status':       Ex. 'Scheduled'
-     *      'sampler_name`:         Hashmark_Sampler_* implementation name, ex. 'SomeFeatureUsage`.
-     *                              It would refer to class Hashmark_Sampler_SomeFeatureUsage defined
-     *                              in Sampler/SomeFeatureUsage.php.
+     *
      * @return int      Inserted row ID.
      * @throws Exception    On query error; if 'name'/'type' are empty/missing;
      *                      if 'type' is invalid.
@@ -72,39 +57,30 @@ class Hashmark_Core extends Hashmark_Module_DbDependent
     public function createScalar($fields)
     {
         if (empty($fields['name']) || empty($fields['type'])) {
-            throw new Exception('Scalar name and type are required.', HASHMARK_EXCEPTION_VALIDATION);
+            throw new Exception('Scalar name and type are required.',
+                                HASHMARK_EXCEPTION_VALIDATION);
         }
 
         $fields['name'] = trim($fields['name']);
         
         if (!$fields['name']) {
-            throw new Exception('Scalar name cannot be empty.', HASHMARK_EXCEPTION_VALIDATION);
+            throw new Exception('Scalar name cannot be empty.',
+                                HASHMARK_EXCEPTION_VALIDATION);
         }
         
         if (!in_array($fields['type'], $this->getModule('Core')->getValidScalarTypes())) {
-            throw new Exception('Cannot create table of unrecognized type: ' . $fields['type'], HASHMARK_EXCEPTION_VALIDATION);
+            throw new Exception('Cannot create table of unrecognized type: ' . $fields['type'],
+                                HASHMARK_EXCEPTION_VALIDATION);
         }
 
         $fields['value'] = isset($fields['value']) ? $fields['value'] : '';
         $fields['description'] = isset($fields['description']) ? $fields['description'] : '';
-        $fields['sampler_frequency'] = isset($fields['sampler_frequency']) ? $fields['sampler_frequency'] : '';
-        $fields['sampler_start'] = isset($fields['sampler_start']) ? $fields['sampler_start'] : HASHMARK_DATETIME_EMPTY;
-        $fields['sampler_name'] = isset($fields['sampler_name']) ? $fields['sampler_name'] : '';
-        $fields['sampler_status'] = isset($fields['sampler_status']) ? $fields['sampler_status'] : 'Unscheduled';
-        
-        if (is_int($fields['sampler_start'])) {
-            $fields['sampler_start'] = gmdate(HASHMARK_DATETIME_FORMAT, $fields['sampler_start']);
-        }
 
         $sql = "INSERT INTO {$this->_dbName}`scalars` "
-             . '(`name`, `value`, `type`, `description`, `sampler_frequency`, '
-             . '`sampler_start`, `sampler_name`, `sampler_status`) '
-             . 'VALUES (?, ?, ?, ?, ?, ?, ?, ?)';
+             . '(`name`, `value`, `type`, `description`) '
+             . 'VALUES (?, ?, ?, ?)';
                                   
-        $args = array($fields['name'], $fields['value'], $fields['type'],
-                      $fields['description'],$fields['sampler_frequency'],
-                      $fields['sampler_start'],$fields['sampler_name'],
-                      $fields['sampler_status']);
+        $args = array($fields['name'], $fields['value'], $fields['type'], $fields['description']);
 
         $this->_db->query($sql, $args);
         
@@ -305,6 +281,170 @@ class Hashmark_Core extends Hashmark_Module_DbDependent
     public function deleteScalar($id)
     {
         $sql = 'DELETE FROM `scalars` WHERE `id` = ?';
+
+        $stmt = $this->_db->query($sql, array($id));
+        
+        return (1 == $stmt->rowCount());
+    }
+    
+    /**
+     * Return valid `agents_scalars`.`status` ENUM values.
+     *
+     * @return Array
+     */
+    public static function getValidScalarAgentStatuses()
+    {
+        return array('Unscheduled', 'Scheduled', 'Running');
+    }
+
+    /**
+     * Add new row to `agents`.
+     *
+     * @param string    $name   Ex. 'ScalarValue` to identify
+     *                          class Hashmark_Agent_ScalarValue.
+     * @return int      Inserted row ID.
+     * @throws Exception On query error.
+     */
+    public function createAgent($name)
+    {
+        $sql = "INSERT INTO {$this->_dbName}`agents` "
+             . '(`name`) '
+             . 'VALUES (?)';
+
+        $this->_db->query($sql, array($name));
+        
+        return $this->_db->lastInsertId();
+    }
+    
+    /**
+     * Return all `agents` fields associated with an ID.
+     *
+     * @param int       $id
+     * @return Array    Assoc. of fields; otherwise false.
+     * @throws Exception On query error.
+     */
+    public function getAgentById($id)
+    {
+        $sql = 'SELECT * '
+             . "FROM {$this->_dbName}`agents` "
+             . 'WHERE `id` = ?';
+
+        $rows = $this->_db->fetchAll($sql, array($id));
+
+        if (!$rows) {
+            return false;
+        }
+
+        return $rows[0];
+    }
+    
+    /**
+     * Return all `agents` fields associated with a name.
+     *
+     * @param string    $name
+     * @return Array    Assoc. of fields; otherwise false.
+     * @throws Exception On query error.
+     */
+    public function getAgentByName($name)
+    {
+        $sql = 'SELECT * '
+             . "FROM {$this->_dbName}`agents` "
+             . 'WHERE `name` = ? '
+             . 'LIMIT 1';
+
+        $rows = $this->_db->fetchAll($sql, array($name));
+        
+        if (!$rows) {
+            return false;
+        }
+
+        return $rows[0];
+    }
+    
+    /**
+     * Delete row from `agents`.
+     *
+     * @param int       $id
+     * @return boolean  True on success.
+     * @throws Exception On query error.
+     */
+    public function deleteAgent($id)
+    {
+        $sql = 'DELETE FROM `agents` WHERE `id` = ?';
+
+        $stmt = $this->_db->query($sql, array($id));
+        
+        return (1 == $stmt->rowCount());
+    }
+
+    /**
+     * Add new row to `agents_scalars`.
+     *
+     * @param int       $scalarId
+     * @param int       $agentId
+     * @param int       $frequency  Recurrence interval in minutes.
+     * @param Array     $config     Will be passed to agent class whenever ran.
+     * @param string    $status     Ex. 'Scheduled'
+     * @param string    $start      Earliest possible sampling as UNIX timestamp
+     *                              or DATETIME string.
+     * @return int  Inserted row ID.
+     * @throws Exception On query error.
+     */
+    public function createScalarAgent($scalarId, $agentId, $frequency, $status = 'Unscheduled', $config = '', $start = HASHMARK_DATETIME_EMPTY)
+    {
+        if ('' !== $config) {
+            $config = base64_encode(serialize($config));
+        }
+        
+        if (is_int($start)) {
+            $start = gmdate(HASHMARK_DATETIME_FORMAT, $start);
+        }
+
+        $sql = "INSERT INTO {$this->_dbName}`agents_scalars` "
+             . '(`scalar_id`, `agent_id`, `frequency`, `config`, `status`, `start`) '
+             . 'VALUES (?, ?, ?, ?, ?, ?)';
+
+        $this->_db->query($sql, array($scalarId, $agentId, $frequency, $config, $status, $start));
+        
+        return $this->_db->lastInsertId();
+    }
+    
+    /**
+     * Return all `agents_scalars` fields associated with an ID.
+     *
+     * @param int       $id
+     * @return Array    Assoc. of fields; otherwise false.
+     * @throws Exception On query error.
+     */
+    public function getScalarAgentById($id)
+    {
+        $sql = 'SELECT * '
+             . "FROM {$this->_dbName}`agents_scalars` "
+             . 'WHERE `id` = ?';
+
+        $rows = $this->_db->fetchAll($sql, array($id));
+
+        if (!$rows) {
+            return false;
+        }
+
+        if ('' !== $rows[0]['config']) {
+            $rows[0]['config'] = unserialize(base64_decode($rows[0]['config']));
+        }
+
+        return $rows[0];
+    }
+    
+    /**
+     * Delete row from `agents_scalars`.
+     *
+     * @param int       $id
+     * @return boolean  True on success.
+     * @throws Exception On query error.
+     */
+    public function deleteScalarAgent($id)
+    {
+        $sql = 'DELETE FROM `agents_scalars` WHERE `id` = ?';
 
         $stmt = $this->_db->query($sql, array($id));
         

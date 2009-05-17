@@ -97,10 +97,10 @@ $mockDb = 1;
  *
  */
 $modList = array('BcMath' => '', 'Cache' => '', 'Client' => '', 'Core' => '', 'Cron' => '',
-                 'DbHelper' => '', 'Partition' => '', 'Sampler' => 'YahooWeather', 'Test' => 'FakeModuleType');
+                 'DbHelper' => '', 'Partition' => '', 'Agent' => 'YahooWeather', 'Test' => 'FakeModuleType');
 
 foreach ($modList as $baseName => $typeName) {
-    // Cache/Sampler modules don't use the DB argument,
+    // Cache modules don't use the DB argument,
     // but it should have no effect.
     $inst = Hashmark::getModule($baseName, $typeName, $mockDb);
 

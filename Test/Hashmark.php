@@ -27,7 +27,7 @@ class Hashmark_TestCase_Hashmark extends Hashmark_TestCase
      */
     public function getsModules()
     {
-        $module = 'Sampler'; 
+        $module = 'Agent'; 
 
         foreach (glob(dirname(__FILE__) . '/../' . $module . '/*.php') as $typeFile) {
             $type = basename($typeFile, '.php');

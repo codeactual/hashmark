@@ -2,7 +2,7 @@
 // vim: fenc=utf-8:ft=php:ai:si:ts=4:sw=4:et:
 
 /**
- * Hashmark_TestCase_Sampler_ScalarValue
+ * Hashmark_TestCase_Agent_ScalarValue
  *
  * @filesource
  * @link        http://code.google.com/p/hashmark/
@@ -11,24 +11,24 @@
  * @copyright   Copyright (c) 2008-2009, Code Actual LLC
  * @license     http://www.opensource.org/licenses/bsd-license.php New BSD License
  * @package     Hashmark-Test
- * @subpackage  Hashmark_Sampler
+ * @subpackage  Hashmark_Agent
  * @version     $Id$
 */
 
 /**
  * @package     Hashmark-Test
- * @subpackage  Hashmark_Sampler
+ * @subpackage  Hashmark_Agent
  */
-class Hashmark_TestCase_Sampler_ScalarValue extends Hashmark_TestCase_Sampler
+class Hashmark_TestCase_Agent_ScalarValue extends Hashmark_TestCase_Agent
 {
     /**
      * @test
-     * @group Sampler
+     * @group Agent
      * @group Test
-     * @group runsSampler
+     * @group runsAgent
      * @group run
      */
-    public function runsSampler()
+    public function runsAgent()
     {
         $expectedFields = array();
         $expectedFields['name'] = self::randomString();
@@ -36,7 +36,7 @@ class Hashmark_TestCase_Sampler_ScalarValue extends Hashmark_TestCase_Sampler
         $expectedFields['type'] = 'string';
 
         $expectedId = Hashmark::getModule('Core', '', $this->_db)->createScalar($expectedFields);
-        $sample = Hashmark::getModule('Sampler', 'ScalarValue')->run(array('scalarId' => $expectedId));
+        $sample = Hashmark::getModule('Agent', 'ScalarValue')->run(array('scalarId' => $expectedId));
 
         $this->assertEquals($expectedFields['value'], $sample);
     }

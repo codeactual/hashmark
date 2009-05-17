@@ -24,10 +24,9 @@ SET @saved_cs_client     = @@character_set_client;
 SET character_set_client = utf8;
 CREATE TABLE `agents` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `type` enum('Sampler','Alert') COLLATE utf8_unicode_ci NOT NULL DEFAULT 'Sampler',
   `name` varchar(30) COLLATE utf8_unicode_ci NOT NULL DEFAULT '' COMMENT 'PHP class',
   PRIMARY KEY (`id`),
-  KEY `idx_list` (`type`,`name`)
+  UNIQUE KEY `idx_name` (`name`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci COMMENT='Classes available to visit scalars';
 SET character_set_client = @saved_cs_client;
 
@@ -207,4 +206,4 @@ SET character_set_client = @saved_cs_client;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2009-05-17  8:15:06
+-- Dump completed on 2009-05-17 17:48:37

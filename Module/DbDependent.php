@@ -173,8 +173,8 @@ abstract class Hashmark_Module_DbDependent extends Hashmark_Module
     /**
      * Return a Hashmark module instance (of the same type as this one)
      *
-     * @param string    $name   Module name, ex. 'Core', 'Cron, 'Client', 'Sampler'.
-     * @param string    $type   Ex. 'ScalarValue', implementation in Sampler/ScalarValue.php.
+     * @param string    $name   Module name, ex. 'Core', 'Cron, 'Client', 'Agent'.
+     * @param string    $type   Ex. 'ScalarValue', implementation in Agent/ScalarValue.php.
      * @return mixed    New instance.
      */
     public function getModule($name, $type = '')
