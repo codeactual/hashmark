@@ -25,10 +25,10 @@ SET character_set_client = utf8;
 CREATE TABLE `agents` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `type` enum('Sampler','Alert') COLLATE utf8_unicode_ci NOT NULL DEFAULT 'Sampler',
-  `classname` varchar(30) COLLATE utf8_unicode_ci NOT NULL DEFAULT '' COMMENT 'PHP class',
+  `name` varchar(30) COLLATE utf8_unicode_ci NOT NULL DEFAULT '' COMMENT 'PHP class',
   PRIMARY KEY (`id`),
-  KEY `idx_list` (`type`,`classname`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci COMMENT='Classes available to visit scalars';
+  KEY `idx_list` (`type`,`name`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci COMMENT='Classes available to visit scalars';
 SET character_set_client = @saved_cs_client;
 
 --
@@ -47,13 +47,14 @@ CREATE TABLE `agents_scalars` (
   `status` enum('Unscheduled','Scheduled','Running') COLLATE utf8_unicode_ci NOT NULL DEFAULT 'Unscheduled',
   `frequency` int(10) unsigned NOT NULL DEFAULT '0' COMMENT 'Minutes',
   `start` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
+  `lastrun` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
   PRIMARY KEY (`id`),
   KEY `agent_id` (`agent_id`),
   KEY `scalar_id` (`scalar_id`),
   KEY `idx_scheduled` (`agent_id`,`scalar_id`,`status`,`frequency`,`start`),
   CONSTRAINT `ibfk_agents_scalars_agent_id` FOREIGN KEY (`agent_id`) REFERENCES `agents` (`id`) ON DELETE CASCADE,
   CONSTRAINT `ibfk_agents_scalars_scalar_id` FOREIGN KEY (`scalar_id`) REFERENCES `scalars` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci COMMENT='Scalar visitors';
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci COMMENT='Scalar visitors';
 SET character_set_client = @saved_cs_client;
 
 --
@@ -206,4 +207,4 @@ SET character_set_client = @saved_cs_client;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2009-05-16 21:06:47
+-- Dump completed on 2009-05-17  8:15:06
