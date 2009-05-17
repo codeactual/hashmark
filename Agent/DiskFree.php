@@ -44,7 +44,7 @@ class Hashmark_Agent_DiskFree implements Hashmark_Agent
     /**
      * @see Parent/interface signature docs.
      */
-    public static function run($agent = array())
+    public static function run(&$agent)
     {
         return disk_free_space('/');
     }

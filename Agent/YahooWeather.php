@@ -44,7 +44,7 @@ class Hashmark_Agent_YahooWeather implements Hashmark_Agent
     /**
      * @see Parent/interface signature docs.
      */
-    public static function run($agent = array())
+    public static function run(&$agent)
     {
         $xml = file_get_contents('http://weather.yahooapis.com/forecastrss?p=98103&u=f');
         if (!$xml) {

@@ -42,7 +42,7 @@ class Hashmark_Agent_Test implements Hashmark_Agent
     /**
      * @see Parent/interface signature docs.
      */
-    public static function run($agent = array())
+    public static function run(&$agent)
     {
         return '1234';
     }

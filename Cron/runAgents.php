@@ -35,7 +35,7 @@ $cache = array();
 foreach ($scheduledAgents as $scalarAgent) {
     if ('Running' == $scalarAgent['status']) {
         $core->setScalarAgentStatus($scalarAgent['id'], 'Unscheduled',
-                              'Last sample did not finish.');
+                                    'Last sample did not finish.');
         continue;
     }
 
@@ -64,13 +64,10 @@ foreach ($scheduledAgents as $scalarAgent) {
     $value = $cache[$scalarAgent['name']]->run($scalarAgent);
     $end = time();
 
-    $core->setScalarAgentStatus($scalarAgent['id'], 'Scheduled', '', $end);
-
-    if (is_null($value)) {
-        $error = "Agent '{$scalarAgent['name']}' could not finish";
-        $core->setScalarAgentStatus($scalarAgent['id'], 'Unscheduled', $error);
-        continue;
-    }
+    // run() received $scalarAgent by-ref and can apply indepedent logic
+    // to set a new status, error message, etc.
+    $core->setScalarAgentStatus($scalarAgent['id'], $scalarAgent['status'],
+                                $scalarAgent['error'], $end);
 
     if (!$partition->createSample($scalarAgent['id'], $value, $start, $end)) {
         $error = sprintf('Could not save sample: start=%s end=%s value=%s',

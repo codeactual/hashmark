@@ -44,7 +44,7 @@ class Hashmark_Agent_StockPrice implements Hashmark_Agent
     /**
      * @see Parent/interface signature docs.
      */
-    public static function run($agent = array())
+    public static function run(&$agent)
     {
         $json = file_get_contents('http://www.google.com/finance/info?client=ig&q=AAPL');
         if (!$json) {

@@ -45,7 +45,7 @@ class Hashmark_Agent_ScalarValue implements Hashmark_Agent
     /**
      * @see Parent/interface signature docs.
      */
-    public static function run($agent = array())
+    public static function run(&$agent)
     {
         if (empty($agent['scalar_id'])) {
             return null;

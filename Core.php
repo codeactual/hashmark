@@ -388,6 +388,7 @@ class Hashmark_Core extends Hashmark_Module_DbDependent
      * @param string    $start      Earliest possible sampling as UNIX timestamp
      *                              or DATETIME string.
      * @return int  Inserted row ID.
+     * @see Hashmark_Core::getValidScalarAgentStatuses() for $status options.
      * @throws Exception On query error.
      */
     public function createScalarAgent($scalarId, $agentId, $frequency, $status = 'Unscheduled', $config = '', $start = HASHMARK_DATETIME_EMPTY)
@@ -459,6 +460,7 @@ class Hashmark_Core extends Hashmark_Module_DbDependent
      * @param string    $error      Optional error message.
      * @param mixed     $lastrun    Optional UNIX timestamp or DATETIME string.
      * @return boolean  True on success.
+     * @see Hashmark_Core::getValidScalarAgentStatuses() for $status options.
      * @throws Exception On query error.
      */
     public function setScalarAgentStatus($id, $status, $error = '', $lastrun = '')
@@ -506,7 +508,7 @@ class Hashmark_Core extends Hashmark_Module_DbDependent
         $canStart = '(`start` = ? OR `start` <= UTC_TIMESTAMP())';
         $hasNeverFinished = '`lastrun` = ?';
 
-        $sql = 'SELECT `map`.`id`, `agent_id`, `scalar_id`, `config`, `status`, `name` '
+        $sql = 'SELECT `map`.`id`, `agent_id`, `scalar_id`, `config`, `status`, `name`, `error` '
              . "FROM {$this->_dbName}`agents_scalars` AS `map` "
              . "JOIN {$this->_dbName}`agents` AS `agent` ON `map`.`agent_id` = `agent`.`id` "
              . "WHERE {$statusMatch} "

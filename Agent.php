@@ -41,9 +41,9 @@ interface Hashmark_Agent
      * Perform the agent's task, ex. sampling a data source, or testing for an
      * alert state and responding.
      *
-     * @param Array     $agent  Agent-specific fields, ex. scalar ID, configs,
-     *                          last run time, etc.
+     * @param Array     &$agent     Agent-specific fields, ex. scalar ID,
+     *                              configs, last run time, etc.
      * @return mixed    Agent-specific.
      */
-    public static function run($agent = array());
+    public static function run(&$agent);
 }
