@@ -33,7 +33,7 @@ define('HASHMARK_CREATESAMPLES_ENDDATE', '2009-01-01 23:59:59 UTC');
 
 $db = Hashmark::getModule('DbHelper')->openDb('unittest');
 $core = Hashmark::getModule('Core', '', $db);
-$cron = $core->getModule('Cron');
+$partition = $core->getModule('Partition');
 
 $rndSampleTime = 0;
 $createScalarTime = 0;
@@ -66,7 +66,7 @@ for ($scalars = 0; $scalars < HASHMARK_CREATESAMPLES_SCALARS; $scalars++) {
     foreach ($samples as $timeData => $value) {
         list($time) = explode('=', $timeData);
         
-        $cron->createSample($scalarId, $value, $time, $time);
+        $partition->createSample($scalarId, $value, $time, $time);
     }
     $end = microtime(true);
     $createSampleTime += $end - $start;

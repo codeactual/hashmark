@@ -20,7 +20,7 @@
 /**
  * For getModule().
  */
-require_once dirname(__FILE__) . '/../../Hashmark.php';
+require_once dirname(__FILE__) . '/../Hashmark.php';
 
 $db = Hashmark::getModule('DbHelper')->openDb('unittest');
 

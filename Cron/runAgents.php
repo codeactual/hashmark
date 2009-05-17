@@ -18,12 +18,13 @@
 /**
  * For getModule().
  */
-require_once dirname(__FILE__) . '/../../Hashmark.php';
+require_once dirname(__FILE__) . '/../Hashmark.php';
 
 $db = Hashmark::getModule('DbHelper')->openDb('cron');
-$cron = Hashmark::getModule('Cron', '', $db);
+$core = Hashmark::getModule('Core', '', $db);
+$partition = Hashmark::getModule('Partition', '', $db);
 
-$scheduledAgents = $cron->getScheduledAgents();
+$scheduledAgents = $core->getScheduledAgents();
 if (empty($scheduledAgents)) {
     exit;
 }
@@ -33,7 +34,7 @@ $cache = array();
 
 foreach ($scheduledAgents as $scalarAgent) {
     if ('Running' == $scalarAgent['status']) {
-        $cron->setScalarAgentStatus($scalarAgent['id'], 'Unscheduled',
+        $core->setScalarAgentStatus($scalarAgent['id'], 'Unscheduled',
                               'Last sample did not finish.');
         continue;
     }
@@ -45,35 +46,35 @@ foreach ($scheduledAgents as $scalarAgent) {
         } catch (Exception $e) {
             $error = sprintf('Agent "%s" module missing: %s',
                              $scalarAgent['name'], $e->getMessage());
-            $cron->setScalarAgentStatus($scalarAgent['id'], 'Unscheduled', $error);
+            $core->setScalarAgentStatus($scalarAgent['id'], 'Unscheduled', $error);
             continue;
         }
     }
 
     if (!$cache[$scalarAgent['name']]) {
         $error = "Agent '{$scalarAgent['name']}' was missing";
-        $cron->setScalarAgentStatus($scalarAgent['id'], 'Unscheduled', $error);
+        $core->setScalarAgentStatus($scalarAgent['id'], 'Unscheduled', $error);
         continue;
     }
 
-    $cron->setScalarAgentStatus($scalarAgent['id'], 'Running');
+    $core->setScalarAgentStatus($scalarAgent['id'], 'Running');
 
     // It's OK if $start and $end are the same.
     $start = time();
     $value = $cache[$scalarAgent['name']]->run($scalarAgent);
     $end = time();
 
-    $cron->setScalarAgentStatus($scalarAgent['id'], 'Scheduled', '', $end);
+    $core->setScalarAgentStatus($scalarAgent['id'], 'Scheduled', '', $end);
 
     if (is_null($value)) {
         $error = "Agent '{$scalarAgent['name']}' could not finish";
-        $cron->setScalarAgentStatus($scalarAgent['id'], 'Unscheduled', $error);
+        $core->setScalarAgentStatus($scalarAgent['id'], 'Unscheduled', $error);
         continue;
     }
 
-    if (!$cron->createSample($scalarAgent['id'], $value, $start, $end)) {
+    if (!$partition->createSample($scalarAgent['id'], $value, $start, $end)) {
         $error = sprintf('Could not save sample: start=%s end=%s value=%s',
                          $start, $end, $value);
-        $cron->setScalarAgentStatus($scalarAgent['id'], 'Scheduled', $error);
+        $core->setScalarAgentStatus($scalarAgent['id'], 'Scheduled', $error);
     }
 }

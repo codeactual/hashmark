@@ -11,7 +11,7 @@
  * @copyright   Copyright (c) 2008-2009, Code Actual LLC
  * @license     http://www.opensource.org/licenses/bsd-license.php New BSD License
  * @package     Hashmark-Test
- * @subpackage  Hashmark_Cron
+ * @subpackage  Cron
  * @version     $Id$
 */
 
@@ -22,7 +22,7 @@ require_once dirname(__FILE__) . '/../bootstrap.php';
 
 /**
  * @package     Hashmark-Test
- * @subpackage  Hashmark_Cron
+ * @subpackage  Cron
  */
 class Hashmark_AllTests_Cron
 {
@@ -35,13 +35,19 @@ class Hashmark_AllTests_Cron
     {
         $suite = new PHPUnit_Framework_TestSuite(__METHOD__);
         
-        // Hashmark_Cron
-        require_once HASHMARK_ROOT_DIR . '/Cron.php';
-
         // Hashmark_TestCase_Cron
         require_once HASHMARK_ROOT_DIR . '/Test/Cron.php';
 
-        $suite->addTestSuite('Hashmark_TestCase_Cron');
+        foreach (glob(HASHMARK_ROOT_DIR . '/Test/Cron/*.php') as $typeTestFile) {
+            $typeName = basename($typeTestFile, '.php');
+
+            if ('AllTests' != $typeName) {
+                // Ex. test file for Cron/gcMergeTables.php
+                require_once $typeTestFile;
+
+                $suite->addTestSuite('Hashmark_TestCase_Cron_' . $typeName);
+            }
+        }
 
         return $suite;
     }

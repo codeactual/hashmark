@@ -29,9 +29,9 @@ class Hashmark_TestCase_Analyst_BasicDecimal extends Hashmark_TestCase
     protected $_analyst;
 
     /**
-     * @var Hashmark_Cron   Fixture instance.
+     * @var Hashmark_Partition  Fixture instance.
      */
-    protected $_cron;
+    protected $_partition;
 
     /**
      * @var Hashmark_Core   Fixture instance.
@@ -54,7 +54,7 @@ class Hashmark_TestCase_Analyst_BasicDecimal extends Hashmark_TestCase
         
         $partition = Hashmark::getModule('Partition', '', $this->_db);
         $this->_analyst = Hashmark::getModule('Analyst', 'BasicDecimal', $this->_db, $partition);
-        $this->_cron = Hashmark::getModule('Cron', '', $this->_db);
+        $this->_partition = Hashmark::getModule('Partition', '', $this->_db);
         $this->_core = Hashmark::getModule('Core', '', $this->_db);
     }
 
@@ -498,7 +498,7 @@ class Hashmark_TestCase_Analyst_BasicDecimal extends Hashmark_TestCase
                 $expValues[$end] = $value;
             }
 
-            $this->_cron->createSample($scalarId, $value, $end, $end);
+            $this->_partition->createSample($scalarId, $value, $end, $end);
         }
 
         $actValues = $this->_analyst->values($scalarId, 50, $sampleProvider['rangeStart'], $sampleProvider['rangeEnd']);
@@ -545,7 +545,7 @@ class Hashmark_TestCase_Analyst_BasicDecimal extends Hashmark_TestCase
                         $expValues[$end] = $value;
                     }
 
-                    $this->_cron->createSample($scalarId, $value, $end, $end);
+                    $this->_partition->createSample($scalarId, $value, $end, $end);
                 }
 
                 $actValues = $this->_analyst->valuesAtInterval($scalarId, 50, $sampleProvider['rangeStart'], $sampleProvider['rangeEnd'], $sampleProvider['interval']);
@@ -583,7 +583,7 @@ class Hashmark_TestCase_Analyst_BasicDecimal extends Hashmark_TestCase
 
         foreach ($sampleProvider['samples'] as $sample) {
             list($end, $value) = $sample;
-            $this->_cron->createSample($scalarId, $value, $end, $end);
+            $this->_partition->createSample($scalarId, $value, $end, $end);
         }
 
         foreach (self::$_aggFunctions as $aggFunc) {
@@ -629,7 +629,7 @@ class Hashmark_TestCase_Analyst_BasicDecimal extends Hashmark_TestCase
 
                 foreach ($samples as $sample) {
                     list($end, $value) = $sample;
-                    $this->_cron->createSample($scalarId, $value, $end, $end);
+                    $this->_partition->createSample($scalarId, $value, $end, $end);
                 }
 
                 foreach (self::$_aggFunctions as $aggFunc) {
@@ -677,7 +677,7 @@ class Hashmark_TestCase_Analyst_BasicDecimal extends Hashmark_TestCase
 
             foreach ($sampleProvider['samples'] as $sample) {
                 list($end, $value) = $sample;
-                $this->_cron->createSample($scalarId, $value, $end, $end);
+                $this->_partition->createSample($scalarId, $value, $end, $end);
             }
 
             foreach (self::$_aggFunctions as $aggFuncOuter) {
@@ -728,7 +728,7 @@ class Hashmark_TestCase_Analyst_BasicDecimal extends Hashmark_TestCase
 
             foreach ($sampleProvider['samples'] as $sample) {
                 list($end, $value) = $sample;
-                $this->_cron->createSample($scalarId, $value, $end, $end);
+                $this->_partition->createSample($scalarId, $value, $end, $end);
             }
 
             foreach (Hashmark_Analyst_BasicDecimal::getRecurFunctions() as $recurFunc) {
@@ -775,7 +775,7 @@ class Hashmark_TestCase_Analyst_BasicDecimal extends Hashmark_TestCase
 
             foreach ($sampleProvider['samples'] as $sample) {
                 list($end, $value) = $sample;
-                $this->_cron->createSample($scalarId, $value, $end, $end);
+                $this->_partition->createSample($scalarId, $value, $end, $end);
             }
 
             $errorMsg = "data={$sampleProviderName}";
@@ -816,7 +816,7 @@ class Hashmark_TestCase_Analyst_BasicDecimal extends Hashmark_TestCase
 
             foreach ($sampleProvider['samples'] as $sample) {
                 list($end, $value) = $sample;
-                $this->_cron->createSample($scalarId, $value, $end, $end);
+                $this->_partition->createSample($scalarId, $value, $end, $end);
             }
 
             $actValues = $this->_analyst->changesAtInterval($scalarId, 50, $sampleProvider['rangeStart'], $sampleProvider['rangeEnd'], $sampleProvider['interval']);
@@ -857,7 +857,7 @@ class Hashmark_TestCase_Analyst_BasicDecimal extends Hashmark_TestCase
 
             foreach ($sampleProvider['samples'] as $sample) {
                 list($end, $value) = $sample;
-                $this->_cron->createSample($scalarId, $value, $end, $end);
+                $this->_partition->createSample($scalarId, $value, $end, $end);
             }
 
             foreach (self::$_aggFunctions as $aggFunc) {
@@ -901,7 +901,7 @@ class Hashmark_TestCase_Analyst_BasicDecimal extends Hashmark_TestCase
 
             foreach ($sampleProvider['samples'] as $sample) {
                 list($end, $value) = $sample;
-                $this->_cron->createSample($scalarId, $value, $end, $end);
+                $this->_partition->createSample($scalarId, $value, $end, $end);
             }
 
             foreach (self::$_aggFunctions as $aggFunc) {
@@ -948,7 +948,7 @@ class Hashmark_TestCase_Analyst_BasicDecimal extends Hashmark_TestCase
 
             foreach ($sampleProvider['samples'] as $sample) {
                 list($end, $value) = $sample;
-                $this->_cron->createSample($scalarId, $value, $end, $end);
+                $this->_partition->createSample($scalarId, $value, $end, $end);
             }
 
             foreach (self::$_aggFunctions as $aggFuncOuter) {
@@ -999,7 +999,7 @@ class Hashmark_TestCase_Analyst_BasicDecimal extends Hashmark_TestCase
 
             foreach ($sampleProvider['samples'] as $sample) {
                 list($end, $value) = $sample;
-                $this->_cron->createSample($scalarId, $value, $end, $end);
+                $this->_partition->createSample($scalarId, $value, $end, $end);
             }
 
             foreach (Hashmark_Analyst_BasicDecimal::getRecurFunctions() as $recurFunc) {
@@ -1046,7 +1046,7 @@ class Hashmark_TestCase_Analyst_BasicDecimal extends Hashmark_TestCase
 
             foreach ($sampleProvider['samples'] as $sample) {
                 list($end, $value) = $sample;
-                $this->_cron->createSample($scalarId, $value, $end, $end);
+                $this->_partition->createSample($scalarId, $value, $end, $end);
             }
 
             $errorMsg = "data={$sampleProviderName}} ASC";
@@ -1093,7 +1093,7 @@ class Hashmark_TestCase_Analyst_BasicDecimal extends Hashmark_TestCase
 
             foreach ($sampleProvider['samples'] as $sample) {
                 list($end, $value) = $sample;
-                $this->_cron->createSample($scalarId, $value, $end, $end);
+                $this->_partition->createSample($scalarId, $value, $end, $end);
             }
 
             foreach (self::$_aggFunctions as $aggFunc) {
@@ -1141,7 +1141,7 @@ class Hashmark_TestCase_Analyst_BasicDecimal extends Hashmark_TestCase
 
             foreach ($sampleProvider['samples'] as $sample) {
                 list($end, $value) = $sample;
-                $this->_cron->createSample($scalarId, $value, $end, $end);
+                $this->_partition->createSample($scalarId, $value, $end, $end);
             }
 
             foreach (self::$_aggFunctions as $aggFunc) {

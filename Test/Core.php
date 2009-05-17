@@ -168,6 +168,126 @@ class Hashmark_TestCase_Core extends Hashmark_TestCase
     /**
      * @test
      * @group Core
+     * @group setsScalarAgentStatus
+     * @group setScalarAgentStatus
+     * @group createAgent
+     * @group createScalar
+     * @group getScalarAgentById
+     */
+    public function setsScalarAgentStatus()
+    {
+        $agentId = $this->_core->createAgent(self::randomString());
+
+        $scalar = array();
+        $scalar['name'] = self::randomString();
+        $scalar['type'] = 'decimal';;
+        $scalarId = $this->_core->createScalar($scalar);
+            
+        $scalarAgentId = $this->_core->createScalarAgent($scalarId, $agentId, 0);
+            
+        // Only change status and error, leaving default lastrun. 
+        $status = 'Scheduled';
+        $error = self::randomString();
+        $this->_core->setScalarAgentStatus($scalarAgentId, $status, $error);
+        $scalarAgent = $this->_core->getScalarAgentById($scalarAgentId);
+        $this->assertEquals($status, $scalarAgent['status']);
+        $this->assertEquals($error, $scalarAgent['error']);
+        $this->assertEquals(HASHMARK_DATETIME_EMPTY, $scalarAgent['lastrun']);
+        
+        // Change all three.
+        $status = 'Scheduled';
+        $error = self::randomString();
+        $lastrun = time();
+        $this->_core->setScalarAgentStatus($scalarAgentId, $status, $error, $lastrun);
+        $scalarAgent = $this->_core->getScalarAgentById($scalarAgentId);
+        $this->assertEquals($status, $scalarAgent['status']);
+        $this->assertEquals($error, $scalarAgent['error']);
+        $this->assertEquals($lastrun, strtotime($scalarAgent['lastrun'] . ' UTC'));
+    }
+    
+    /**
+     * @test
+     * @group Core
+     * @group getsScheduledAgents
+     * @group getScheduledAgents
+     * @group createScalar
+     */
+    public function getsScheduledAgents()
+    {
+        $scalar = array();
+        $scalar['name'] = self::randomString();
+        $scalar['type'] = 'decimal';
+        $scalarId = $this->_core->createScalar($scalar);
+
+        $agentId = $this->_core->createAgent(self::randomString());
+
+        $time = time();
+        $expectedIds = array();
+
+        $expectedIds[] = $this->_core->createScalarAgent($scalarId, $agentId,
+                                                           0, 'Scheduled', '',
+                                                           $time);
+        $expectedIds[] = $this->_core->createScalarAgent($scalarId, $agentId,
+                                                           1440, 'Scheduled');
+
+        $scheduledAgents = $this->_core->getScheduledAgents();
+
+        foreach ($scheduledAgents as $scalarAgent) {
+            // Ignore records created outside this test.
+            if ($scalarId == $scalarAgent['scalar_id']) {
+                $actualIds[] = $scalarAgent['id'];
+            }
+        }
+                
+        $this->assertEquals($expectedIds, $actualIds);
+    }        
+   
+    /**
+     * @test
+     * @group Core
+     * @group avoidsUnscheduledAgents
+     * @group getScheduledAgents
+     * @group createScalar
+     */
+    public function avoidsUnscheduledAgents()
+    {
+        $scalar = array();
+        $scalar['name'] = self::randomString();
+        $scalar['type'] = 'decimal';
+        $scalarId = $this->_core->createScalar($scalar);
+
+        $agentId = $this->_core->createAgent(self::randomString());
+
+        $time = time();
+        $unexpectedIds = array();
+
+        $unexpectedIds[] = $this->_core->createScalarAgent($scalarId, $agentId,
+                                                           0, 'Unscheduled', '',
+                                                           $time);
+        // Won't start until tomorrow.
+        $unexpectedIds[] = $this->_core->createScalarAgent($scalarId, $agentId,
+                                                           0, 'Scheduled', '',
+                                                           $time + 1400);
+
+        $scheduledAgents = $this->_core->getScheduledAgents();
+
+        $actualIds = array();
+        foreach ($scheduledAgents as $scalarAgent) {
+            // Ignore records created outside this test.
+            if ($scalarId == $scalarAgent['scalar_id']) {
+                $msg = sprintf('scalar: %d, agent: %d, join id: %d',
+                               $scalarId, $agentId, $scalarAgent['id']);
+                $this->assertTrue(false, $msg);
+                return;
+            }
+        }
+                
+        $this->assertTrue(true);
+    }        
+    
+    /**
+     * @test
+     * @group Core
      * @group createsScalarAndGetsById
      * @group getScalarById
      * @group createScalar

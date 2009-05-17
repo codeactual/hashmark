@@ -96,8 +96,8 @@ $mockDb = 1;
  * Module loading checks.
  *
  */
-$modList = array('BcMath' => '', 'Cache' => '', 'Client' => '', 'Core' => '', 'Cron' => '',
-                 'DbHelper' => '', 'Partition' => '', 'Agent' => 'YahooWeather', 'Test' => 'FakeModuleType');
+$modList = array('BcMath' => '', 'Cache' => '', 'Client' => '', 'Core' => '', 'DbHelper' => '',
+                 'Partition' => '', 'Agent' => 'YahooWeather', 'Test' => 'FakeModuleType');
 
 foreach ($modList as $baseName => $typeName) {
     // Cache modules don't use the DB argument,

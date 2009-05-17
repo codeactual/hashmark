@@ -20,7 +20,7 @@
 /**
  * For getModule() and cron constants.
  */
-require_once dirname(__FILE__) . '/../../Hashmark.php';
+require_once dirname(__FILE__) . '/../Hashmark.php';
 
 // Max. table age in days.
 if (!isset($maxDays)) {

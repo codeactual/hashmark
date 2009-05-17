@@ -452,6 +452,77 @@ class Hashmark_Core extends Hashmark_Module_DbDependent
     }
 
     /**
+     * Update an scalar's agent status and error message.
+     *
+     * @param int       $id         `agents_scalars`.`id`
+     * @param string    $status     Ex. 'Scheduled'.
+     * @param string    $error      Optional error message.
+     * @param mixed     $lastrun    Optional UNIX timestamp or DATETIME string.
+     * @return boolean  True on success.
+     * @throws Exception On query error.
+     */
+    public function setScalarAgentStatus($id, $status, $error = '', $lastrun = '')
+    {
+        if ($lastrun) {
+            if (is_int($lastrun)) {
+                $lastrun = gmdate(HASHMARK_DATETIME_FORMAT, $lastrun);
+            }
+
+            $sql = "UPDATE {$this->_dbName}`agents_scalars` "
+                 . 'SET `status` = ?, '
+                 . '`error` = ?, '
+                 . '`lastrun` = ? '
+                 . 'WHERE `id` = ?';
+    
+            $stmt = $this->_db->query($sql, array($status, $error, $lastrun, $id));
+        } else {
+            $sql = "UPDATE {$this->_dbName}`agents_scalars` "
+                 . 'SET `status` = ?, '
+                 . '`error` = ? '
+                 . 'WHERE `id` = ?';
+    
+            $stmt = $this->_db->query($sql, array($status, $error, $id));
+        }
+        
+        return (1 == $stmt->rowCount());
+    }
+    
+    /**
+     * Find scalar agents which are due to run right now.
+     *  
+     *   -  Due: Based on frequency, last run time, and if they've
+     *      successfully ran before.
+     *
+     * @return Array    Assoc. of fields; otherwise false.
+     * @throws Exception On query error.
+     */
+    public function getScheduledAgents()
+    {
+        // "Running" means it's scheduled but the last run didn't finish.
+        $statusMatch = '(`status` IN ("Scheduled", "Running"))';
+        // Recurrence interval has been reached.
+        $isDue = '(`lastrun` + INTERVAL `frequency` MINUTE <= UTC_TIMESTAMP())';
+        // Start date/time has been reached or none was specified.
+        $canStart = '(`start` = ? OR `start` <= UTC_TIMESTAMP())';
+        $hasNeverFinished = '`lastrun` = ?';
+
+        $sql = 'SELECT `map`.`id`, `agent_id`, `scalar_id`, `config`, `status`, `name` '
+             . "FROM {$this->_dbName}`agents_scalars` AS `map` "
+             . "JOIN {$this->_dbName}`agents` AS `agent` ON `map`.`agent_id` = `agent`.`id` "
+             . "WHERE {$statusMatch} "
+             . "AND {$canStart} "
+             . "AND ({$isDue} OR {$hasNeverFinished}) ";
+
+        $rows = $this->_db->fetchAll($sql, array(HASHMARK_DATETIME_EMPTY, HASHMARK_DATETIME_EMPTY));
+
+        if (!$rows) {
+            return false;
+        }
+
+        return $rows;
+    }
+
+    /**
      * Add new row to `categories`.
      *
      * @param string    $name

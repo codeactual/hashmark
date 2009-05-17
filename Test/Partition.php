@@ -902,8 +902,6 @@ class Hashmark_TestCase_Partition extends Hashmark_TestCase
      */
     public function createsTempTableFromQueryResults()
     {
-        $cron = Hashmark::getModule('Cron', '', $this->_db);
-        
         // Create a sample for the current time, for a new scalar.
         $srcName = 'samples_analyst_temp';
         $srcDef = str_replace('TABLE `' . $srcName,
@@ -915,7 +913,7 @@ class Hashmark_TestCase_Partition extends Hashmark_TestCase
         $scalarId = $this->_core->createScalar($scalarFields);
         $start = gmdate(HASHMARK_DATETIME_FORMAT);
         $end = $start;
-        $cron->createSample($scalarId, 1, $start, $end);
+        $this->_partition->createSample($scalarId, 1, $start, $end);
 
         // Triggers a Hashmark_Partition::queryCurrent() in createTempFromQuery().
         $currentPartition = $this->_partition->getIntervalTableName($scalarId);
@@ -935,8 +933,8 @@ class Hashmark_TestCase_Partition extends Hashmark_TestCase
         $start = '2008-06-03 00:00:00';
         $end = '2008-12-12 00:00:00';
         $sql = 'SELECT `end`, `value` FROM ~samples';
-        $cron->createSample($scalarId, 1, $start, $start);
-        $cron->createSample($scalarId, 1, $end, $end);
+        $this->_partition->createSample($scalarId, 1, $start, $start);
+        $this->_partition->createSample($scalarId, 1, $end, $end);
         $tempName = $this->_partition->createTempFromQuery($srcName, '`x`, `y`',
                                                            $sql, array(),
                                                            $scalarId, $start, $end);
@@ -1027,5 +1025,55 @@ class Hashmark_TestCase_Partition extends Hashmark_TestCase
                                        'INSERT INTO ~samples (`value`) VALUES (1)',
                                        gmdate(HASHMARK_DATETIME_FORMAT));
         $this->assertTrue($this->_partition->tableExists($expectedTableName));
+    }
+    
+    /**
+     * @test
+     * @group Partition
+     * @group createsSampleAndUpdatesScalar
+     * @group createSample
+     * @group getSample
+     * @group createScalar
+     * @group getScalarById
+     */
+    public function createsSampleAndUpdatesScalar()
+    {
+        foreach (self::provideScalarTypesAndValues() as $data) {
+            list($type, $value) = $data;
+
+            $expectedScalar = array();
+            $expectedScalar['name'] = self::randomString();
+            $expectedScalar['type'] = $type;
+
+            $expectedScalarId = $this->_core->createScalar($expectedScalar);
+
+            $expectedStart = gmdate(HASHMARK_DATETIME_FORMAT, time() - 5);
+            $expectedEnd = gmdate(HASHMARK_DATETIME_FORMAT);
+
+            $sampleCreated = $this->_partition->createSample($expectedScalarId, $value,
+                                                             $expectedStart, $expectedEnd);
+            $this->assertTrue($sampleCreated);
+
+            $sample = $this->_partition->getLatestSample($expectedScalarId);
+
+            // Ensure samples table got updated.
+            $this->assertEquals($expectedStart, $sample['start']);
+            $this->assertEquals($expectedEnd, $sample['end']);
+            $this->assertEquals($value, $sample['value']);
+            $this->assertEquals(1, $sample['id']);
+
+            // Ensure associated scalar got updated.
+            $scalar = $this->_core->getScalarById($expectedScalarId);
+            $this->assertEquals($value, $scalar['value']);
+            $this->assertEquals($expectedEnd, $scalar['last_agent_change']);
+            $this->assertEquals(1, $scalar['sample_count']);
+            
+            // Ensure sample sequence is increasing in scalars and samples table.
+            $sampleCreated = $this->_partition->createSample($expectedScalarId, $value, 
+                                                             $expectedStart, $expectedEnd);
+            $this->assertTrue($sampleCreated);
+            $nextSample = $this->_partition->getLatestSample($expectedScalarId);
+            $this->assertEquals(2, $nextSample['id']);
+        }
     }
 }

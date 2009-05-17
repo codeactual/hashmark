@@ -31,7 +31,7 @@ class Hashmark_TestCase_Module_DbDependent extends Hashmark_TestCase_Module
      */
     public function getsDbProps()
     {
-        $moduleNames = array('Client' => '', 'Core' => '', 'Cron' => '', 'Partition' => '');
+        $moduleNames = array('Client' => '', 'Core' => '', 'Partition' => '');
         
         $dbHelper = Hashmark::getModule('DbHelper');
         $dbHelperConfig = $dbHelper->getBaseConfig();

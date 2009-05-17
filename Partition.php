@@ -530,7 +530,7 @@ class Hashmark_Partition extends Hashmark_Module_DbDependent
         $definition = $this->getPartitionDefinition($type);
         $definition = preg_replace('/\n|CREATE TABLE `samples_' . $type . '`|(ENGINE.*$)/', '', $definition);
 
-        // Default DATETIME comments are used in Cron/Tool/gcMergeTables.php.
+        // Default DATETIME comments are used in Cron/gcMergeTables.php.
         if (!$comment) {
             $comment = gmdate('Y-m-d H:i:s');
         }
@@ -666,5 +666,61 @@ class Hashmark_Partition extends Hashmark_Module_DbDependent
         }
 
         return $name;
+    }
+    /**
+     * Add new row to `samples` and update `scalars` statistics.
+     *
+     * @param int       $scalarId
+     * @param string    $value
+     * @param mixed     $start  UNIX timestamp or DATETIME string.
+     * @param mixed     $end    UNIX timestamp or DATETIME string.
+     * @return boolean  True on success.
+     * @throws Exception On query error.
+     */
+    public function createSample($scalarId, $value, $start, $end)
+    {
+        $start = Hashmark_Util::toDatetime($start);
+        $end = Hashmark_Util::toDatetime($end);
+
+        // `sample_count` seeds AUTO_INCREMENT `id` values in sample partitions
+        $sql = "UPDATE {$this->_dbName}`scalars` "
+             . 'SET `value` = ?, '
+             . '`last_agent_change` = ?, '
+             . '`sample_count` = `sample_count` + 1 '
+             . 'WHERE `id` = ?';
+
+        $this->_db->query($sql, array($value, $end, $scalarId));
+        
+        $sql = 'INSERT INTO ~samples '
+             . '(`value`, `start`, `end`) '
+             . 'VALUES (?, ?, ?)';
+        
+        // queryAtDate() instead of queryCurrent() so unit tests can
+        // create backdated samples.
+        $bind = array($value, $start, $end);
+        $stmt = $this->queryAtDate($scalarId, $sql, $end, $bind);
+
+        return (1 == $stmt->rowCount());
+    }
+
+    /**
+     * Return all fields from a scalar's latest sample in the current partition.
+     *
+     * @param int       $scalarId
+     * @return Array    Assoc. of fields; otherwise false.
+     * @throws Exception On query error.
+     */
+    public function getLatestSample($scalarId)
+    {
+        $sql = 'SELECT * FROM ~samples ORDER BY `id` DESC LIMIT 1';
+
+        $stmt = $this->queryCurrent($scalarId, $sql);
+
+        $rows = $stmt->fetchAll();
+        if (!$rows) {
+            return false;
+        }
+
+        return $rows[0];
     }
 }

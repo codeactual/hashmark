@@ -107,8 +107,6 @@ class Hashmark_TestCase_Client extends Hashmark_TestCase
      */
     public function setsScalarValueAndCreatesSample()
     {
-        $cron = Hashmark::getModule('Cron', '', $this->_db);
-
         $expectedFields = array();
         $expectedFields['name'] = self::randomString();
         $expectedFields['type'] = 'decimal';
@@ -129,7 +127,7 @@ class Hashmark_TestCase_Client extends Hashmark_TestCase
         $this->assertDecimalEquals($value, $this->_client->get($expectedFields['name']));
 
         // Ensure sample change.
-        $sample = $cron->getLatestSample($expectedId);
+        $sample = Hashmark::getModule('Partition', '', $this->_db)->getLatestSample($expectedId);
         $this->assertDecimalEquals($value, $sample['value']);
     }
 
@@ -219,8 +217,6 @@ class Hashmark_TestCase_Client extends Hashmark_TestCase
      */
     public function incrementsScalarDecimalValueAndCreatesSample()
     {
-        $cron = Hashmark::getModule('Cron', '', $this->_db);
-        
         $value = array('start' => '1.0001', 'delta' => '100000000000000.0001', 'sum' => '100000000000001.0002');
 
         $expectedFields = array();
@@ -250,7 +246,7 @@ class Hashmark_TestCase_Client extends Hashmark_TestCase
         $this->assertDecimalEquals($value['sum'], $this->_client->get($expectedFields['name']));
 
         // Ensure sample change.
-        $sample = $cron->getLatestSample($expectedId);
+        $sample = Hashmark::getModule('Partition', '', $this->_db)->getLatestSample($expectedId);
         $this->assertDecimalEquals($value['sum'], $sample['value']);
     }
 
@@ -266,8 +262,6 @@ class Hashmark_TestCase_Client extends Hashmark_TestCase
      */
     public function decrementsScalarDecimalValueAndCreatesSample()
     {
-        $cron = Hashmark::getModule('Cron', '', $this->_db);
-              
         $value = array('start' => '100000000000000.0001', 'delta' => '.0001', 'sum' => '100000000000000.0000');
 
         $expectedFields = array();
@@ -297,7 +291,7 @@ class Hashmark_TestCase_Client extends Hashmark_TestCase
         $this->assertDecimalEquals($value['sum'], $this->_client->get($expectedFields['name']));
 
         // Ensure sample change.
-        $sample = $cron->getLatestSample($expectedId);
+        $sample = Hashmark::getModule('Partition', '', $this->_db)->getLatestSample($expectedId);
         $this->assertDecimalEquals($value['sum'], $sample['value']);
     }
 
@@ -336,8 +330,7 @@ class Hashmark_TestCase_Client extends Hashmark_TestCase
         $this->_client->incr($expectedName, $expectedValue, true);
         $scalar = $this->_core->getScalarByName($expectedName);
 
-        $cron = Hashmark::getModule('Cron', '', $this->_db);
-        $sample = $cron->getLatestSample($scalar['id']);
+        $sample = Hashmark::getModule('Partition', '', $this->_db)->getLatestSample($scalar['id']);
         $this->assertDecimalEquals($expectedValue, $sample['value']);
     }
     

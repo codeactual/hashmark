@@ -58,7 +58,7 @@ define('HASHMARK_EXCEPTION_SQL', 2);
 class Hashmark
 {
     /**
-     * Factory for Hashmark_Module implementations: Client, Core, Cron, Agent, etc.
+     * Factory for instances of Client, Core, Cron, Agent, etc.
      *
      *      -   Autoloads required scripts and config files (if they exist)
      *          based on naming conventions.
