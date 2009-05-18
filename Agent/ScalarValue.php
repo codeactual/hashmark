@@ -48,16 +48,23 @@ class Hashmark_Agent_ScalarValue implements Hashmark_Agent
     public static function run(&$agent)
     {
         if (empty($agent['scalar_id'])) {
-            return null;
+            return;
         }
 
         $db = Hashmark::getModule('DbHelper')->openDb('cron');
         $client = Hashmark::getModule('Client', '', $db);
+        $partition = Hashmark::getModule('Partition', '', $db);
 
         if (!$client) {
-            return null;
+            return;
         }
 
-        return $client->get((int) $agent['scalar_id']);
+        $value = $client->get((int) $agent['scalar_id']);
+
+        $time = time();
+        if (!$partition->createSample($agent['id'], $value, $time, $time)) {
+            $agent['error'] = sprintf('Could not save sample: start=%s end=%s value=%s',
+                                      $start, $end, $value);
+        }
     }
 }
