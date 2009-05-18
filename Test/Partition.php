@@ -911,9 +911,8 @@ class Hashmark_TestCase_Partition extends Hashmark_TestCase
         $scalarFields['name'] = self::randomString();
         $scalarFields['type'] = 'decimal';
         $scalarId = $this->_core->createScalar($scalarFields);
-        $start = gmdate(HASHMARK_DATETIME_FORMAT);
-        $end = $start;
-        $this->_partition->createSample($scalarId, 1, $start, $end);
+        $end = gmdate(HASHMARK_DATETIME_FORMAT);
+        $this->_partition->createSample($scalarId, 1, $end);
 
         // Triggers a Hashmark_Partition::queryCurrent() in createTempFromQuery().
         $currentPartition = $this->_partition->getIntervalTableName($scalarId);
@@ -933,8 +932,8 @@ class Hashmark_TestCase_Partition extends Hashmark_TestCase
         $start = '2008-06-03 00:00:00';
         $end = '2008-12-12 00:00:00';
         $sql = 'SELECT `end`, `value` FROM ~samples';
-        $this->_partition->createSample($scalarId, 1, $start, $start);
-        $this->_partition->createSample($scalarId, 1, $end, $end);
+        $this->_partition->createSample($scalarId, 1, $start);
+        $this->_partition->createSample($scalarId, 1, $end);
         $tempName = $this->_partition->createTempFromQuery($srcName, '`x`, `y`',
                                                            $sql, array(),
                                                            $scalarId, $start, $end);
@@ -1047,17 +1046,15 @@ class Hashmark_TestCase_Partition extends Hashmark_TestCase
 
             $expectedScalarId = $this->_core->createScalar($expectedScalar);
 
-            $expectedStart = gmdate(HASHMARK_DATETIME_FORMAT, time() - 5);
             $expectedEnd = gmdate(HASHMARK_DATETIME_FORMAT);
 
             $sampleCreated = $this->_partition->createSample($expectedScalarId, $value,
-                                                             $expectedStart, $expectedEnd);
+                                                             $expectedEnd);
             $this->assertTrue($sampleCreated);
 
             $sample = $this->_partition->getLatestSample($expectedScalarId);
 
             // Ensure samples table got updated.
-            $this->assertEquals($expectedStart, $sample['start']);
             $this->assertEquals($expectedEnd, $sample['end']);
             $this->assertEquals($value, $sample['value']);
             $this->assertEquals(1, $sample['id']);
@@ -1070,7 +1067,7 @@ class Hashmark_TestCase_Partition extends Hashmark_TestCase
             
             // Ensure sample sequence is increasing in scalars and samples table.
             $sampleCreated = $this->_partition->createSample($expectedScalarId, $value, 
-                                                             $expectedStart, $expectedEnd);
+                                                             $expectedEnd);
             $this->assertTrue($sampleCreated);
             $nextSample = $this->_partition->getLatestSample($expectedScalarId);
             $this->assertEquals(2, $nextSample['id']);

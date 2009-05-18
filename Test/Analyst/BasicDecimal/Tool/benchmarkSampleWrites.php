@@ -66,7 +66,7 @@ for ($scalars = 0; $scalars < HASHMARK_CREATESAMPLES_SCALARS; $scalars++) {
     foreach ($samples as $timeData => $value) {
         list($time) = explode('=', $timeData);
         
-        $partition->createSample($scalarId, $value, $time, $time);
+        $partition->createSample($scalarId, $value, $time);
     }
     $end = microtime(true);
     $createSampleTime += $end - $start;

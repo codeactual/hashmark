@@ -672,14 +672,12 @@ class Hashmark_Partition extends Hashmark_Module_DbDependent
      *
      * @param int       $scalarId
      * @param string    $value
-     * @param mixed     $start  UNIX timestamp or DATETIME string.
      * @param mixed     $end    UNIX timestamp or DATETIME string.
      * @return boolean  True on success.
      * @throws Exception On query error.
      */
-    public function createSample($scalarId, $value, $start, $end)
+    public function createSample($scalarId, $value, $end)
     {
-        $start = Hashmark_Util::toDatetime($start);
         $end = Hashmark_Util::toDatetime($end);
 
         // `sample_count` seeds AUTO_INCREMENT `id` values in sample partitions
@@ -692,12 +690,12 @@ class Hashmark_Partition extends Hashmark_Module_DbDependent
         $this->_db->query($sql, array($value, $end, $scalarId));
         
         $sql = 'INSERT INTO ~samples '
-             . '(`value`, `start`, `end`) '
-             . 'VALUES (?, ?, ?)';
+             . '(`value`, `end`) '
+             . 'VALUES (?, ?)';
         
         // queryAtDate() instead of queryCurrent() so unit tests can
         // create backdated samples.
-        $bind = array($value, $start, $end);
+        $bind = array($value, $end);
         $stmt = $this->queryAtDate($scalarId, $sql, $end, $bind);
 
         return (1 == $stmt->rowCount());

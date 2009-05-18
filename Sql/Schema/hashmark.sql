@@ -135,9 +135,8 @@ CREATE TABLE `samples_string` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Sequence seeded w/ `scalars`.`sample_count`',
   `end` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
   `value` varchar(128) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',
-  `start` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
   PRIMARY KEY (`id`),
-  KEY `idx_analyst` (`end`,`start`,`value`)
+  KEY `idx_analyst` (`end`,`value`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci COMMENT='Model for partitions of scalar string samples';
 SET character_set_client = @saved_cs_client;
 
@@ -152,9 +151,8 @@ CREATE TABLE `samples_decimal` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Sequence seeded w/ `scalars`.`sample_count`',
   `end` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
   `value` decimal(20,4) NOT NULL DEFAULT '0.0000',
-  `start` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
   PRIMARY KEY (`id`),
-  KEY `idx_analyst` (`end`,`start`,`value`)
+  KEY `idx_analyst` (`end`,`value`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci COMMENT='Model for partitions of scalar decimal samples';
 SET character_set_client = @saved_cs_client;
 
@@ -206,4 +204,4 @@ SET character_set_client = @saved_cs_client;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2009-05-17 17:48:37
+-- Dump completed on 2009-05-18  2:23:46
