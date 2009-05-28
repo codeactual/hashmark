@@ -64,8 +64,8 @@ class Hashmark_Client extends Hashmark_Module_DbDependent
             unset($stmt);
             
             $sql = 'INSERT INTO ~samples '
-                 . '(`value`, `start`, `end`) '
-                 . 'VALUES (?, UTC_TIMESTAMP(), UTC_TIMESTAMP())';
+                 . '(`value`, `end`) '
+                 . 'VALUES (?, UTC_TIMESTAMP())';
 
             $scalarId = $this->getModule('Core')->getScalarIdByName($scalarName);
 
@@ -154,8 +154,8 @@ class Hashmark_Client extends Hashmark_Module_DbDependent
 
                 if ($newSample) {
                     $sql = 'INSERT INTO ~samples '
-                         . '(`value`, `start`, `end`) '
-                         . "VALUES ({$amount}, UTC_TIMESTAMP(), UTC_TIMESTAMP())";
+                         . '(`value`, `end`) '
+                         . "VALUES ({$amount}, UTC_TIMESTAMP())";
     
                     $partition = $this->getModule('Partition');
                     $partition->queryCurrent($scalarId, $sql);
@@ -189,8 +189,8 @@ class Hashmark_Client extends Hashmark_Module_DbDependent
             $currentScalarValue = "SELECT `value` FROM {$this->_dbName}`scalars` WHERE `name` = ? LIMIT 1";
 
             $sql = 'INSERT INTO ~samples '
-                 . '(`value`, `start`, `end`) '
-                 . "VALUES (({$currentScalarValue}), UTC_TIMESTAMP(), UTC_TIMESTAMP())";
+                 . '(`value`, `end`) '
+                 . "VALUES (({$currentScalarValue}), UTC_TIMESTAMP())";
 
             $scalarId = $this->getModule('Core')->getScalarIdByName($scalarName);
 
