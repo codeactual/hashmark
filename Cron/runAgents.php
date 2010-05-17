@@ -1,3 +1,4 @@
+#!/usr/bin/php
 <?php
 // vim: fenc=utf-8:ft=php:ai:si:ts=4:sw=4:et:
 

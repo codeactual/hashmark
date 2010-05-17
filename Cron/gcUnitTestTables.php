@@ -1,3 +1,4 @@
+#!/usr/bin/php
 <?php
 // vim: fenc=utf-8:ft=php:ai:si:ts=4:sw=4:et:
 
@@ -28,8 +29,8 @@ $coreTables = array('categories', 'categories_milestones', 'categories_scalars',
                     'milestones', 'scalars');
 
 foreach ($coreTables as $table) {
-    $db->query($db, "TRUNCATE `{$table}`");
-    $db->query($db, "ALTER TABLE `{$table}` SET AUTO_INCREMENT = 1");
+    $db->query("TRUNCATE `{$table}`");
+    $db->query("ALTER TABLE `{$table}` AUTO_INCREMENT = 1");
 }
 
 $partition = Hashmark::getModule('Partition', '', $db);
@@ -39,5 +40,5 @@ $garbageTables = array_diff($partition->getTablesLike('%samples%'), $nonPartSamp
 
 if ($garbageTables) {
     $partition->dropTable($garbageTables);
-    $db->query($db, 'FLUSH TABLES');
+    $db->query('FLUSH TABLES');
 }
