@@ -83,6 +83,9 @@ for ($scalars = 0; $scalars < HASHMARK_DUMP_RANDOMSAMPLES_SCALARS; $scalars++) {
         foreach ($samples as $timeData => $value) {
             list($time) = explode('=', $timeData);
             $sampleDate = Hashmark_Util::toDatetime($time);
+            if ('string' == HASHMARK_DUMP_RANDOMSAMPLES_TYPE) {
+                $value = $partition->escape($value);
+            }
 
             // Create partitions as needed based on sample date.
             $tableName = $partition->getIntervalTableName($scalarId, $sampleDate);
