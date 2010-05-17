@@ -21,39 +21,41 @@
  */
 
 /**
- * Zend_Db_Statement_Exception
+ * @see Zend_Db_Statement_Exception
  */
 require_once 'Zend/Db/Statement/Exception.php';
 
 /**
- * @category   Zend
  * @package    Zend_Db
  * @subpackage Statement
  * @copyright  Copyright (c) 2005-2010 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
-
-class Zend_Db_Statement_Oracle_Exception extends Zend_Db_Statement_Exception
+class Zend_Db_Statement_Sqlsrv_Exception extends Zend_Db_Statement_Exception
 {
-   protected $message = 'Unknown exception';
-   protected $code = 0;
-
-   function __construct($error = null, $code = 0)
-   {
-       if (is_array($error)) {
-            if (!isset($error['offset'])) {
-                $this->message = $error['code']." ".$error['message'];
-            } else {
-                $this->message = $error['code']." ".$error['message']." ";
-                $this->message .= substr($error['sqltext'], 0, $error['offset']);
-                $this->message .= "*";
-                $this->message .= substr($error['sqltext'], $error['offset']);
+    /**
+     * Constructor
+     *
+     * If $message is an array, the assumption is that the return value of
+     * sqlsrv_errors() was provided. If so, it then retrieves the most recent
+     * error from that stack, and sets the message and code based on it.
+     *
+     * @param null|array|string $message
+     * @param null|int $code
+     */
+    public function __construct($message = null, $code = 0)
+    {
+       if (is_array($message)) {
+            // Error should be array of errors
+            // We only need first one (?)
+            if (isset($message[0])) {
+                $message = $message[0];
             }
-            $this->code = $error['code'];
+
+            $code    = (int)    $message['code'];
+            $message = (string) $message['message'];
        }
-       if (!$this->code && $code) {
-           $this->code = $code;
-       }
+       parent::__construct($message, $code);
    }
 }
 

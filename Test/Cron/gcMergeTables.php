@@ -63,7 +63,10 @@ class Hashmark_TestCase_Cron_gcMergeTables extends Hashmark_TestCase_Cron
 
         $maxDays = 3;
         $maxCount = 2;
+
+        ob_start();
         require HASHMARK_ROOT_DIR . '/Cron/gcMergeTables.php';
+        ob_end_clean();
 
         for ($t = 0; $t < 5; $t++) {
             if ($t < 2) {

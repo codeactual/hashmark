@@ -49,8 +49,9 @@ class Hashmark_TestCase_Cron_runAgents extends Hashmark_TestCase_Cron
         // Agent is scheduled to run immediately (0 frequency).
         $scalarAgentId = $core->createScalarAgent($scalarId, $agentId,
                                                          0, 'Scheduled');
-
+        ob_start();
         require HASHMARK_ROOT_DIR . '/Cron/runAgents.php';
+        ob_end_clean();
         
         // Assert scalar value changed in last 60 seconds.
         $scalar = $core->getScalarById($scalarId);

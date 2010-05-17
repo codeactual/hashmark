@@ -15,9 +15,9 @@
  * @category   Zend
  * @package    Zend_Db
  * @subpackage Adapter
- * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright  Copyright (c) 2005-2010 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
- * @version    $Id: Abstract.php 15577 2009-05-14 12:43:34Z matthew $
+ * @version    $Id: Abstract.php 20096 2010-01-06 02:05:09Z bkarwin $
  */
 
 
@@ -39,7 +39,7 @@ require_once 'Zend/Db/Statement/Pdo.php';
  * @category   Zend
  * @package    Zend_Db
  * @subpackage Adapter
- * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright  Copyright (c) 2005-2010 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
 abstract class Zend_Db_Adapter_Pdo_Abstract extends Zend_Db_Adapter_Abstract
@@ -62,11 +62,12 @@ abstract class Zend_Db_Adapter_Pdo_Abstract extends Zend_Db_Adapter_Abstract
         // baseline of DSN parts
         $dsn = $this->_config;
 
-        // don't pass the username, password, and driver_options in the DSN
+        // don't pass the username, password, charset, persistent and driver_options in the DSN
         unset($dsn['username']);
         unset($dsn['password']);
         unset($dsn['options']);
         unset($dsn['charset']);
+        unset($dsn['persistent']);
         unset($dsn['driver_options']);
 
         // use all remaining parts in the DSN
@@ -114,6 +115,11 @@ abstract class Zend_Db_Adapter_Pdo_Abstract extends Zend_Db_Adapter_Abstract
         // create PDO connection
         $q = $this->_profiler->queryStart('connect', Zend_Db_Profiler::CONNECT);
 
+        // add the persistence flag if we find it in our config array
+        if (isset($this->_config['persistent']) && ($this->_config['persistent'] == true)) {
+            $this->_config['driver_options'][PDO::ATTR_PERSISTENT] = true;
+        }
+
         try {
             $this->_connection = new PDO(
                 $dsn,
@@ -135,7 +141,7 @@ abstract class Zend_Db_Adapter_Pdo_Abstract extends Zend_Db_Adapter_Abstract
              * @see Zend_Db_Adapter_Exception
              */
             require_once 'Zend/Db/Adapter/Exception.php';
-            throw new Zend_Db_Adapter_Exception($e->getMessage());
+            throw new Zend_Db_Adapter_Exception($e->getMessage(), $e->getCode(), $e);
         }
 
     }
@@ -235,7 +241,7 @@ abstract class Zend_Db_Adapter_Pdo_Abstract extends Zend_Db_Adapter_Abstract
              * @see Zend_Db_Statement_Exception
              */
             require_once 'Zend/Db/Statement/Exception.php';
-            throw new Zend_Db_Statement_Exception($e->getMessage());
+            throw new Zend_Db_Statement_Exception($e->getMessage(), $e->getCode(), $e);
         }
     }
 
@@ -252,10 +258,10 @@ abstract class Zend_Db_Adapter_Pdo_Abstract extends Zend_Db_Adapter_Abstract
         if ($sql instanceof Zend_Db_Select) {
             $sql = $sql->assemble();
         }
-        
+
         try {
             $affected = $this->getConnection()->exec($sql);
-            
+
             if ($affected === false) {
                 $errorInfo = $this->getConnection()->errorInfo();
                 /**
@@ -264,14 +270,14 @@ abstract class Zend_Db_Adapter_Pdo_Abstract extends Zend_Db_Adapter_Abstract
                 require_once 'Zend/Db/Adapter/Exception.php';
                 throw new Zend_Db_Adapter_Exception($errorInfo[2]);
             }
-            
+
             return $affected;
         } catch (PDOException $e) {
             /**
              * @see Zend_Db_Adapter_Exception
              */
             require_once 'Zend/Db/Adapter/Exception.php';
-            throw new Zend_Db_Adapter_Exception($e->getMessage());
+            throw new Zend_Db_Adapter_Exception($e->getMessage(), $e->getCode(), $e);
         }
     }
 

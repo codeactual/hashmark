@@ -15,8 +15,9 @@
  * @category   Zend
  * @package    Zend_Db
  * @subpackage Statement
- * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright  Copyright (c) 2005-2010 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
+ * @version    $Id: Oracle.php 20096 2010-01-06 02:05:09Z bkarwin $
  */
 
 /**
@@ -30,16 +31,11 @@ require_once 'Zend/Db/Statement.php';
  * @category   Zend
  * @package    Zend_Db
  * @subpackage Statement
- * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright  Copyright (c) 2005-2010 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
 class Zend_Db_Statement_Oracle extends Zend_Db_Statement
 {
-
-    /**
-     * The connection_stmt object.
-     */
-    protected $_stmt;
 
     /**
      * Column names.
@@ -233,16 +229,9 @@ class Zend_Db_Statement_Oracle extends Zend_Db_Statement
     public function _execute(array $params = null)
     {
         $connection = $this->_adapter->getConnection();
+
         if (!$this->_stmt) {
             return false;
-        }
-
-        if (! $this->_stmt) {
-            /**
-             * @see Zend_Db_Adapter_Oracle_Exception
-             */
-            require_once 'Zend/Db/Statement/Oracle/Exception.php';
-            throw new Zend_Db_Statement_Oracle_Exception(oci_error($connection));
         }
 
         if ($params !== null) {

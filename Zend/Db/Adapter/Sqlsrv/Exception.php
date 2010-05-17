@@ -17,16 +17,16 @@
  * @subpackage Adapter
  * @copyright  Copyright (c) 2005-2010 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
- * @version    $Id: Exception.php 20096 2010-01-06 02:05:09Z bkarwin $
+ * @version    $Id: Exception.php 20629 2010-01-25 21:17:23Z ralph $
  */
 
 /**
- * Zend_Db_Adapter_Exception
+ * @see Zend_Db_Adapter_Exception
  */
 require_once 'Zend/Db/Adapter/Exception.php';
 
 /**
- * Zend_Db_Adapter_Oracle_Exception
+ * Zend_Db_Adapter_Sqlsrv_Exception
  *
  * @category   Zend
  * @package    Zend_Db
@@ -34,27 +34,30 @@ require_once 'Zend/Db/Adapter/Exception.php';
  * @copyright  Copyright (c) 2005-2010 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
-class Zend_Db_Adapter_Oracle_Exception extends Zend_Db_Adapter_Exception
+class Zend_Db_Adapter_Sqlsrv_Exception extends Zend_Db_Adapter_Exception
 {
-   protected $message = 'Unknown exception';
-   protected $code = 0;
-
-   function __construct($error = null, $code = 0) {
-       if (is_array($error)) {
-            if (!isset($error['offset'])) {
-                $this->message = $error['code'] .' '. $error['message'];
-            } else {
-                $this->message = $error['code'] .' '. $error['message']." "
-                               . substr($error['sqltext'], 0, $error['offset'])
-                               . "*"
-                               . substr($error['sqltext'], $error['offset']);
+    /**
+     * Constructor
+     *
+     * If $message is an array, the assumption is that the return value of
+     * sqlsrv_errors() was provided. If so, it then retrieves the most recent
+     * error from that stack, and sets the message and code based on it.
+     *
+     * @param null|array|string $message
+     * @param null|int $code
+     */
+    public function __construct($message = null, $code = 0)
+    {
+       if (is_array($message)) {
+            // Error should be array of errors
+            // We only need first one (?)
+            if (isset($message[0])) {
+                $message = $message[0];
             }
-            $this->code = $error['code'];
-       } else if (is_string($error)) {
-           $this->message = $error;
+
+            $code    = (int)    $message['code'];
+            $message = (string) $message['message'];
        }
-       if (!$this->code && $code) {
-           $this->code = $code;
-       }
+       parent::__construct($message, $code, new Exception($message, $code));
    }
 }

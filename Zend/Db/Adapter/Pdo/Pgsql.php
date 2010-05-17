@@ -15,9 +15,9 @@
  * @category   Zend
  * @package    Zend_Db
  * @subpackage Adapter
- * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright  Copyright (c) 2005-2010 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
- * @version    $Id: Pgsql.php 14953 2009-04-17 00:56:16Z norm2782 $
+ * @version    $Id: Pgsql.php 20096 2010-01-06 02:05:09Z bkarwin $
  */
 
 
@@ -33,7 +33,7 @@ require_once 'Zend/Db/Adapter/Pdo/Abstract.php';
  * @category   Zend
  * @package    Zend_Db
  * @subpackage Adapter
- * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright  Copyright (c) 2005-2010 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
 class Zend_Db_Adapter_Pdo_Pgsql extends Zend_Db_Adapter_Pdo_Abstract
@@ -84,7 +84,7 @@ class Zend_Db_Adapter_Pdo_Pgsql extends Zend_Db_Adapter_Pdo_Abstract
             return;
         }
 
-    	parent::_connect();
+        parent::_connect();
 
         if (!empty($this->_config['charset'])) {
             $sql = "SET NAMES '" . $this->_config['charset'] . "'";
@@ -194,13 +194,17 @@ class Zend_Db_Adapter_Pdo_Pgsql extends Zend_Db_Adapter_Pdo_Abstract
 
         $desc = array();
         foreach ($result as $key => $row) {
-            if ($row[$type] == 'varchar') {
-                if (preg_match('/character varying(?:\((\d+)\))?/', $row[$complete_type], $matches)) {
+            $defaultValue = $row[$default_value];
+            if ($row[$type] == 'varchar' || $row[$type] == 'bpchar' ) {
+                if (preg_match('/character(?: varying)?(?:\((\d+)\))?/', $row[$complete_type], $matches)) {
                     if (isset($matches[1])) {
                         $row[$length] = $matches[1];
                     } else {
                         $row[$length] = null; // unlimited
                     }
+                }
+                if (preg_match("/^'(.*?)'::(?:character varying|bpchar)$/", $defaultValue, $matches)) {
+                    $defaultValue = $matches[1];
                 }
             }
             list($primary, $primaryPosition, $identity) = array(false, null, false);
@@ -215,7 +219,7 @@ class Zend_Db_Adapter_Pdo_Pgsql extends Zend_Db_Adapter_Pdo_Abstract
                 'COLUMN_NAME'      => $this->foldCase($row[$colname]),
                 'COLUMN_POSITION'  => $row[$attnum],
                 'DATA_TYPE'        => $row[$type],
-                'DEFAULT'          => $row[$default_value],
+                'DEFAULT'          => $defaultValue,
                 'NULLABLE'         => (bool) ($row[$notnull] != 't'),
                 'LENGTH'           => $row[$length],
                 'SCALE'            => null, // @todo

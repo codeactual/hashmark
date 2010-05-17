@@ -16,9 +16,9 @@
  * @category   Zend
  * @package    Zend_Db
  * @subpackage Select
- * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright  Copyright (c) 2005-2010 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
- * @version    $Id: Select.php 5308 2007-06-14 17:18:45Z bkarwin $
+ * @version    $Id: Select.php 20096 2010-01-06 02:05:09Z bkarwin $
  */
 
 
@@ -40,7 +40,7 @@ require_once 'Zend/Db/Table/Abstract.php';
  * @category   Zend
  * @package    Zend_Db
  * @subpackage Table
- * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright  Copyright (c) 2005-2010 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
 class Zend_Db_Table_Select extends Zend_Db_Select
@@ -185,7 +185,7 @@ class Zend_Db_Table_Select extends Zend_Db_Select
      * Performs a validation on the select query before passing back to the parent class.
      * Ensures that only columns from the primary Zend_Db_Table are returned in the result.
      *
-     * @return string This object as a SELECT string.
+     * @return string|null This object as a SELECT string (or null if a string cannot be produced)
      */
     public function assemble()
     {
@@ -193,23 +193,27 @@ class Zend_Db_Table_Select extends Zend_Db_Select
         $primary = $this->_info[Zend_Db_Table_Abstract::NAME];
         $schema  = $this->_info[Zend_Db_Table_Abstract::SCHEMA];
 
-        // If no fields are specified we assume all fields from primary table
-        if (!count($fields)) {
-            $this->from($primary, self::SQL_WILDCARD, $schema);
-            $fields = $this->getPart(Zend_Db_Table_Select::COLUMNS);
-        }
 
-        $from = $this->getPart(Zend_Db_Table_Select::FROM);
+        if (count($this->_parts[self::UNION]) == 0) {
 
-        if ($this->_integrityCheck !== false) {
-            foreach ($fields as $columnEntry) {
-                list($table, $column) = $columnEntry;
+            // If no fields are specified we assume all fields from primary table
+            if (!count($fields)) {
+                $this->from($primary, self::SQL_WILDCARD, $schema);
+                $fields = $this->getPart(Zend_Db_Table_Select::COLUMNS);
+            }
 
-                // Check each column to ensure it only references the primary table
-                if ($column) {
-                    if (!isset($from[$table]) || $from[$table]['tableName'] != $primary) {
-                        require_once 'Zend/Db/Table/Select/Exception.php';
-                        throw new Zend_Db_Table_Select_Exception('Select query cannot join with another table');
+            $from = $this->getPart(Zend_Db_Table_Select::FROM);
+
+            if ($this->_integrityCheck !== false) {
+                foreach ($fields as $columnEntry) {
+                    list($table, $column) = $columnEntry;
+
+                    // Check each column to ensure it only references the primary table
+                    if ($column) {
+                        if (!isset($from[$table]) || $from[$table]['tableName'] != $primary) {
+                            require_once 'Zend/Db/Table/Select/Exception.php';
+                            throw new Zend_Db_Table_Select_Exception('Select query cannot join with another table');
+                        }
                     }
                 }
             }
