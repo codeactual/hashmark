@@ -26,13 +26,12 @@ require_once dirname(__FILE__) . '/../../../bootstrap.php';
  * Loads dependencies of most calc* generator scripts.
  */
 require_once HASHMARK_ROOT_DIR . '/BcMath.php';
-require_once HASHMARK_ROOT_DIR . '/Config/DbHelper.php';
 require_once HASHMARK_ROOT_DIR . '/Analyst.php';
 require_once HASHMARK_ROOT_DIR . '/Analyst/BasicDecimal.php';
 require_once HASHMARK_ROOT_DIR . '/Test/Analyst/BasicDecimal.php';
 
 $expProviders = array();
-        
+
 $required = array();
 $required[] = HASHMARK_ROOT_DIR . '/Test/Analyst/BasicDecimal/Tool/calcValuesAggAtInterval.php';
 $required[] = HASHMARK_ROOT_DIR . '/Test/Analyst/BasicDecimal/Tool/calcChanges.php';

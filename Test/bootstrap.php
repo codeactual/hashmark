@@ -18,13 +18,6 @@ ini_set('log_errors', 1);
 ini_set('error_log', dirname(__FILE__) . '/error_log');
 
 /**
- * PHPUnit dependencies for AllTests.php scripts.
- */
-require_once 'PHPUnit/Framework.php';
-require_once 'PHPUnit/Framework/TestCase.php';
-require_once 'PHPUnit/Framework/TestSuite.php';
-
-/**
  * For Hashmark::getModule().
  */
 require_once dirname(__FILE__) . '/../Hashmark.php';
@@ -38,3 +31,5 @@ require_once HASHMARK_ROOT_DIR . '/Test/Case.php';
  * Ex. forces Hashmark_DbHelper::openDb() to always use the 'unittest' profile.
  */
 define('HASHMARK_TEST_MODE', 1);
+
+require_once '/usr/lib/php/PHPUnit/Autoload.php';

@@ -38,14 +38,14 @@ class Hashmark_Analyst_BasicDecimal extends Hashmark_Analyst
      */
     protected static $_aggFunctions = array('AVG', 'SUM', 'COUNT', 'MAX', 'MIN',
                                             'STDDEV_POP', 'STDDEV_SAMP', 'VAR_POP', 'VAR_SAMP');
-    
+
     /**
      * Aggregation options w/ DISTINCT support.
      *
      * @var Array   Function names.
      */
     protected static $_distinctFunctions = array('AVG', 'SUM', 'COUNT', 'MAX', 'MIN');
-    
+
     /**
      * Time interval codes mapped to their DATE_FORMAT() format strings.
      *
@@ -55,7 +55,7 @@ class Hashmark_Analyst_BasicDecimal extends Hashmark_Analyst
      */
     protected static $_intervalDbFormats = array('h' => '%Y%m%d%H', 'd' => '%Y%m%d',
                                                  'w' => '%x%v', 'm' => '%Y%m', 'y' => '%Y');
-    
+
     /**
      * Time interval codes mapped to their date() format strings.
      *
@@ -65,9 +65,9 @@ class Hashmark_Analyst_BasicDecimal extends Hashmark_Analyst
      */
     protected static $_intervalPhpFormats = array('h' => 'YmdH', 'd' => 'Ymd',
                                                   'w' => 'oW', 'm' => 'Ym', 'y' => 'Y');
-    
+
     /**
-     * Time formats/functions used to collect aggegrates of recurrence groups, 
+     * Time formats/functions used to collect aggegrates of recurrence groups,
      * ex. Tuesdays, Junes, or 1st days of the month.
      *
      *      -   'z' provides (DAYOFYEAR - 1)
@@ -86,7 +86,7 @@ class Hashmark_Analyst_BasicDecimal extends Hashmark_Analyst
      * @return boolean  False if module could not be initialized and is unusable.
      *                  Hashmark::getModule() will also then return false.
      */
-    public function initModule($db, $partition)
+    public function initModule($db, $partition = '')
     {
         parent::initModule($db);
 
@@ -97,7 +97,7 @@ class Hashmark_Analyst_BasicDecimal extends Hashmark_Analyst
 
         return true;
     }
-    
+
     /**
      * Public access to $_intervalDbFormats values by interval code.
      *
@@ -112,7 +112,7 @@ class Hashmark_Analyst_BasicDecimal extends Hashmark_Analyst
 
         return false;
     }
-    
+
     /**
      * Public access to $_intervalPhpFormats values by interval code.
      *
@@ -127,7 +127,7 @@ class Hashmark_Analyst_BasicDecimal extends Hashmark_Analyst
 
         return false;
     }
-    
+
     /**
      * Public access to $_aggFunctions.
      *
@@ -137,7 +137,7 @@ class Hashmark_Analyst_BasicDecimal extends Hashmark_Analyst
     {
         return self::$_aggFunctions;
     }
-    
+
     /**
      * Public access to $_distinctFunctions.
      *
@@ -147,7 +147,7 @@ class Hashmark_Analyst_BasicDecimal extends Hashmark_Analyst
     {
         return self::$_distinctFunctions;
     }
-    
+
     /**
      * Public access to $_recurFormats keys.
      *
@@ -157,7 +157,7 @@ class Hashmark_Analyst_BasicDecimal extends Hashmark_Analyst
     {
         return array_keys(self::$_recurFormats);
     }
-    
+
     /**
      * Public access to $_recurFormats.
      *
@@ -167,7 +167,7 @@ class Hashmark_Analyst_BasicDecimal extends Hashmark_Analyst
     {
         return self::$_recurFormats;
     }
-   
+
     /**
      * Public access to $_recurFormats values by function name.
      *
@@ -182,7 +182,7 @@ class Hashmark_Analyst_BasicDecimal extends Hashmark_Analyst
 
         return false;
     }
-    
+
     /**
      * Set MySQL div_precision_increment variable.
      *
@@ -200,7 +200,7 @@ class Hashmark_Analyst_BasicDecimal extends Hashmark_Analyst
             $this->_db->query($sql);
         }
     }
-    
+
     /**
      * Execute one or more SQL statements.
      *
@@ -208,7 +208,7 @@ class Hashmark_Analyst_BasicDecimal extends Hashmark_Analyst
      *  -   Subsequent statements can use those intermediate results via temp.
      *      table macros in format: ~STATEMENT_ID
      *  -   Supports 1 temp. table self-join per statement.
-     * 
+     *
      * @param int       $scalarId
      * @param mixed     $stmts      Keys = statement ID, ex. 'valuesAtInterval',
      *                              Values = assoc. arrays of statement options.
@@ -269,7 +269,7 @@ class Hashmark_Analyst_BasicDecimal extends Hashmark_Analyst
         } else {
             throw new Exception('No SQL statements to execute.', HASHMARK_EXCEPTION_VALIDATION);
         }
-            
+
         $stmtCount = count($stmtIds);
 
         for ($stmtNum = 0; $stmtNum < $stmtCount; $stmtNum++) {
@@ -312,7 +312,7 @@ class Hashmark_Analyst_BasicDecimal extends Hashmark_Analyst
                                                       1);
                 }
             }
-                
+
             // Last statement in sequence.
             if ($stmtNum == ($stmtCount - 1)) {
                 if (false === strpos($currentStmt['sql'], '~samples')) {
@@ -363,18 +363,18 @@ class Hashmark_Analyst_BasicDecimal extends Hashmark_Analyst
     {
         $sql = $this->getSql(__FUNCTION__)
              . ($limit ? 'LIMIT ' . intval($limit) : '');
-       
-        $bind = array($start, $end); 
+
+        $bind = array($start, $end);
         $stmt = $this->_partition->queryInRange($scalarId, $start, $end, $sql, $bind);
 
         $rows = $stmt->fetchAll();
         if (!$rows) {
             return false;
         }
-    
+
         return $rows;
     }
-    
+
     /**
      * Finds the most recent sample from each time interval.
      *
@@ -396,10 +396,10 @@ class Hashmark_Analyst_BasicDecimal extends Hashmark_Analyst
         if (!($format = $this->getIntervalDbFormat($interval))) {
             throw new Exception('Invalid interval: ' . $interval, HASHMARK_EXCEPTION_VALIDATION);
         }
-        
+
         $sql = $this->getSql(__FUNCTION__)
              . ($limit ? 'LIMIT ' . intval($limit) : '');
-        
+
         $bind = array($format, $format, $start, $end, $start, $end);
         $stmt = $this->_partition->queryInRange($scalarId, $start, $end, $sql, $bind);
 
@@ -407,7 +407,7 @@ class Hashmark_Analyst_BasicDecimal extends Hashmark_Analyst
         if (!$rows) {
             return false;
         }
-    
+
         return $rows;
     }
 
@@ -445,7 +445,7 @@ class Hashmark_Analyst_BasicDecimal extends Hashmark_Analyst
         if (!$rows) {
             return false;
         }
-    
+
         return $rows[0]['y'];
     }
 
@@ -475,11 +475,11 @@ class Hashmark_Analyst_BasicDecimal extends Hashmark_Analyst
         if (!($format = $this->getIntervalDbFormat($interval))) {
             throw new Exception('Invalid interval: ' . $interval, HASHMARK_EXCEPTION_VALIDATION);
         }
-        
+
         $this->setDivPrecisionIncr(0);
-        
+
         $distinct = $distinct ? 'DISTINCT ' : '';
-        
+
         $sql = $this->expandSql($this->getSql(__FUNCTION__),
                                 array('@aggFunc' => $aggFunc,
                                       '@distinct' => $distinct));
@@ -491,13 +491,13 @@ class Hashmark_Analyst_BasicDecimal extends Hashmark_Analyst
         if (!$rows) {
             return false;
         }
-    
+
         return $rows;
     }
-    
+
     /**
      * Finds the aggregate of interval aggregates, i.e. aggregate of valuesAggAtInterval().
-     * 
+     *
      *      -   Ex. MAX(AVG())-type queries.
      *      -   Use these to pre-validate parameters:
      *          $interval: getIntervalDbFormat()
@@ -523,12 +523,12 @@ class Hashmark_Analyst_BasicDecimal extends Hashmark_Analyst
         if (!($format = $this->getIntervalDbFormat($interval))) {
             throw new Exception('Invalid interval: ' . $interval, HASHMARK_EXCEPTION_VALIDATION);
         }
-        
+
         $this->setDivPrecisionIncr(0);
-        
+
         $distinctOuter = $distinctOuter ? 'DISTINCT ' : '';
         $distinctInner = $distinctInner ? 'DISTINCT ' : '';
-                                
+
         $querySet = array('valuesAggAtInterval' => array(),
                           __FUNCTION__ => array());
 
@@ -549,10 +549,10 @@ class Hashmark_Analyst_BasicDecimal extends Hashmark_Analyst
         if (!$rows) {
             return false;
         }
-    
+
         return $rows[0]['y2'];
     }
-    
+
     /**
      * Finds the aggregate of samples in each recurrence group.
      *
@@ -593,10 +593,10 @@ class Hashmark_Analyst_BasicDecimal extends Hashmark_Analyst
         if (!$rows) {
             return false;
         }
-    
+
         return $rows;
     }
-   
+
     /**
      * Finds value changes between successive samples.
      *
@@ -612,7 +612,7 @@ class Hashmark_Analyst_BasicDecimal extends Hashmark_Analyst
     {
         $sql = $this->getSql(__FUNCTION__)
              . ($limit ? 'LIMIT ' . intval($limit) : '');
-       
+
         $bind = array($start, $end, $start, $end);
         $stmt = $this->_partition->queryInRange($scalarId, $start, $end, $sql, $bind);
 
@@ -620,10 +620,10 @@ class Hashmark_Analyst_BasicDecimal extends Hashmark_Analyst
         if (!$rows) {
             return false;
         }
-    
+
         return $rows;
     }
-    
+
     /**
      * Finds value changes between successive interval samples,
      * i.e. changes between valuesAtInterval() results.
@@ -653,7 +653,7 @@ class Hashmark_Analyst_BasicDecimal extends Hashmark_Analyst
                                              . 'ORDER BY `s1`.`end` DESC ';
         $querySet['valuesAtInterval']['bind'] = array($format, $format,
                                                       $start, $end, $start, $end);
-        
+
         // Set which temporary table columns are filled this query's results.
         $querySet['valuesAtInterval']['tmpcol'] = '`x`, `y`';
 
@@ -666,10 +666,10 @@ class Hashmark_Analyst_BasicDecimal extends Hashmark_Analyst
         if (!$rows) {
             return false;
         }
-    
+
         return $rows;
     }
-    
+
     /**
      * Finds aggregate of value changes between successive interval samples.
      *
@@ -704,10 +704,10 @@ class Hashmark_Analyst_BasicDecimal extends Hashmark_Analyst
         if (!$rows) {
             return false;
         }
-    
+
         return $rows[0]['y'];
     }
-    
+
     /**
      * Finds aggregate of value changes in each interval.
      *
@@ -734,17 +734,17 @@ class Hashmark_Analyst_BasicDecimal extends Hashmark_Analyst
         if (!($format = $this->getIntervalDbFormat($interval))) {
             throw new Exception('Invalid interval: ' . $interval, HASHMARK_EXCEPTION_VALIDATION);
         }
-        
+
         $this->setDivPrecisionIncr(0);
-        
+
         $distinct = $distinct ? 'DISTINCT ' : '';
-        
+
         $querySet = array('changes' => array(),
                           __FUNCTION__ => array());
 
         $querySet['changes']['sql'] = $this->getSql('changes');
         $querySet['changes']['bind'] = array($start, $end, $start, $end);
-                        
+
         // Set which temporary table columns are filled this query's results.
         $querySet['changes']['tmpcol'] = '`x`, `y`, `y2`, `id`';
 
@@ -758,13 +758,13 @@ class Hashmark_Analyst_BasicDecimal extends Hashmark_Analyst
         if (!$rows) {
             return false;
         }
-    
+
         return $rows;
     }
-    
+
     /**
      * Finds the aggregate of interval aggregates, i.e. aggregate of changesAggAtInterval().
-     * 
+     *
      *      -   Ex. MAX(AVG())-type queries.
      *      -   Use these to pre-validate parameters:
      *          $interval: getIntervalDbFormat()
@@ -790,16 +790,16 @@ class Hashmark_Analyst_BasicDecimal extends Hashmark_Analyst
         if (!($format = $this->getIntervalDbFormat($interval))) {
             throw new Exception('Invalid interval: ' . $interval, HASHMARK_EXCEPTION_VALIDATION);
         }
-        
+
         $this->setDivPrecisionIncr(0);
-        
+
         $distinctOuter = $distinctOuter ? 'DISTINCT ' : '';
         $distinctInner = $distinctInner ? 'DISTINCT ' : '';
 
         $querySet = array('changes' => array(),
                           'changesAggAtInterval' => array(),
                           __FUNCTION__ => array());
-        
+
         $querySet['changes']['sql'] = $this->getSql('changes');
         $querySet['changes']['bind'] = array($start, $end, $start, $end);
 
@@ -810,7 +810,7 @@ class Hashmark_Analyst_BasicDecimal extends Hashmark_Analyst
         $querySet['changesAggAtInterval']['macros'] = array('@aggFunc' => $aggFuncInner,
                                                             '@distinct' => $distinctInner);
         $querySet['changesAggAtInterval']['bind'] = array($format, $format);
-        
+
         // Set which temporary table columns are filled this query's results.
         $querySet['changesAggAtInterval']['tmpcol'] = '`grp`, `y`';
 
@@ -823,10 +823,10 @@ class Hashmark_Analyst_BasicDecimal extends Hashmark_Analyst
         if (!$rows) {
             return false;
         }
-    
+
         return $rows[0]['y'];
     }
-    
+
     /**
      * Finds the aggregate of value changes in each recurrence group.
      *
@@ -851,9 +851,9 @@ class Hashmark_Analyst_BasicDecimal extends Hashmark_Analyst
     public function changesAggAtRecurrence($scalarId, $start, $end, $recurFunc, $aggFunc, $distinct)
     {
         $this->setDivPrecisionIncr(0);
-       
+
         $distinct = $distinct ? 'DISTINCT ' : '';
-        
+
         $sql = $this->expandSql($this->getSql(__FUNCTION__),
                                 array('@recurFunc' => $recurFunc,
                                       '@aggFunc' => $aggFunc,
@@ -866,10 +866,10 @@ class Hashmark_Analyst_BasicDecimal extends Hashmark_Analyst
         if (!$rows) {
             return false;
         }
-    
+
         return $rows;
     }
-    
+
     /**
      * Finds value occurrence counts, i.e. frequency/popularity.
      *
@@ -887,7 +887,7 @@ class Hashmark_Analyst_BasicDecimal extends Hashmark_Analyst
         $sql = $this->getSql(__FUNCTION__)
              . 'ORDER BY `y` ' . ($descOrder ? 'DESC' : 'ASC')
              . ($limit ? ' LIMIT ' . intval($limit) : '');
-       
+
         $bind = array($start, $end);
         $stmt = $this->_partition->queryInRange($scalarId, $start, $end, $sql, $bind);
 
@@ -895,10 +895,10 @@ class Hashmark_Analyst_BasicDecimal extends Hashmark_Analyst
         if (!$rows) {
             return false;
         }
-    
+
         return $rows;
     }
-    
+
     /**
      * Finds moving aggregrate of values, i.e. running/cumulative aggregate.
      *
@@ -923,10 +923,10 @@ class Hashmark_Analyst_BasicDecimal extends Hashmark_Analyst
         $this->setDivPrecisionIncr(0);
 
         $distinct = $distinct ? 'DISTINCT ' : '';
-        
+
         $sql = $this->getSql(__FUNCTION__)
              . ($limit ? ' LIMIT ' . intval($limit) : '');
-       
+
         $sql = $this->expandSql($this->getSql(__FUNCTION__),
                                 array('@aggFunc' => $aggFunc,
                                       '@distinct' => $distinct));
@@ -938,10 +938,10 @@ class Hashmark_Analyst_BasicDecimal extends Hashmark_Analyst
         if (!$rows) {
             return false;
         }
-    
+
         return $rows;
     }
-    
+
     /**
      * Finds the most recent moving aggregate from each time interval,
      * i.e. like valuesAtInterval() but source data is a moving()
@@ -971,11 +971,11 @@ class Hashmark_Analyst_BasicDecimal extends Hashmark_Analyst
         if (!($format = $this->getIntervalDbFormat($interval))) {
             throw new Exception('Invalid interval: ' . $interval, HASHMARK_EXCEPTION_VALIDATION);
         }
-        
+
         $distinct = $distinct ? 'DISTINCT ' : '';
-        
+
         $this->setDivPrecisionIncr(0);
-        
+
         $querySet = array('moving' => array(),
                           __FUNCTION__ => array());
 
@@ -998,7 +998,7 @@ class Hashmark_Analyst_BasicDecimal extends Hashmark_Analyst
         if (!$rows) {
             return false;
         }
-    
+
         return $rows;
     }
 }

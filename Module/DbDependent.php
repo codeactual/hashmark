@@ -28,12 +28,12 @@ abstract class Hashmark_Module_DbDependent extends Hashmark_Module
      * @var Zend_Db_Adapter_*   Current instance.
      */
     protected $_db;
-    
+
     /**
      * @var string  Database selection in quoted form `<name>` w/ trailing period.
      */
     protected $_dbName;
-    
+
     /**
      * @var Array   SQL templates indexed by module base name, then template name
      *              which is usually the associated function's name.
@@ -45,7 +45,7 @@ abstract class Hashmark_Module_DbDependent extends Hashmark_Module
      * @return boolean  False if module could not be initialized and is unusable.
      *                  Hashmark::getModule() will also then return false.
      */
-    public function initModule($db)
+    public function initModule($db, $partition = '')
     {
         if (!$db) {
             return false;
@@ -92,7 +92,7 @@ abstract class Hashmark_Module_DbDependent extends Hashmark_Module
     {
         return $this->_db;
     }
-    
+
     /**
      * Public access to $_dbName.
      *
@@ -122,7 +122,7 @@ abstract class Hashmark_Module_DbDependent extends Hashmark_Module
             $this->_dbName = '';
         }
     }
-    
+
     /**
      * Escape strings without quoting them, ex. SQL function names.
      *
