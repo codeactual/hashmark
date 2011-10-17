@@ -8,8 +8,8 @@
  * @link        http://code.google.com/p/hashmark/
  * @link        http://framework.zend.com/manual/en/coding-standard.html
  * @link        http://phpdoc.org/tutorial.php
- * @copyright   Copyright (c) 2008-2009, Code Actual LLC
- * @license     http://www.opensource.org/licenses/bsd-license.php New BSD License
+ * @copyright   Copyright (c) 2008-2011 David Smith
+ * @license     http://www.opensource.org/licenses/mit-license.php MIT License
  * @package     Hashmark
  * @subpackage  Hashmark_Analyst
  * @version     $Id$

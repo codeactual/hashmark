@@ -8,8 +8,8 @@
  * @link        http://code.google.com/p/hashmark/
  * @link        http://framework.zend.com/manual/en/coding-standard.html
  * @link        http://phpdoc.org/tutorial.php
- * @copyright   Copyright (c) 2008, David Smith, Code Actual LLC
- * @license     http://www.opensource.org/licenses/bsd-license.php New BSD License
+ * @copyright   Copyright (c) 2008-2011, David Smith
+ * @license     http://www.opensource.org/licenses/mit-license.php MIT License
  * @package     Hashmark-Test
  * @subpackage  Hashmark_Analyst_BasicDecimal
  * @version     $Id$
@@ -65,7 +65,7 @@ for ($scalars = 0; $scalars < HASHMARK_CREATESAMPLES_SCALARS; $scalars++) {
     $start = microtime(true);
     foreach ($samples as $timeData => $value) {
         list($time) = explode('=', $timeData);
-        
+
         $partition->createSample($scalarId, $value, $time);
     }
     $end = microtime(true);
