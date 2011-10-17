@@ -1,6 +1,4 @@
-Config/*
-!Config/Hashmark.php
-!Config/Test.php
+Config/Hashmark.php
 Test/Analyst/BasicDecimal/Data/*
 Test/error_log
 error_log
