@@ -57,13 +57,10 @@ foreach ($scheduledAgents as $scalarAgent) {
 
     $core->setScalarAgentStatus($scalarAgent['id'], 'Running');
 
-    // It's OK if $start and $end are the same.
-    $start = time();
     $value = $cache[$scalarAgent['name']]->run($scalarAgent);
-    $end = time();
 
     // run() received $scalarAgent by-ref and can apply indepedent logic
     // to set a new status, error message, etc.
     $core->setScalarAgentStatus($scalarAgent['id'], $scalarAgent['status'],
-                                $scalarAgent['error'], $end);
+                                $scalarAgent['error'], time());
 }

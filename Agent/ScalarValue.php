@@ -56,12 +56,13 @@ class Hashmark_Agent_ScalarValue implements Hashmark_Agent
             return;
         }
 
-        $value = $client->get((int) $agent['scalar_id']);
+        $oldValue = $client->get((int) $agent['scalar_id']);
+        $newValue = $oldValue + 5;
 
         $time = time();
-        if (!$partition->createSample($agent['id'], $value, $time)) {
-            $agent['error'] = sprintf('Could not save sample: start=%s end=%s value=%s',
-                                      $start, $end, $value);
+        if (!$partition->createSample($agent['scalar_id'], $newValue, $time)) {
+            $agent['error'] = sprintf('Could not save sample: time=%s value=%s',
+                                      $time, $value);
         }
     }
 }

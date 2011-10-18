@@ -30,11 +30,11 @@ class Hashmark_TestCase_Cron_runAgents extends Hashmark_TestCase_Cron
 
         $scheduledScalarIds = array();
 
-        $scalar = array();
-        $scalar['name'] = self::randomString();
-        $scalar['type'] = 'decimal';
-        $scalar['value'] = '1234';
-        $scalarId = $core->createScalar($scalar);
+        $expected = array();
+        $expected['name'] = self::randomString();
+        $expected['type'] = 'decimal';
+        $expected['value'] = 1234;
+        $scalarId = $core->createScalar($expected);
 
         $agent = $core->getAgentByName('ScalarValue');
         if ($agent) {
@@ -49,11 +49,11 @@ class Hashmark_TestCase_Cron_runAgents extends Hashmark_TestCase_Cron
         ob_start();
         require HASHMARK_ROOT_DIR . '/Cron/runAgents.php';
         ob_end_clean();
-        
+
         // Assert scalar value changed in last 60 seconds.
-        $scalar = $core->getScalarById($scalarId);
-        $this->assertEquals($scalar['value'], $scalar['value']);
-        
+        $actual = $core->getScalarById($scalarId);
+        $this->assertEquals($expected['value'] + 5, (int) $actual['value']);
+
         // Assert scalar agent is ready for future run.
         $scalarAgent = $core->getScalarAgentById($scalarAgentId);
         $this->assertEquals('Scheduled', $scalarAgent['status']);
