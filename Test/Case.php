@@ -40,24 +40,26 @@ abstract class Hashmark_TestCase extends PHPUnit_Framework_TestCase
 
     /**
      * Set up the test case fixtures.
-     * 
+     *
      * @return void
      */
     protected function setUp()
     {
-        // Extract suffix (ex. 'DbDependent') from class (ex. 'Hashmark_TestCase_Module_DbDependent'). 
+        // Extract suffix (ex. 'DbDependent') from class (ex. 'Hashmark_TestCase_Module_DbDependent').
         $className = get_class($this);
 
         $this->_type = substr($className, strrpos($className, '_') + 1);
         $this->_db = Hashmark::getModule('DbHelper')->openDb('unittest');
     }
-    
+
     /**
      * @return void
      */
     protected function tearDown()
     {
-        $this->_db->closeConnection();
+        if ($this->_db) {
+            $this->_db->closeConnection();
+        }
     }
 
     /**
@@ -172,7 +174,7 @@ abstract class Hashmark_TestCase extends PHPUnit_Framework_TestCase
      * Provide sets of scalar types and values.
      *
      * @return Array    Test method argument sets.
-     * 
+     *
      * Format:
      *
      *      array(array('decimal', 0),
@@ -230,7 +232,7 @@ abstract class Hashmark_TestCase extends PHPUnit_Framework_TestCase
         }
         return $value;
     }
-    
+
     /**
      * Return a random string.
      *
@@ -249,7 +251,7 @@ abstract class Hashmark_TestCase extends PHPUnit_Framework_TestCase
 
         throw new Exception('Random string limits are invalid.', HASHMARK_EXCEPTION_VALIDATION);
     }
-    
+
     /**
      * Testable logic for assertArrayContainsOnly().
      *
@@ -302,7 +304,7 @@ abstract class Hashmark_TestCase extends PHPUnit_Framework_TestCase
             $this->assertTrue(false, $message);
         }
     }
-    
+
     /**
      * Testable logic for assertDecimalEquals().
      *
@@ -310,17 +312,17 @@ abstract class Hashmark_TestCase extends PHPUnit_Framework_TestCase
      * @param string    $actual
      * @return boolean  True if equal.
      */
-    public static function checkDecimalEquals($expected, $actual) 
+    public static function checkDecimalEquals($expected, $actual)
     {
         if (!is_string($expected) || !is_string($actual)) {
             return false;
         }
-        
+
         bcscale(Hashmark::getConfig('DbHelper', '', 'decimal_right_width'));
 
         return 0 === bccomp($expected, $actual);
     }
-    
+
     /**
      * Uses bccomp() to check equality of two strings representing decimal values.
      *
@@ -338,7 +340,7 @@ abstract class Hashmark_TestCase extends PHPUnit_Framework_TestCase
         } else {
             $actualType = gettype($actual);
             $expectedType = gettype($expected);
-            
+
             if ($message) {
                 $message .= "\n";
             }

@@ -53,13 +53,13 @@ class Hashmark_Client extends Hashmark_Module_DbDependent
                  . 'WHERE `name` = ?';
 
             $stmt = $this->_db->query($sql, array($value, $scalarName));
-            
+
             if (!$stmt->rowCount()) {
                 return false;
             }
 
             unset($stmt);
-            
+
             $sql = 'INSERT INTO ~samples '
                  . '(`value`, `end`) '
                  . 'VALUES (?, UTC_TIMESTAMP())';
@@ -79,7 +79,7 @@ class Hashmark_Client extends Hashmark_Module_DbDependent
 
         return (1 == $stmt->rowCount());
     }
-    
+
     /**
      * Get the value of a scalar identified by name or ID.
      *
@@ -109,10 +109,10 @@ class Hashmark_Client extends Hashmark_Module_DbDependent
         if (!$rows) {
             return false;
         }
-        
+
         return $rows[0]['value'];
     }
-    
+
     /**
      * Increment a scalar identified by name.
      *
@@ -142,7 +142,7 @@ class Hashmark_Client extends Hashmark_Module_DbDependent
             if (!$scalarId) {
                 $fields = array('name' => $scalarName, 'type' => 'decimal',
                                 'value' => $amount,
-                                'description' => 'Auto-created by client'); 
+                                'description' => 'Auto-created by client');
                 $scalarId = $core->createScalar($fields);
                 if (!$scalarId) {
                     throw new Exception("Scalar '{$scalarName}' was not auto-created",
@@ -153,7 +153,7 @@ class Hashmark_Client extends Hashmark_Module_DbDependent
                     $sql = 'INSERT INTO ~samples '
                          . '(`value`, `end`) '
                          . "VALUES ({$amount}, UTC_TIMESTAMP())";
-    
+
                     $partition = $this->getModule('Partition');
                     $partition->queryCurrent($scalarId, $sql);
                 }
@@ -165,9 +165,9 @@ class Hashmark_Client extends Hashmark_Module_DbDependent
         $dbHelperConfig = Hashmark::getConfig('DbHelper');
 
         $sum = 'CONVERT(`value`, DECIMAL'
-             . $dbHelperConfig['decimal_sql_width'] . ') + '
+             . "({$dbHelperConfig['decimal_total_width']},{$dbHelperConfig['decimal_right_width']})) + "
              . $this->escape($amount);
-       
+
         if ($newSample) {
             $sql = "UPDATE {$this->_dbName}`scalars` "
                  . "SET `value` = {$sum}, "
@@ -176,7 +176,7 @@ class Hashmark_Client extends Hashmark_Module_DbDependent
                  . 'AND `type` = "decimal"';
 
             $stmt = $this->_db->query($sql, array($scalarName));
-        
+
             if (!$stmt->rowCount()) {
                 return false;
             }
@@ -205,7 +205,7 @@ class Hashmark_Client extends Hashmark_Module_DbDependent
 
         return (1 == $stmt->rowCount());
     }
-    
+
     /**
      * Decrement a scalar identified by name.
      *

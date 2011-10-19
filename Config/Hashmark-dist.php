@@ -21,7 +21,7 @@
 $config = array();
 
 $config['Cache'] = array('backEndName' => '',
-                         'frontEndOpts' => array(),
+                         'frontEndOpts' => array('automatic_serialization' => true),
                          'backEndOpts' => array());
 
 $config['Cron'] = array('merge_gc_max_count' => 30,
@@ -34,8 +34,6 @@ $config['DbHelper']['decimal_total_width'] = 20;    // Match DECIMAL(D,M) data t
 $config['DbHelper']['decimal_right_width'] = 4;     // Match DECIMAL(D,M) data types in Sql/Schema/hashmark.sql
 
 $config['DbHelper']['decimal_round_scale'] = $config['DbHelper']['decimal_right_width'] * 2;
-
-$config['DbHelper']['decimal_sql_width'] = "({$config['DbHelper']['decimal_total_width']},{$config['DbHelper']['decimal_right_width']})";
 
 $config['DbHelper']['div_precision_increment'] = 4;
 
