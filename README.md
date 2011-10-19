@@ -326,7 +326,7 @@ Agent.php
 
 Most test-related files live under `Test/`, but a few like `Config/Test.php` live outside so cases can cover code relying on naming conventions.
 
-### [Sql/Analyst/](https://github.com/codeactual/hashmark/tree/07c4dc972b180418d62bee49ee382d88cf07dc8f/Sql/Analyst)
+### Sql/Analyst/
 
 Contains SQL templates. For example, [Sql/Analyst/BasicDecimal.php](https://github.com/codeactual/hashmark/tree/07c4dc972b180418d62bee49ee382d88cf07dc8f/Sql/Analyst/BasicDecimal.php) templates allow [Analyst/BasicDecimal.php]((https://github.com/codeactual/hashmark/blob/b24734f75552189b82611cd927e745ebe70ef4b8/Analyst/BasicDecimal.php) ) to reuse and combine statements as intermediate results toward final aggregates.
 
