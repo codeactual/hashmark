@@ -15,8 +15,8 @@
  * @category   Zend
  * @package    Zend_Loader
  * @subpackage Autoloader
- * @copyright  Copyright (c) 2005-2010 Zend Technologies USA Inc. (http://www.zend.com)
- * @version    $Id: Autoloader.php 20096 2010-01-06 02:05:09Z bkarwin $
+ * @copyright  Copyright (c) 2005-2011 Zend Technologies USA Inc. (http://www.zend.com)
+ * @version    $Id: Autoloader.php 23907 2011-04-30 18:19:29Z ramon $
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
 
@@ -29,7 +29,7 @@ require_once 'Zend/Loader.php';
  * @uses       Zend_Loader_Autoloader
  * @package    Zend_Loader
  * @subpackage Autoloader
- * @copyright  Copyright (c) 2005-2010 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright  Copyright (c) 2005-2011 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
 class Zend_Loader_Autoloader
@@ -120,14 +120,12 @@ class Zend_Loader_Autoloader
                 if ($autoloader->autoload($class)) {
                     return true;
                 }
-            } elseif (is_string($autoloader)) {
-                if ($autoloader($class)) {
+            } elseif (is_array($autoloader)) {
+                if (call_user_func($autoloader, $class)) {
                     return true;
                 }
-            } elseif (is_array($autoloader)) {
-                $object = array_shift($autoloader);
-                $method = array_shift($autoloader);
-                if (call_user_func(array($object, $method), $class)) {
+            } elseif (is_string($autoloader) || is_callable($autoloader)) {
+                if ($autoloader($class)) {
                     return true;
                 }
             }
@@ -337,9 +335,10 @@ class Zend_Loader_Autoloader
                 continue;
             }
             if (0 === strpos($class, $ns)) {
-                $namespace   = $ns;
-                $autoloaders = $autoloaders + $this->getNamespaceAutoloaders($ns);
-                break;
+                if ((false === $namespace) || (strlen($ns) > strlen($namespace))) {
+                    $namespace = $ns;
+                    $autoloaders = $this->getNamespaceAutoloaders($ns);
+                }
             }
         }
 
@@ -353,7 +352,13 @@ class Zend_Loader_Autoloader
         }
 
         // Add non-namespaced autoloaders
-        $autoloaders = $autoloaders + $this->getNamespaceAutoloaders('');
+        $autoloadersNonNamespace = $this->getNamespaceAutoloaders('');
+        if (count($autoloadersNonNamespace)) {
+            foreach ($autoloadersNonNamespace as $ns) {
+                $autoloaders[] = $ns;
+            }
+            unset($autoloadersNonNamespace);
+        }
 
         // Add fallback autoloader
         if (!$namespace && $this->isFallbackAutoloader()) {
@@ -562,7 +567,7 @@ class Zend_Loader_Autoloader
         $versionLen = strlen($version);
         $versions   = array();
         $dirs       = glob("$path/*", GLOB_ONLYDIR);
-        foreach ($dirs as $dir) {
+        foreach ((array) $dirs as $dir) {
             $dirName = substr($dir, strlen($path) + 1);
             if (!preg_match('/^(?:ZendFramework-)?(\d+\.\d+\.\d+((a|b|pl|pr|p|rc)\d+)?)(?:-minimal)?$/i', $dirName, $matches)) {
                 continue;

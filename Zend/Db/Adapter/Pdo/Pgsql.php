@@ -15,9 +15,9 @@
  * @category   Zend
  * @package    Zend_Db
  * @subpackage Adapter
- * @copyright  Copyright (c) 2005-2010 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright  Copyright (c) 2005-2011 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
- * @version    $Id: Pgsql.php 20096 2010-01-06 02:05:09Z bkarwin $
+ * @version    $Id: Pgsql.php 23772 2011-02-28 21:35:29Z ralph $
  */
 
 
@@ -33,7 +33,7 @@ require_once 'Zend/Db/Adapter/Pdo/Abstract.php';
  * @category   Zend
  * @package    Zend_Db
  * @subpackage Adapter
- * @copyright  Copyright (c) 2005-2010 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright  Copyright (c) 2005-2011 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
 class Zend_Db_Adapter_Pdo_Pgsql extends Zend_Db_Adapter_Pdo_Abstract
@@ -281,7 +281,10 @@ class Zend_Db_Adapter_Pdo_Pgsql extends Zend_Db_Adapter_Pdo_Abstract
     public function lastSequenceId($sequenceName)
     {
         $this->_connect();
-        $value = $this->fetchOne("SELECT CURRVAL(".$this->quote($sequenceName).")");
+        $sequenceName = str_replace($this->getQuoteIdentifierSymbol(), '', (string) $sequenceName);
+        $value = $this->fetchOne("SELECT CURRVAL("
+               . $this->quote($this->quoteIdentifier($sequenceName, true))
+               . ")");
         return $value;
     }
 
@@ -296,7 +299,10 @@ class Zend_Db_Adapter_Pdo_Pgsql extends Zend_Db_Adapter_Pdo_Abstract
     public function nextSequenceId($sequenceName)
     {
         $this->_connect();
-        $value = $this->fetchOne("SELECT NEXTVAL(".$this->quote($sequenceName).")");
+        $sequenceName = str_replace($this->getQuoteIdentifierSymbol(), '', (string) $sequenceName);
+        $value = $this->fetchOne("SELECT NEXTVAL("
+               . $this->quote($this->quoteIdentifier($sequenceName, true))
+               . ")");
         return $value;
     }
 

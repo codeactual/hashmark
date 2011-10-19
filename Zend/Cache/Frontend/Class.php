@@ -15,9 +15,9 @@
  * @category   Zend
  * @package    Zend_Cache
  * @subpackage Zend_Cache_Frontend
- * @copyright  Copyright (c) 2005-2010 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright  Copyright (c) 2005-2011 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
- * @version    $Id: Class.php 20379 2010-01-18 14:40:57Z mabe $
+ * @version    $Id: Class.php 24031 2011-05-10 21:00:50Z mabe $
  */
 
 /**
@@ -29,7 +29,7 @@ require_once 'Zend/Cache/Core.php';
 /**
  * @package    Zend_Cache
  * @subpackage Zend_Cache_Frontend
- * @copyright  Copyright (c) 2005-2010 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright  Copyright (c) 2005-2011 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
 class Zend_Cache_Frontend_Class extends Zend_Cache_Core
@@ -200,13 +200,19 @@ class Zend_Cache_Frontend_Class extends Zend_Cache_Core
      */
     public function __call($name, $parameters)
     {
+        $callback = array($this->_cachedEntity, $name);
+
+        if (!is_callable($callback, false)) {
+            Zend_Cache::throwException('Invalid callback');
+        }
+
         $cacheBool1 = $this->_specificOptions['cache_by_default'];
         $cacheBool2 = in_array($name, $this->_specificOptions['cached_methods']);
         $cacheBool3 = in_array($name, $this->_specificOptions['non_cached_methods']);
         $cache = (($cacheBool1 || $cacheBool2) && (!$cacheBool3));
         if (!$cache) {
             // We do not have not cache
-            return call_user_func_array(array($this->_cachedEntity, $name), $parameters);
+            return call_user_func_array($callback, $parameters);
         }
 
         $id = $this->_makeId($name, $parameters);
@@ -218,11 +224,16 @@ class Zend_Cache_Frontend_Class extends Zend_Cache_Core
             // A cache is not available (or not valid for this frontend)
             ob_start();
             ob_implicit_flush(false);
-            $return = call_user_func_array(array($this->_cachedEntity, $name), $parameters);
-            $output = ob_get_contents();
-            ob_end_clean();
-            $data = array($output, $return);
-            $this->save($data, $id, $this->_tags, $this->_specificLifetime, $this->_priority);
+
+            try {
+                $return = call_user_func_array($callback, $parameters);
+                $output = ob_get_clean();
+                $data = array($output, $return);
+                $this->save($data, $id, $this->_tags, $this->_specificLifetime, $this->_priority);
+            } catch (Exception $e) {
+                ob_end_clean();
+                throw $e;
+            }
         }
 
         echo $output;
@@ -230,15 +241,25 @@ class Zend_Cache_Frontend_Class extends Zend_Cache_Core
     }
 
     /**
+     * ZF-9970
+     *
+     * @deprecated
+     */
+    private function _makeId($name, $args)
+    {
+        return $this->makeId($name, $args);
+    }
+
+    /**
      * Make a cache id from the method name and parameters
      *
-     * @param  string $name       Method name
-     * @param  array  $parameters Method parameters
+     * @param  string $name Method name
+     * @param  array  $args Method parameters
      * @return string Cache id
      */
-    private function _makeId($name, $parameters)
+    public function makeId($name, array $args = array())
     {
-        return md5($this->_cachedEntityLabel . '__' . $name . '__' . serialize($parameters));
+        return md5($this->_cachedEntityLabel . '__' . $name . '__' . serialize($args));
     }
 
 }
