@@ -24,21 +24,27 @@ $config['Cache'] = array('backEndName' => '',
                          'frontEndOpts' => array('automatic_serialization' => true),
                          'backEndOpts' => array());
 
+// Hard limits for merge table expiration.
 $config['Cron'] = array('merge_gc_max_count' => 30,
                         'merge_gc_max_days' => 10);
 
 $config['DbHelper'] = array();
 
-$config['DbHelper']['decimal_total_width'] = 20;    // Match DECIMAL(D,M) data types in Sql/Schema/hashmark.sql
+// Match DECIMAL(D,M) columns in Sql/Schema/hashmark.sql. Alter both if needed.
+$config['DbHelper']['decimal_total_width'] = 20;
+$config['DbHelper']['decimal_right_width'] = 4;
 
-$config['DbHelper']['decimal_right_width'] = 4;     // Match DECIMAL(D,M) data types in Sql/Schema/hashmark.sql
-
+// Used by Hashmark_BcMath when generating expected floating-point aggregates.
+// It probably only needs to be slightly longer than 'decimal_right_width' to match MySQL rounding.
 $config['DbHelper']['decimal_round_scale'] = $config['DbHelper']['decimal_right_width'] * 2;
 
+// Match your MySQL server's 'div_precision_increment' setting.
+// Allows classes like Hashmark_Analyst_BasicDecimal to know whether it should adjust its session setting for DECIMAL calculations.
 $config['DbHelper']['div_precision_increment'] = 4;
 
 $config['DbHelper']['profile'] = array();
 
+// For use by agent scripts.
 $config['DbHelper']['profile']['cron'] = array('adapter' => 'Mysqli',
                                                'params' => array('host' => '',
                                                                  'port' => 3360,
@@ -54,19 +60,18 @@ $config['DbHelper']['profile']['unittest'] = array('adapter' => 'Mysqli',
                                                                      'password' => ''));
 
 /**
- * interval options:
+ * Merge table partitioning.
  *
- *      d:  Daily partitions
- *          Table name format: samples_<scalarId>_<YYMMDD>_<YYMMDD>
- *      m:  Monthly partitions
- *          Table name format: samples_<scalarId>_<YYMM>_<YYMM>
+ * Interval options:
+ *   'd':  Daily. Table name format: samples_<scalarId>_<YYMMDD>_<YYMMDD>.
+ *   'm':  Monthly. Table name format: samples_<scalarId>_<YYMM>_<YYMM>.
  */
 $config['Partition'] = array('interval' => 'm',
                              'mergetable_prefix' => 'samples_mrg_');
 
+// Ignore. Used by tests covering code that depends on naming conventions.
 $config['Test'] = array('base' => 'Test',
                         'override_me' => 'not overwritten',
                         'ext_config_paths' => array(dirname(__FILE__) . '/../Test/ExtConfig/Test'),
                         'ext_module_paths' => array(dirname(__FILE__) . '/../Test/ExtModule/Test'));
-
 $config['Test_FakeModuleType'] = array('type' => 'FakeModuleType');
