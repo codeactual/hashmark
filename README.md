@@ -18,72 +18,72 @@ hashmark is a MySQL [time-series](http://en.wikipedia.org/wiki/Time_series) data
 
 * MySQL aggregate functions: `AVG`, `SUM`, `COUNT`, `MAX`, `MIN`, `STDDEV_POP`, `STDDEV_SAMP`, `VAR_POP`, `VAR_SAMP`
 * MySQL aggregate functions eligible for DISTINCT selection: `AVG`,`'SUM`, `COUNT`, `MAX`, `MIN`
-* Time intervals for aggregates: hour, day, week, month, year                                                                                                                                                                         
+* Time intervals for aggregates: hour, day, week, month, year
 * MySQL time functions for aggregates of recurrence groups (e.g. "1st of the month"): `HOUR`, `DAYOFMONTH`, `DAYOFYEAR`, `MONTH`
 
 ### Methods
 
-<code>[multiQuery](http://https://github.com/codeactual/hashmark/blob/90bcc5083d2c326b167392b8fd8427e36803fc92/Analyst/BasicDecimal.php#205)($scalarId, $start, $end, $stmts)</code>
+<code>[multiQuery](https://github.com/codeactual/hashmark/blob/90bcc5083d2c326b167392b8fd8427e36803fc92/Analyst/BasicDecimal.php#205)($scalarId, $start, $end, $stmts)</code>
 
 > Perform multiple queries using macros to reference prior intermediate result sets. Internally supports many of the functions below.
 
-<code>[values](http://https://github.com/codeactual/hashmark/blob/90bcc5083d2c326b167392b8fd8427e36803fc92/Analyst/BasicDecimal.php#351)($scalarId, $limit, $start, $end)</code>
+<code>[values](https://github.com/codeactual/hashmark/blob/90bcc5083d2c326b167392b8fd8427e36803fc92/Analyst/BasicDecimal.php#351)($scalarId, $limit, $start, $end)</code>
 
 > Return samples within a date range.
 
-<code>[valuesAtInterval](http://https://github.com/codeactual/hashmark/blob/90bcc5083d2c326b167392b8fd8427e36803fc92/Analyst/BasicDecimal.php#379)($scalarId, $limit, $start, $end, $interval)</code>
+<code>[valuesAtInterval](https://github.com/codeactual/hashmark/blob/90bcc5083d2c326b167392b8fd8427e36803fc92/Analyst/BasicDecimal.php#379)($scalarId, $limit, $start, $end, $interval)</code>
 
 > Return the most recent sample from each interval within a date range.
 
-<code>[valuesAgg](http://https://github.com/codeactual/hashmark/blob/90bcc5083d2c326b167392b8fd8427e36803fc92/Analyst/BasicDecimal.php#415)($scalarId, $start, $end, $aggFunc, $distinct)</code>
+<code>[valuesAgg](https://github.com/codeactual/hashmark/blob/90bcc5083d2c326b167392b8fd8427e36803fc92/Analyst/BasicDecimal.php#415)($scalarId, $start, $end, $aggFunc, $distinct)</code>
 
 > E.g. return **"average value between date X and Y" or **"volume of distinct values between date X and Y."**
 
-<code>[valuesAggAtInterval](http://https://github.com/codeactual/hashmark/blob/90bcc5083d2c326b167392b8fd8427e36803fc92/Analyst/BasicDecimal.php#453)($scalarId, $start, $end, $interval, $aggFunc, $distinct)</code>
+<code>[valuesAggAtInterval](https://github.com/codeactual/hashmark/blob/90bcc5083d2c326b167392b8fd8427e36803fc92/Analyst/BasicDecimal.php#453)($scalarId, $start, $end, $interval, $aggFunc, $distinct)</code>
 
 > Similar to `valuesAgg` except that results are grouped into a given interval, e.g.  **"average weekly value between date X and Y."**
 
-<code>[valuesNestedAggAtInterval](http://https://github.com/codeactual/hashmark/blob/90bcc5083d2c326b167392b8fd8427e36803fc92/Analyst/BasicDecimal.php#499)($scalarId, $start, $end, $interval, $aggFuncOuter, $distinctOuter, $aggFuncInner, $distinctInner)</code>
+<code>[valuesNestedAggAtInterval](https://github.com/codeactual/hashmark/blob/90bcc5083d2c326b167392b8fd8427e36803fc92/Analyst/BasicDecimal.php#499)($scalarId, $start, $end, $interval, $aggFuncOuter, $distinctOuter, $aggFuncInner, $distinctInner)</code>
 
 > Aggregate values returned by `valuesAggAtInterval`, e.g. **"average weekly high between date X and Y."**
 
-<code>[valuesAggAtRecurrence](http://https://github.com/codeactual/hashmark/blob/90bcc5083d2c326b167392b8fd8427e36803fc92/Analyst/BasicDecimal.php#557)($scalarId, $start, $end, $recurFunc, $aggFunc, $distinct)</code>
+<code>[valuesAggAtRecurrence](https://github.com/codeactual/hashmark/blob/90bcc5083d2c326b167392b8fd8427e36803fc92/Analyst/BasicDecimal.php#557)($scalarId, $start, $end, $recurFunc, $aggFunc, $distinct)</code>
 
 > E.g. **"peak value in the 8-9am hour between date X and Y."**
 
-<code>[changes](http://https://github.com/codeactual/hashmark/blob/90bcc5083d2c326b167392b8fd8427e36803fc92/Analyst/BasicDecimal.php#601)($scalarId, $limit, $start, $end)</code>
+<code>[changes](https://github.com/codeactual/hashmark/blob/90bcc5083d2c326b167392b8fd8427e36803fc92/Analyst/BasicDecimal.php#601)($scalarId, $limit, $start, $end)</code>
 
 > Return from a date range each sample's date, value, and change in value from the prior sample.
 
-<code>[changesAtInterval](http://https://github.com/codeactual/hashmark/blob/90bcc5083d2c326b167392b8fd8427e36803fc92/Analyst/BasicDecimal.php#628)($scalarId, $limit, $start, $end, $interval)</code>
+<code>[changesAtInterval](https://github.com/codeactual/hashmark/blob/90bcc5083d2c326b167392b8fd8427e36803fc92/Analyst/BasicDecimal.php#628)($scalarId, $limit, $start, $end, $interval)</code>
 
 > Similar to `changes` except that `valuesAtInterval` provides the source data, e.g. **"weekly value and its change (week-over-week) between date X and Y."**
 
-<code>[changesAgg](http://https://github.com/codeactual/hashmark/blob/90bcc5083d2c326b167392b8fd8427e36803fc92/Analyst/BasicDecimal.php#674)($scalarId, $start, $end, $aggFunc, $distinct)</code>
+<code>[changesAgg](https://github.com/codeactual/hashmark/blob/90bcc5083d2c326b167392b8fd8427e36803fc92/Analyst/BasicDecimal.php#674)($scalarId, $start, $end, $aggFunc, $distinct)</code>
 
 > E.g. **"peak value change between date X and Y."**
 
-<code>[changesAggAtInterval](http://https://github.com/codeactual/hashmark/blob/90bcc5083d2c326b167392b8fd8427e36803fc92/Analyst/BasicDecimal.php#712)($scalarId, $start, $end, $interval, $aggFunc, $distinct)</code>
+<code>[changesAggAtInterval](https://github.com/codeactual/hashmark/blob/90bcc5083d2c326b167392b8fd8427e36803fc92/Analyst/BasicDecimal.php#712)($scalarId, $start, $end, $interval, $aggFunc, $distinct)</code>
 
 > Similar to `changesAgg` except that `changes` provides the source data, e.g. **"weekly peak value change (week-over-week) between date X and Y."**
 
-<code>[changesNestedAggAtInterval](http://https://github.com/codeactual/hashmark/blob/90bcc5083d2c326b167392b8fd8427e36803fc92/Analyst/BasicDecimal.php#766)($scalarId, $start, $end, $interval, $aggFuncOuter, $distinctOuter, $aggFuncInner, $distinctInner)</code>
+<code>[changesNestedAggAtInterval](https://github.com/codeactual/hashmark/blob/90bcc5083d2c326b167392b8fd8427e36803fc92/Analyst/BasicDecimal.php#766)($scalarId, $start, $end, $interval, $aggFuncOuter, $distinctOuter, $aggFuncInner, $distinctInner)</code>
 
 > Aggregate values returned by `changesAggAtInterval`, e.g. **"average of weekly peak value changes (week-over-week) between date X and Y."**
 
-<code>[changesAggAtRecurrence](http://https://github.com/codeactual/hashmark/blob/90bcc5083d2c326b167392b8fd8427e36803fc92/Analyst/BasicDecimal.php#831)($scalarId, $start, $end, $recurFunc, $aggFunc, $distinct)</code>
+<code>[changesAggAtRecurrence](https://github.com/codeactual/hashmark/blob/90bcc5083d2c326b167392b8fd8427e36803fc92/Analyst/BasicDecimal.php#831)($scalarId, $start, $end, $recurFunc, $aggFunc, $distinct)</code>
 
 > E.g. **"peak value change on Black Friday between year X and year Y."**
 
-<code>[frequency](http://https://github.com/codeactual/hashmark/blob/90bcc5083d2c326b167392b8fd8427e36803fc92/Analyst/BasicDecimal.php#874)($scalarId, $limit, $start, $end, $descOrder)</code>
+<code>[frequency](https://github.com/codeactual/hashmark/blob/90bcc5083d2c326b167392b8fd8427e36803fc92/Analyst/BasicDecimal.php#874)($scalarId, $limit, $start, $end, $descOrder)</code>
 
 > Return unique values and their frequency between date X and Y.
 
-<code>[moving](http://https://github.com/codeactual/hashmark/blob/90bcc5083d2c326b167392b8fd8427e36803fc92/Analyst/BasicDecimal.php#903)($scalarId, $limit, $start, $end, $aggFunc, $distinct)</code>
+<code>[moving](https://github.com/codeactual/hashmark/blob/90bcc5083d2c326b167392b8fd8427e36803fc92/Analyst/BasicDecimal.php#903)($scalarId, $limit, $start, $end, $aggFunc, $distinct)</code>
 
 > Return from a date range each sample's date, value, and the aggregate value at sample-time. E.g. **"values and their moving averages between date X and Y."**
 
-<code>[movingAtInterval](http://https://github.com/codeactual/hashmark/blob/90bcc5083d2c326b167392b8fd8427e36803fc92/Analyst/BasicDecimal.php#946)($scalarId, $limit, $start, $end, $interval, $aggFunc, $distinct)</code>
+<code>[movingAtInterval](https://github.com/codeactual/hashmark/blob/90bcc5083d2c326b167392b8fd8427e36803fc92/Analyst/BasicDecimal.php#946)($scalarId, $limit, $start, $end, $interval, $aggFunc, $distinct)</code>
 
 > Similar to `valuesAtInterval` except that `moving` provides the data source, e.g. **"the last value and its moving average from each week between date X and Y."**
 
@@ -218,12 +218,12 @@ Hashmark uses Zend Framework's database component. Refer to the ZF [guide](http:
 ``` php
 <?php
 $config['DbHelper']['profile']['unittest'] = array(
- 'adapter' => 'Mysqli',                                                               
+ 'adapter' => 'Mysqli',
  'params' => array(
-   'host' => '127.0.0.1',                                             
-   'port' => 5516,                                                    
-   'dbname' => 'hashmark_test',                                       
-   'username' => 'msandbox',                                          
+   'host' => '127.0.0.1',
+   'port' => 5516,
+   'dbname' => 'hashmark_test',
+   'username' => 'msandbox',
    'password' => 'msandbox'
  )
 );
@@ -253,7 +253,7 @@ $config['Cache'] = array(
      array('host' => 'localhost', 'port' => 11211)
    )
  )
-);   
+);
 ```
 
 ### Other Configuration
@@ -306,8 +306,8 @@ Agent/
  YahooWeather.php
  ...
 Agent.php
-...     
-```     
+...
+```
 
 ### Classes
 
