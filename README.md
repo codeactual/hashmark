@@ -285,7 +285,7 @@ pass: Built samples_1234_20111000 partition name with 'm' setting in Config/Part
 * <code>[agents_scalars](https://github.com/codeactual/hashmark/blob/b24734f75552189b82611cd927e745ebe70ef4b8/Sql/Schema/hashmark.sql#L37)</code>: Agent's schedules and last-run metadata.
 * <code>[categories](https://github.com/codeactual/hashmark/blob/b24734f75552189b82611cd927e745ebe70ef4b8/Sql/Schema/hashmark.sql#L63)</code>: Groups to support front-end browsing, searches, visualization, etc.
 * <code>[categories_milestones](https://github.com/codeactual/hashmark/blob/b24734f75552189b82611cd927e745ebe70ef4b8/Sql/Schema/hashmark.sql#L79)</code>: For example, to link category "ShoppingCart" with milestone "site release 2.1.2".
-* <code>[categories_scalars(https://github.com/codeactual/hashmark/blob/b24734f75552189b82611cd927e745ebe70ef4b8/Sql/Schema/hashmark.sql#L97)</code>: For example, to link category "ShoppingCart" with data point "featureX:optOut".
+* <code>[categories_scalars](https://github.com/codeactual/hashmark/blob/b24734f75552189b82611cd927e745ebe70ef4b8/Sql/Schema/hashmark.sql#L97)</code>: For example, to link category "ShoppingCart" with data point "featureX:optOut".
 * <code>[milestones](https://github.com/codeactual/hashmark/blob/b24734f75552189b82611cd927e745ebe70ef4b8/Sql/Schema/hashmark.sql#L115)</code>: Events to correlate with scalar histories, e.g. to visualize "featureX:optOut" changes across site releases that tweak "featureX".
 * <code>[samples_analyst_temp](https://github.com/codeactual/hashmark/blob/b24734f75552189b82611cd927e745ebe70ef4b8/Sql/Schema/hashmark.sql#L163)</code>: When Hashmark creates temporary tables to hold intermediate aggregates, it copies this table's definition.
 * <code>[samples_decimal](https://github.com/codeactual/hashmark/blob/b24734f75552189b82611cd927e745ebe70ef4b8/Sql/Schema/hashmark.sql#L147)</code> and <code>[samples_string](https://github.com/codeactual/hashmark/blob/b24734f75552189b82611cd927e745ebe70ef4b8/Sql/Schema/hashmark.sql#L131)</code>: Identical except for one column. Hashmark copies their definitions when creating new partitions. `id` auto-increment values are seeded from the associated scalar's `sample_count` column.
@@ -328,7 +328,7 @@ Most test-related files live under `Test/`, but a few like `Config/Test.php` liv
 
 ### Sql/Analyst/
 
-Contains SQL templates. For example, [Sql/Analyst/BasicDecimal.php](https://github.com/codeactual/hashmark/tree/07c4dc972b180418d62bee49ee382d88cf07dc8f/Sql/Analyst/BasicDecimal.php) templates allow [Analyst/BasicDecimal.php]((https://github.com/codeactual/hashmark/blob/b24734f75552189b82611cd927e745ebe70ef4b8/Analyst/BasicDecimal.php) ) to reuse and combine statements as intermediate results toward final aggregates.
+Contains SQL templates. For example, [Sql/Analyst/BasicDecimal.php](https://github.com/codeactual/hashmark/tree/07c4dc972b180418d62bee49ee382d88cf07dc8f/Sql/Analyst/BasicDecimal.php) templates allow [Analyst/BasicDecimal.php](https://github.com/codeactual/hashmark/blob/b24734f75552189b82611cd927e745ebe70ef4b8/Analyst/BasicDecimal.php) to reuse and combine statements as intermediate results toward final aggregates.
 
 ## Cron Scripts
 
